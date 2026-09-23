@@ -1,0 +1,94 @@
+﻿<!--
+This starts the project definition.
+
+Project is the root element of the .csproj file, and:
+
+Sdk="Microsoft.NET.Sdk"
+
+means that the project uses the standard .NET SDK.
+-->
+
+<Project Sdk="Microsoft.NET.Sdk">
+
+ <!--
+    Project settings.
+    These properties define how the test project should be built.
+  -->
+
+  <PropertyGroup>
+    <!--
+      Defines which version of .NET this project uses.
+      This test project uses .NET 10.
+    -->
+    <TargetFramework>net10.0</TargetFramework>
+    <!--
+      Automatically includes common using statements,
+      such as namespaces from System.
+    -->
+    <ImplicitUsings>enable</ImplicitUsings>
+     <!--
+      Enables nullable reference type checking.
+      This helps warn us if a variable could unexpectedly be null.
+    -->
+    <Nullable>enable</Nullable>
+    <!--
+      Prevents this test project from being packaged
+      as a NuGet package.
+    -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+    <!--
+    NuGet packages used by the test project.
+    -->
+
+  <ItemGroup>
+    <!--
+      Used for measuring code coverage.
+      Code coverage shows how much of the application code
+      is executed by the tests.
+    -->
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <!--
+      Provides the .NET test infrastructure.
+      This allows tests to be discovered and run using
+      commands such as "dotnet test".
+    -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <!--
+      The xUnit testing framework.
+      This provides features such as [Fact] and Assert.
+    -->
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <!--
+      Allows xUnit tests to be discovered and run
+      by Visual Studio and the .NET test system.
+    -->
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+    <!--
+    Adds Xunit as a global using for the test project.
+    Because of this, each test file does not need to write:
+
+    using Xunit;
+    -->
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+    <!--
+    References the main CodePursuit project.
+
+    The ".." means go one folder up from HMJT.Tests,
+    then enter the HMJT folder and find CodePursuit.csproj.
+
+    This reference allows the test project to use and test
+    classes from the main application, such as DiceService.
+  -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\HMJT\CodePursuit.csproj" />
+  </ItemGroup>
+
+</Project>
