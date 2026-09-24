@@ -1,3 +1,7 @@
+//Needs HMJT.Models for logic from Question and AnswerOption
+
+using HMJT.Models;
+
 // Organizes this class inside the Services namespace.
 // The full class name is HMJT.Services.GameMechanicsService.
 //See DiceService.cs for more info about namespace.
@@ -52,4 +56,54 @@ public class GameMechanicsService
 
         return category;
     }
+
+    // Checks whether the answer selected by the player
+    // matches the correct answer for the question.
+    public bool IsAnswerCorrect(
+        Question question,
+        AnswerOption selectedAnswer)
+    {
+        return question.CorrectAnswer == selectedAnswer;
+    }
+
+    // Creates a GameAnswer containing information
+    // about the player's answer to a question.
+    public GameAnswer CreateGameAnswer(
+        Question question,
+        string playerName,
+        AnswerOption selectedAnswer)
+    {
+        // Check whether the selected answer is correct.
+        bool isCorrect = IsAnswerCorrect(question, selectedAnswer);
+
+        // Create and return a GameAnswer containing
+        // the result of the player's answer.
+        return new GameAnswer
+        {
+            QuestionId = question.QuestionId,
+            PlayerName = playerName,
+            SelectedAnswer = selectedAnswer,
+            IsCorrect = isCorrect
+        };
+    }
+
+    // Awards a category wedge to the player if the answer was correct.
+    // Returns true if a new wedge was added.
+    // Returns false if the answer was wrong or the player already has the wedge.
+    public bool AwardWedge(
+        PlayerGameState player,
+        Question question,
+        GameAnswer gameAnswer)
+    {
+        // A player only receives a wedge for a correct answer.
+        if (!gameAnswer.IsCorrect)
+        {
+            return false;
+        }
+
+        // HashSet.Add returns true if the category was added,
+        // and false if the player already had that category.
+        return player.Wedges.Add(question.Category);
+    }
+    
 }
