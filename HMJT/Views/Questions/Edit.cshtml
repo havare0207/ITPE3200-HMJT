@@ -1,0 +1,98 @@
+@model HMJT.Models.Question
+
+@{
+// Sets the title for the page.
+ViewData["Title"] = "Edit Question";
+}
+
+<h2>Edit Question</h2>
+
+<!-- Sends the edited question to the Edit action in QuestionsController. -->
+
+<form asp-action="Edit" method="post">
+
+<!-- Keeps the QuestionId when the form is submitted. -->
+<input type="hidden" asp-for="QuestionId" />
+
+<div class="form-group">
+    <label asp-for="QuestionText"></label>
+    <span class="text-danger">*</span>
+    <input asp-for="QuestionText" class="form-control" />
+    <span asp-validation-for="QuestionText" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="Category"></label>
+    <span class="text-danger">*</span>
+    <input asp-for="Category" class="form-control" />
+    <span asp-validation-for="Category" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="Difficulty"></label>
+    <span class="text-danger">*</span>
+
+    <!-- Creates a dropdown using the Difficulty enum. -->
+    <select asp-for="Difficulty"
+            asp-items="Html.GetEnumSelectList<HMJT.Models.Difficulty>()"
+            class="form-control">
+    </select>
+
+    <span asp-validation-for="Difficulty" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="AnswerA"></label>
+    <span class="text-danger">*</span>
+    <input asp-for="AnswerA" class="form-control" />
+    <span asp-validation-for="AnswerA" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="AnswerB"></label>
+    <span class="text-danger">*</span>
+    <input asp-for="AnswerB" class="form-control" />
+    <span asp-validation-for="AnswerB" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="AnswerC"></label>
+    <span class="text-danger">*</span>
+    <input asp-for="AnswerC" class="form-control" />
+    <span asp-validation-for="AnswerC" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="AnswerD"></label>
+    <span class="text-danger">*</span>
+    <input asp-for="AnswerD" class="form-control" />
+    <span asp-validation-for="AnswerD" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="CorrectAnswer"></label>
+    <span class="text-danger">*</span>
+
+    <!-- Creates a dropdown containing A, B, C and D. -->
+    <select asp-for="CorrectAnswer"
+            asp-items="Html.GetEnumSelectList<HMJT.Models.AnswerOption>()"
+            class="form-control">
+    </select>
+
+    <span asp-validation-for="CorrectAnswer" class="text-danger"></span>
+</div>
+
+<br />
+
+<!-- Saves the changes to the question. -->
+<button type="submit" class="btn btn-primary">
+    Save Changes
+</button>
+
+<!-- Returns to the list without saving changes. -->
+<a asp-action="Index" class="btn btn-secondary">
+    Back to Questions
+</a>
+
+</form>
+
