@@ -1,0 +1,43 @@
+@model HMJT.Models.Question
+
+@{
+// Sets the title for the page.
+ViewData["Title"] = "Delete Question";
+}
+
+<h2>Delete Question</h2>
+
+<h4>Are you sure you want to delete this question?</h4>
+
+<hr />
+
+<!-- Displays the question information before deletion. -->
+
+<div class="form-group"> <label asp-for="QuestionText"></label> <p class="form-control">@Model.QuestionText</p> </div>
+
+<div class="form-group"> <label asp-for="Category"></label> <p class="form-control">@Model.Category</p> </div>
+
+<div class="form-group"> <label asp-for="Difficulty"></label> <p class="form-control">@Model.Difficulty</p> </div>
+
+<div class="form-group"> <label asp-for="CorrectAnswer"></label> <p class="form-control">@Model.CorrectAnswer</p> </div>
+
+<br />
+
+<!-- Sends the QuestionId to the Delete POST action. -->
+
+<form asp-action="Delete" method="post">
+
+<!-- Hidden field keeps track of which question should be deleted. -->
+<input type="hidden" asp-for="QuestionId" />
+
+<!-- Confirms deletion. -->
+<button type="submit" class="btn btn-danger">
+    Delete
+</button>
+
+<!-- Cancels deletion and returns to the question list. -->
+<a asp-action="Index" class="btn btn-secondary">
+    Cancel
+</a>
+
+</form>

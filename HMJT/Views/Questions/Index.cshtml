@@ -1,0 +1,69 @@
+@model IEnumerable<HMJT.Models.Question>
+
+@{
+// Sets the title for the page.
+ViewData["Title"] = "Questions";
+}
+
+<h2>Questions</h2>
+
+<!-- Link to the page for creating a new question. -->
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        Create New Question
+    </a>
+</p>
+
+<!-- Displays all questions in a table. -->
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Question</th>
+            <th>Category</th>
+            <th>Difficulty</th>
+            <th>Correct Answer</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+
+<tbody>
+    <!-- Loops through every question supplied by the controller. -->
+    @foreach (var question in Model)
+    {
+        <tr>
+            <td>@question.QuestionText</td>
+            <td>@question.Category</td>
+            <td>@question.Difficulty</td>
+            <td>@question.CorrectAnswer</td>
+
+            <td>
+                <!-- Opens the details page for this question. -->
+                <a asp-action="Details"
+                   asp-route-id="@question.QuestionId"
+                   class="btn btn-info btn-sm">
+                    Details
+                </a>
+
+                <!-- Opens the edit page for this question. -->
+                <a asp-action="Edit"
+                   asp-route-id="@question.QuestionId"
+                   class="btn btn-warning btn-sm">
+                    Edit
+                </a>
+
+                <!-- Opens the delete confirmation page for this question. -->
+                <a asp-action="Delete"
+                   asp-route-id="@question.QuestionId"
+                   class="btn btn-danger btn-sm">
+                    Delete
+                </a>
+            </td>
+        </tr>
+    }
+</tbody>
+
+
+</table>

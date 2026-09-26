@@ -1,0 +1,54 @@
+@model HMJT.Models.Question
+
+@{
+// Sets the title for the page.
+ViewData["Title"] = "Question Details";
+}
+
+<h2>Question Details</h2>
+
+<!-- Displays the question text. -->
+
+<div class="form-group"> <label asp-for="QuestionText"></label> <p class="form-control">@Model.QuestionText</p> </div>
+
+<!-- Displays the category. -->
+
+<div class="form-group"> <label asp-for="Category"></label> <p class="form-control">@Model.Category</p> </div>
+
+<!-- Displays the difficulty. -->
+
+<div class="form-group"> <label asp-for="Difficulty"></label> <p class="form-control">@Model.Difficulty</p> </div>
+
+<!-- Displays answer A. -->
+
+<div class="form-group"> <label asp-for="AnswerA"></label> <p class="form-control">@Model.AnswerA</p> </div>
+
+<!-- Displays answer B. -->
+
+<div class="form-group"> <label asp-for="AnswerB"></label> <p class="form-control">@Model.AnswerB</p> </div>
+
+<!-- Displays answer C. -->
+
+<div class="form-group"> <label asp-for="AnswerC"></label> <p class="form-control">@Model.AnswerC</p> </div>
+
+<!-- Displays answer D. -->
+
+<div class="form-group"> <label asp-for="AnswerD"></label> <p class="form-control">@Model.AnswerD</p> </div>
+
+<!-- Displays which answer is correct. -->
+
+<div class="form-group"> <label asp-for="CorrectAnswer"></label> <p class="form-control">@Model.CorrectAnswer</p> </div>
+
+<br />
+
+<!-- Opens the edit page for this question. -->
+
+<a asp-action="Edit" asp-route-id="@Model.QuestionId" class="btn btn-warning">
+Edit
+</a>
+
+<!-- Returns to the list of questions. -->
+
+<a asp-action="Index" class="btn btn-secondary">
+Back to Questions
+</a>
