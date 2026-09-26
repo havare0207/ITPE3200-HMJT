@@ -105,5 +105,91 @@ public class GameMechanicsService
         // and false if the player already had that category.
         return player.Wedges.Add(question.Category);
     }
+
+    // Checks whether the player already owns
+    // the wedge for the given category.
+    public bool HasWedge(PlayerGameState player, string category)
+    {
+        return player.Wedges.Contains(category);
+    }
     
+    // Contains all category wedges required to complete the game.
+    private readonly HashSet<string> _requiredWedges = new()
+    {
+        "Java",
+        "JavaScript",
+        "HTML/CSS",
+        "Python",
+        "Game History",
+        "C#"
+    };
+
+    // Checks whether the player has collected
+    // every required category wedge.
+    public bool HasAllWedges(PlayerGameState player)
+    {
+        return _requiredWedges.IsSubsetOf(player.Wedges);
+    }
+
+    // Returns the category wedges that the player
+    // has not collected yet.
+    public List<string> GetMissingWedges(PlayerGameState player)
+    {
+        return _requiredWedges
+            .Where(category => !player.Wedges.Contains(category))
+            .ToList();
+    }
+
+    // Selects a random starting player.
+    // This method should only be called once when the game begins.
+    public void SelectRandomStartingPlayer(GameSessionState gameState)
+    {
+        // A game cannot start without players.
+        if (gameState.Players.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "The game must contain at least one player."
+            );
+        }
+
+        // Select a random index from the player list.
+        gameState.CurrentPlayerIndex =
+            Random.Shared.Next(gameState.Players.Count);
+    }
+
+    // Returns the player whose turn it currently is.
+    public PlayerGameState GetCurrentPlayer(GameSessionState gameState)
+    {
+        if (gameState.Players.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "The game must contain at least one player."
+            );
+        }
+
+        return gameState.Players[gameState.CurrentPlayerIndex];
+    }
+
+    // Moves the turn to the next player.
+    // After the last player, the turn returns to the first player.
+    public void MoveToNextPlayer(GameSessionState gameState)
+    {
+        if (gameState.Players.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "The game must contain at least one player."
+            );
+        }
+
+        gameState.CurrentPlayerIndex++;
+
+        // Return to the first player after the last player.
+        if (gameState.CurrentPlayerIndex >= gameState.Players.Count)
+        {
+            gameState.CurrentPlayerIndex = 0;
+        }
+    }
+
+    
+
 }

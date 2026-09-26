@@ -293,4 +293,303 @@ public class GameMechanicsServiceTests
         Assert.Single(player.Wedges);
     }
 
+    [Fact]
+    public void HasWedge_ShouldReturnTrueWhenPlayerOwnsWedge()
+    {
+        // Create a player who already owns the Python wedge.
+        var player = new PlayerGameState
+        {
+            PlayerName = "Player 1",
+            Wedges = new HashSet<string> { "Python" }
+        };
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // Check whether the player owns the Python wedge.
+        bool result = gameMechanicsService.HasWedge(player, "Python");
+
+        // The player owns this wedge, so the result should be true.
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void HasWedge_ShouldReturnFalseWhenPlayerDoesNotOwnWedge()
+    {
+        // Create a player who owns the Java wedge.
+        var player = new PlayerGameState
+        {
+            PlayerName = "Player 1",
+            Wedges = new HashSet<string> { "Java" }
+        };
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // Check for a wedge the player does not own.
+        bool result = gameMechanicsService.HasWedge(
+            player,
+            "JavaScript"
+        );
+
+        // The player does not own this wedge.
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void HasAllWedges_ShouldReturnTrueWhenPlayerHasAllWedges()
+    {
+        // Create a player who owns all six category wedges.
+        var player = new PlayerGameState
+        {
+            PlayerName = "Player 1",
+
+            Wedges = new HashSet<string>
+            {
+                "Java",
+                "JavaScript",
+                "HTML/CSS",
+                "Python",
+                "Game History",
+                "C#"
+            }
+        };
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // Check whether the player has completed the wedge collection.
+        bool result = gameMechanicsService.HasAllWedges(player);
+
+        // All six wedges are present.
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void HasAllWedges_ShouldReturnFalseWhenWedgeIsMissing()
+    {
+        // Create a player who is missing the C# wedge.
+        var player = new PlayerGameState
+        {
+            PlayerName = "Player 1",
+
+            Wedges = new HashSet<string>
+            {
+                "Java",
+                "JavaScript",
+                "HTML/CSS",
+                "Python",
+                "Game History"
+            }
+        };
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // Check whether the player has collected every wedge.
+        bool result = gameMechanicsService.HasAllWedges(player);
+
+        // One required wedge is missing.
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void GetMissingWedges_ShouldReturnOnlyMissingWedges()
+    {
+        // Create a player who currently owns three wedges.
+        var player = new PlayerGameState
+        {
+            PlayerName = "Player 1",
+
+            Wedges = new HashSet<string>
+            {
+                "Java",
+                "Python",
+                "C#"
+            }
+        };
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // Get the wedges the player still needs to collect.
+        List<string> result =
+            gameMechanicsService.GetMissingWedges(player);
+
+        // The player should be missing exactly three wedges.
+        Assert.Equal(3, result.Count);
+
+        // Check that all missing wedges are included.
+        Assert.Contains("JavaScript", result);
+        Assert.Contains("HTML/CSS", result);
+        Assert.Contains("Game History", result);
+
+        // Check that already owned wedges are not included.
+        Assert.DoesNotContain("Java", result);
+        Assert.DoesNotContain("Python", result);
+        Assert.DoesNotContain("C#", result);
+    }
+
+    [Fact]
+    public void SelectRandomStartingPlayer_ShouldSelectValidPlayer()
+    {
+        // Create a game with four players.
+        var gameState = new GameSessionState
+        {
+            Players = new List<PlayerGameState>
+            {
+                new PlayerGameState { PlayerNumber = 1, PlayerName = "Player 1" },
+                new PlayerGameState { PlayerNumber = 2, PlayerName = "Player 2" },
+                new PlayerGameState { PlayerNumber = 3, PlayerName = "Player 3" },
+                new PlayerGameState { PlayerNumber = 4, PlayerName = "Player 4" }
+            }
+        };
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // Select the random starting player.
+        gameMechanicsService.SelectRandomStartingPlayer(gameState);
+
+        // The selected index must point to one of the players in the list.
+        Assert.InRange(
+            gameState.CurrentPlayerIndex,
+            0,
+            // because four players, the valid indices are 0, 1, 2, and 3
+            gameState.Players.Count - 1
+        );
+    }
+
+    [Fact]
+    public void GetCurrentPlayer_ShouldReturnSelectedPlayer()
+    {
+        var gameState = new GameSessionState
+        {
+            Players = new List<PlayerGameState>
+            {
+                new PlayerGameState { PlayerNumber = 1, PlayerName = "Anna" },
+                new PlayerGameState { PlayerNumber = 2, PlayerName = "Erik" },
+                new PlayerGameState { PlayerNumber = 3, PlayerName = "Nora" }
+            },
+
+            // Index 1 represents Player 2.
+            CurrentPlayerIndex = 1
+        };
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // Get the player whose turn it currently is.
+        PlayerGameState result =
+            gameMechanicsService.GetCurrentPlayer(gameState);
+
+        // Player 2 should be the active player.
+        Assert.Equal(2, result.PlayerNumber);
+        Assert.Equal("Erik", result.PlayerName);
+    }
+
+    [Fact]
+    public void MoveToNextPlayer_ShouldFollowPlayerOrder()
+    {
+        var gameState = new GameSessionState
+        {
+            Players = new List<PlayerGameState>
+            {
+                new PlayerGameState { PlayerNumber = 1, PlayerName = "Anna" },
+                new PlayerGameState { PlayerNumber = 2, PlayerName = "Erik" },
+                new PlayerGameState { PlayerNumber = 3, PlayerName = "Nora" },
+                new PlayerGameState { PlayerNumber = 4, PlayerName = "Håvard" }
+            },
+
+            // Player 2 currently has the turn.
+            CurrentPlayerIndex = 1
+        };
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // Move from Player 2 to Player 3.
+        gameMechanicsService.MoveToNextPlayer(gameState);
+
+        PlayerGameState result =
+            gameMechanicsService.GetCurrentPlayer(gameState);
+
+        Assert.Equal(3, result.PlayerNumber);
+        Assert.Equal("Nora", result.PlayerName);
+    }
+
+    [Fact]
+    public void MoveToNextPlayer_ShouldReturnToFirstPlayerAfterLast()
+    {
+        var gameState = new GameSessionState
+        {
+            Players = new List<PlayerGameState>
+            {
+                new PlayerGameState { PlayerNumber = 1, PlayerName = "Anna" },
+                new PlayerGameState { PlayerNumber = 2, PlayerName = "Erik" },
+                new PlayerGameState { PlayerNumber = 3, PlayerName = "Nora" },
+                new PlayerGameState { PlayerNumber = 4, PlayerName = "Håvard" }
+            },
+
+            // Player 4 is the final player in the turn order.
+            CurrentPlayerIndex = 3
+        };
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // The next turn should return to Player 1.
+        gameMechanicsService.MoveToNextPlayer(gameState);
+
+        PlayerGameState result =
+            gameMechanicsService.GetCurrentPlayer(gameState);
+
+        Assert.Equal(1, result.PlayerNumber);
+        Assert.Equal("Anna", result.PlayerName);
+    }
+
+    [Fact]
+    public void MoveToNextPlayer_ShouldOnlyUseActivePlayers()
+    {
+        // Only player slots 1, 2 and 3 are being used.
+        var gameState = new GameSessionState
+        {
+            Players = new List<PlayerGameState>
+            {
+                new PlayerGameState { PlayerNumber = 1, PlayerName = "Anna" },
+                new PlayerGameState { PlayerNumber = 2, PlayerName = "Erik" },
+                new PlayerGameState { PlayerNumber = 3, PlayerName = "Nora" }
+            },
+
+            CurrentPlayerIndex = 2
+        };
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // After Player 3, the turn should return to Player 1.
+        gameMechanicsService.MoveToNextPlayer(gameState);
+
+        PlayerGameState result =
+            gameMechanicsService.GetCurrentPlayer(gameState);
+
+        Assert.Equal(1, result.PlayerNumber);
+    }
+
+    [Fact]
+    public void SelectRandomStartingPlayer_ShouldThrowWhenNoPlayersExist()
+    {
+        // Create a game without any players.
+        var gameState = new GameSessionState();
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // A starting player cannot be selected
+        // when the game contains no players.
+        Assert.Throws<InvalidOperationException>(() =>
+            gameMechanicsService.SelectRandomStartingPlayer(gameState));
+    }
+
+    [Fact]
+    public void MoveToNextPlayer_ShouldThrowWhenNoPlayersExist()
+    {
+        var gameState = new GameSessionState();
+
+        var gameMechanicsService = new GameMechanicsService();
+
+        // The turn cannot move forward if no players exist.
+        Assert.Throws<InvalidOperationException>(() =>
+            gameMechanicsService.MoveToNextPlayer(gameState));
+    }
+
 }
