@@ -1,7 +1,14 @@
+using HMJT.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// M - VS Code autofilled this differently, teacher's code line in MyShop: builder.Configuration["ConnectionStrings:ItemDbContextConnection"]);
+builder.Services.AddDbContext<GameDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("GameDbConnection")));
 
 var app = builder.Build();
 
