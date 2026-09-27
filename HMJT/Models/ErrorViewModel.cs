@@ -1,4 +1,4 @@
-namespace FirstMVC.Models;
+namespace HMJT.Models;
 
 public class ErrorViewModel
 {
