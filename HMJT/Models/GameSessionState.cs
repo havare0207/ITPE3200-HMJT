@@ -17,5 +17,5 @@ public class GameSessionState
     // Stores the player who won the game.
     // null means that no player has won yet.
     public PlayerGameState? Winner { get; set; }
-    
+
 }

@@ -112,7 +112,7 @@ public class GameMechanicsService
     {
         return player.Wedges.Contains(category);
     }
-    
+
     // Contains all category wedges required to complete the game.
     private readonly HashSet<string> _requiredWedges = new()
     {
@@ -190,6 +190,6 @@ public class GameMechanicsService
         }
     }
 
-    
+
 
 }

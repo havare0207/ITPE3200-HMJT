@@ -17,7 +17,7 @@ public class GameMechanicsServiceTests
     // multiple times with different input values.
 
     [Theory]
-    
+
     // Each InlineData contains:
     // dice roll -> expected category
     [InlineData(1, "Java")]
@@ -45,16 +45,16 @@ public class GameMechanicsServiceTests
         // we expected for this dice roll.
         Assert.Equal(expectedCategory, result);
     }
-    
+
     //test for numbers out of range:
     [Theory]
-    
+
     [InlineData(0)]
-    [InlineData(7)] 
+    [InlineData(7)]
 
     public void GetCategoryFromDiceRoll_ShouldThrowExceptionForInvalidRoll(
     int diceRoll)
-    {   
+    {
         var gameMechanicsService = new GameMechanicsService();
 
         // Check that an invalid dice roll causes

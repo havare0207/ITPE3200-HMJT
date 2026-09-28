@@ -524,7 +524,7 @@ public class GameTurnServiceTests
             Difficulty.Hard,
             turnState.Question.Difficulty
         );
-    }       
+    }
 
     [Fact]
     public void SetFinalQuestion_ShouldThrowWhenTurnIsNotFinal()
@@ -555,7 +555,7 @@ public class GameTurnServiceTests
                 "Java",
                 Difficulty.Easy
             ));
-    }    
+    }
 
     [Fact]
     public void SetFinalQuestion_ShouldNotChangeDiceRoll()
@@ -765,6 +765,6 @@ public class GameTurnServiceTests
             ));
     }
 
-    
+
 
 }

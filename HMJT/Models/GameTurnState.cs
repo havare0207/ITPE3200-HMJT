@@ -18,5 +18,5 @@ public class GameTurnState
 
     // Stores whether this turn is a final question turn.
     public bool IsFinalTurn { get; set; }
-    
+
 }
