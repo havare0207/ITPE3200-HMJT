@@ -10,4 +10,12 @@ public class GameSessionState
     // Stores the index of the player whose turn it currently is.
     // This is only used for turn order, not board position.
     public int CurrentPlayerIndex { get; set; }
+
+    // Stores whether the game has ended.
+    public bool IsGameOver { get; set; }
+
+    // Stores the player who won the game.
+    // null means that no player has won yet.
+    public PlayerGameState? Winner { get; set; }
+    
 }

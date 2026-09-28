@@ -1,0 +1,59 @@
+<!--{ ... } is Razor-language. 
+Here it is used to set the title of the page: -->
+
+
+@model HMJT.Models.GamePlayViewModel
+
+@{
+    ViewData["Title"] = "Play";
+}
+
+<h1>Game</h1>
+
+<h2>Current Player</h2>
+
+<p>
+    Player @Model.PlayerNumber:
+    @Model.PlayerName
+</p>
+
+<h2>Turn</h2>
+
+<p>
+    Dice roll: @Model.DiceRoll
+</p>
+
+<p>
+    Category: @Model.Category
+</p>
+
+<h2>Question</h2>
+
+<p>
+    @Model.Question.QuestionText
+</p>
+
+<ul>
+    <li>A: @Model.Question.AnswerA</li>
+    <li>B: @Model.Question.AnswerB</li>
+    <li>C: @Model.Question.AnswerC</li>
+    <li>D: @Model.Question.AnswerD</li>
+</ul>
+
+<h2>Collected Wedges</h2>
+
+<ul>
+    @foreach (string wedge in Model.Wedges)
+    {
+        <li>@wedge</li>
+    }
+</ul>
+
+<h2>Missing Wedges</h2>
+
+<ul>
+    @foreach (string wedge in Model.MissingWedges)
+    {
+        <li>@wedge</li>
+    }
+</ul>
