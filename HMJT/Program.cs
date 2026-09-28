@@ -1,7 +1,19 @@
+using HMJT.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Registers the game services for dependency injection.
+// ASP.NET Core can then create these services automatically
+// when they are required by controllers or other services.
+builder.Services.AddScoped<DiceService>();
+builder.Services.AddScoped<GameMechanicsService>();
+builder.Services.AddScoped<QuestionService>();
+builder.Services.AddScoped<GameTurnService>();
+builder.Services.AddSingleton<GameStateService>();
+
 
 var app = builder.Build();
 

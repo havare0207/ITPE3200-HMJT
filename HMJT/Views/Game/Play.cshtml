@@ -1,0 +1,347 @@
+@model HMJT.Models.GamePlayViewModel
+@using HMJT.Models
+
+@{
+    ViewData["Title"] = "Play";
+}
+
+<h1>Game</h1>
+
+<!-- Show the game setup if no game has started yet. -->
+@if (!Model.HasActiveGame)
+{
+    <h2>Start New Game</h2>
+
+    <!-- Sends the player names and difficulty to StartGame. -->
+    <form asp-controller="Game"
+          asp-action="StartGame"
+          method="post">
+
+        <div class="mb-3">
+            <label for="player1" class="form-label">
+                Player 1
+            </label>
+
+            <input type="text"
+                   id="player1"
+                   name="player1"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="player2" class="form-label">
+                Player 2
+            </label>
+
+            <input type="text"
+                   id="player2"
+                   name="player2"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="player3" class="form-label">
+                Player 3
+            </label>
+
+            <input type="text"
+                   id="player3"
+                   name="player3"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="player4" class="form-label">
+                Player 4
+            </label>
+
+            <input type="text"
+                   id="player4"
+                   name="player4"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="player5" class="form-label">
+                Player 5
+            </label>
+
+            <input type="text"
+                   id="player5"
+                   name="player5"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="player6" class="form-label">
+                Player 6
+            </label>
+
+            <input type="text"
+                   id="player6"
+                   name="player6"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="difficulty" class="form-label">
+                Difficulty
+            </label>
+
+            <!-- The selected value is sent to StartGame as Difficulty. -->
+            <select id="difficulty"
+                    name="difficulty"
+                    class="form-select">
+
+                <option value="@Difficulty.Easy">
+                    Easy
+                </option>
+
+                <option value="@Difficulty.Medium">
+                    Medium
+                </option>
+
+                <option value="@Difficulty.Hard">
+                    Hard
+                </option>
+
+            </select>
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary">
+            Start Game
+        </button>
+    </form>
+}
+else
+{
+    <!-- Show feedback from the previous action. -->
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="alert alert-info">
+            @Model.Message
+        </div>
+    }
+
+    <!-- Allows the players to stop the current game
+         and return to the player setup screen. -->
+    <form asp-controller="Game"
+          asp-action="ResetGame"
+          method="post"
+          class="mb-3">
+
+        <button type="submit"
+                class="btn btn-outline-danger">
+            Reset Game
+        </button>
+    </form>
+
+    <!-- Show the winner when the game is finished. -->
+    @if (Model.IsGameOver)
+    {
+        <h2>Game Over</h2>
+
+        <p>
+            Winner: <strong>@Model.WinnerName</strong>
+        </p>
+    }
+    else
+    {
+        <!-- Show whose turn it currently is. -->
+        <h2>Current Player</h2>
+
+        <p>
+            Player @Model.PlayerNumber:
+            <strong>@Model.PlayerName</strong>
+        </p>
+
+        <!-- Normal turn before the dice has been rolled. -->
+        @if (Model.CanRollDice)
+        {
+            <h2>Roll Dice</h2>
+
+            <p>
+                @Model.PlayerName can roll the dice.
+            </p>
+
+            <!-- Sends a POST request to RollDice. -->
+            <form asp-controller="Game"
+                  asp-action="RollDice"
+                  method="post">
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Roll Dice
+                </button>
+            </form>
+        }
+
+        <!-- The player has all six wedges and must receive a final question. -->
+        @if (Model.NeedsFinalCategory)
+        {
+            <h2>Final Turn</h2>
+
+            <p>
+                @Model.PlayerName has collected all six wedges.
+            </p>
+
+            <p>
+                The other players must choose the category
+                for the final question.
+            </p>
+
+            <!-- Each button sends one category to SelectFinalCategory. -->
+            <form asp-controller="Game"
+                  asp-action="SelectFinalCategory"
+                  method="post">
+
+                <button type="submit"
+                        name="category"
+                        value="Java"
+                        class="btn btn-secondary m-1">
+                    Java
+                </button>
+
+                <button type="submit"
+                        name="category"
+                        value="JavaScript"
+                        class="btn btn-secondary m-1">
+                    JavaScript
+                </button>
+
+                <button type="submit"
+                        name="category"
+                        value="HTML/CSS"
+                        class="btn btn-secondary m-1">
+                    HTML/CSS
+                </button>
+
+                <button type="submit"
+                        name="category"
+                        value="Python"
+                        class="btn btn-secondary m-1">
+                    Python
+                </button>
+
+                <button type="submit"
+                        name="category"
+                        value="Game History"
+                        class="btn btn-secondary m-1">
+                    Game History
+                </button>
+
+                <button type="submit"
+                        name="category"
+                        value="C#"
+                        class="btn btn-secondary m-1">
+                    C#
+                </button>
+            </form>
+        }
+
+        <!-- Show the question after the dice has been rolled
+             or after a final category has been selected. -->
+        @if (Model.HasActiveTurn)
+        {
+            @if (Model.IsFinalTurn)
+            {
+                <h2>Final Question</h2>
+            }
+            else
+            {
+                <h2>Turn</h2>
+
+                <p>
+                    Dice roll: @Model.DiceRoll
+                </p>
+            }
+
+            <p>
+                Category:
+                <strong>@Model.Category</strong>
+            </p>
+
+            <h3>Question</h3>
+
+            <p>
+                @Model.Question.QuestionText
+            </p>
+
+            <!-- Each button sends the selected answer
+                 to SubmitAnswer. -->
+            <form asp-controller="Game"
+                  asp-action="SubmitAnswer"
+                  method="post">
+
+                <div class="d-grid gap-2">
+
+                    <button type="submit"
+                            name="selectedAnswer"
+                            value="@AnswerOption.A"
+                            class="btn btn-outline-primary">
+                        A: @Model.Question.AnswerA
+                    </button>
+
+                    <button type="submit"
+                            name="selectedAnswer"
+                            value="@AnswerOption.B"
+                            class="btn btn-outline-primary">
+                        B: @Model.Question.AnswerB
+                    </button>
+
+                    <button type="submit"
+                            name="selectedAnswer"
+                            value="@AnswerOption.C"
+                            class="btn btn-outline-primary">
+                        C: @Model.Question.AnswerC
+                    </button>
+
+                    <button type="submit"
+                            name="selectedAnswer"
+                            value="@AnswerOption.D"
+                            class="btn btn-outline-primary">
+                        D: @Model.Question.AnswerD
+                    </button>
+
+                </div>
+            </form>
+        }
+
+        <hr />
+
+        <!-- Show the wedges already collected by the current player. -->
+        <h3>Collected Wedges</h3>
+
+        @if (Model.Wedges.Count == 0)
+        {
+            <p>No wedges collected yet.</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (string wedge in Model.Wedges)
+                {
+                    <li>@wedge</li>
+                }
+            </ul>
+        }
+
+        <!-- Show which wedges the current player still needs. -->
+        <h3>Missing Wedges</h3>
+
+        @if (Model.MissingWedges.Count == 0)
+        {
+            <p>All wedges collected!</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (string wedge in Model.MissingWedges)
+                {
+                    <li>@wedge</li>
+                }
+            </ul>
+        }
+    }
+}
