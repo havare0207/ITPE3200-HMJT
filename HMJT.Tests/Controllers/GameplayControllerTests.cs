@@ -450,4 +450,84 @@ public class GameplayControllerTests
             result
         );
     }
+
+    // Tests that the game cannot start if Player 1 is empty
+    // while another player name has been entered.
+    [Fact]
+    public void StartGame_RejectsGameWhenPlayer1IsMissing()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService();
+
+        var controller =
+            CreateController(gameStateService);
+
+        // Act
+        IActionResult result =
+            controller.StartGame(
+                "",
+                "Bob",
+                "",
+                "",
+                "",
+                "",
+                Difficulty.Easy
+            );
+
+        // Assert
+        Assert.Null(
+            gameStateService.GameSession
+        );
+
+        Assert.Equal(
+            "Player 1 must be entered.",
+            gameStateService.Message
+        );
+
+        Assert.IsType<RedirectToActionResult>(
+            result
+        );
+    }
+
+
+    // Tests that players must be entered in order.
+    // Player 3 cannot be used if Player 2 is empty.
+    [Fact]
+    public void StartGame_RejectsSkippedPlayerNumber()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService();
+
+        var controller =
+            CreateController(gameStateService);
+
+        // Act
+        IActionResult result =
+            controller.StartGame(
+                "Alice",
+                "",
+                "Charlie",
+                "",
+                "",
+                "",
+                Difficulty.Easy
+            );
+
+        // Assert
+        Assert.Null(
+            gameStateService.GameSession
+        );
+
+        Assert.Equal(
+            "Player 2 must be entered before Player 3.",
+            gameStateService.Message
+        );
+
+        Assert.IsType<RedirectToActionResult>(
+            result
+        );
+    }
+
 }

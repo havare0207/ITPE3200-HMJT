@@ -10,6 +10,12 @@
 <!-- Show the game setup if no game has started yet. -->
 @if (!Model.HasActiveGame)
 {
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="alert alert-warning">
+            @Model.Message
+        </div>
+    }
     <h2>Start New Game</h2>
 
     <!-- Sends the player names and difficulty to StartGame. -->

@@ -41,12 +41,14 @@ public class GameplayController : Controller{
     {
         // If no game is currently active,
         // return an empty ViewModel to the Play view.
+        // If no game is currently active,
+        // return an empty ViewModel to the Play view.
         if (!_gameStateService.HasActiveGame)
         {
             var emptyViewModel = new GamePlayViewModel
-
             {
-                HasActiveGame = false
+                HasActiveGame = false,
+                Message = _gameStateService.Message
             };
 
             return View(emptyViewModel);
@@ -169,22 +171,66 @@ public class GameplayController : Controller{
         string player6,
         Difficulty difficulty)
     {
+        // Player 1 must always be entered.
+        if (string.IsNullOrWhiteSpace(player1))
+        {
+            _gameStateService.Message =
+                "Player 1 must be entered.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
+        // Players must be entered in order.
+        // Player 3 cannot be used unless Player 2 is also entered, etc.
+        if (!string.IsNullOrWhiteSpace(player3) &&
+            string.IsNullOrWhiteSpace(player2))
+        {
+            _gameStateService.Message =
+                "Player 2 must be entered before Player 3.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
+        if (!string.IsNullOrWhiteSpace(player4) &&
+            string.IsNullOrWhiteSpace(player3))
+        {
+            _gameStateService.Message =
+                "Player 3 must be entered before Player 4.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
+        if (!string.IsNullOrWhiteSpace(player5) &&
+            string.IsNullOrWhiteSpace(player4))
+        {
+            _gameStateService.Message =
+                "Player 4 must be entered before Player 5.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
+        if (!string.IsNullOrWhiteSpace(player6) &&
+            string.IsNullOrWhiteSpace(player5))
+        {
+            _gameStateService.Message =
+                "Player 5 must be entered before Player 6.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
         // Create a new game session.
         var gameState = new GameSessionState();
 
-        // Add Player 1 if a name was entered.
-        if (!string.IsNullOrWhiteSpace(player1))
-        {
-            gameState.Players.Add(
-                new PlayerGameState
-                {
-                    PlayerNumber = 1,
-                    PlayerName = player1
-                }
-            );
-        }
+        // Player 1 is required.
+        gameState.Players.Add(
+            new PlayerGameState
+            {
+                PlayerNumber = 1,
+                PlayerName = player1
+            }
+        );
 
-        // Add Player 2 if a name was entered.
+        // Add the remaining players only if their names were entered.
         if (!string.IsNullOrWhiteSpace(player2))
         {
             gameState.Players.Add(
@@ -196,7 +242,6 @@ public class GameplayController : Controller{
             );
         }
 
-        // Add Player 3 if a name was entered.
         if (!string.IsNullOrWhiteSpace(player3))
         {
             gameState.Players.Add(
@@ -208,7 +253,6 @@ public class GameplayController : Controller{
             );
         }
 
-        // Add Player 4 if a name was entered.
         if (!string.IsNullOrWhiteSpace(player4))
         {
             gameState.Players.Add(
@@ -220,7 +264,6 @@ public class GameplayController : Controller{
             );
         }
 
-        // Add Player 5 if a name was entered.
         if (!string.IsNullOrWhiteSpace(player5))
         {
             gameState.Players.Add(
@@ -232,7 +275,6 @@ public class GameplayController : Controller{
             );
         }
 
-        // Add Player 6 if a name was entered.
         if (!string.IsNullOrWhiteSpace(player6))
         {
             gameState.Players.Add(
@@ -244,14 +286,7 @@ public class GameplayController : Controller{
             );
         }
 
-        // A game cannot start without any players.
-        if (gameState.Players.Count == 0)
-        {
-            return RedirectToAction(nameof(Play));
-        }
-
         // Select one random starting player.
-        // This only happens once when the game begins.
         _gameMechanicsService
             .SelectRandomStartingPlayer(gameState);
 
@@ -268,7 +303,6 @@ public class GameplayController : Controller{
         _gameStateService.Message =
             "Game started. The first player can roll the dice.";
 
-        // Return to the Play page after the game starts.
         return RedirectToAction(nameof(Play));
     }
 
