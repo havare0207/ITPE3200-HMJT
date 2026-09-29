@@ -65,6 +65,14 @@ means that the project uses the standard .NET SDK.
       by Visual Studio and the .NET test system.
     -->
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <!--
+  Provides an in-memory database for testing.
+
+  The tests can create a temporary database without using
+  the real application database. This makes it safe to test
+  creating, editing, and deleting questions.
+-->
+<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.0" />
   </ItemGroup>
 
     <!--
