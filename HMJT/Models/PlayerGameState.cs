@@ -10,4 +10,7 @@ public class PlayerGameState
     // Stores the category wedges the player has collected.
     // HashSet prevents the same category from being added more than once.
     public HashSet<string> Wedges { get; set; } = new();
+
+    // Stores the player's fixed number in the turn order.
+    public int PlayerNumber { get; set; }
 }

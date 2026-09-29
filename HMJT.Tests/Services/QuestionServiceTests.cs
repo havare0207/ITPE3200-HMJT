@@ -33,7 +33,7 @@ public class QuestionServiceTests
         // the category and difficulty from InlineData.
         Question result =
             questionService.GetRandomQuestion(category, difficulty);
-        
+
         // Check that the returned question belongs
         // to the requested category.
         Assert.Equal(category, result.Category);

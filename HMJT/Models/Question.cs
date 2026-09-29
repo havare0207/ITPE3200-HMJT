@@ -44,5 +44,5 @@ public class Question
     public string AnswerD { get; set; } = string.Empty;
 
     // Stores which answer option is correct: A, B, C or D.
-   public AnswerOption CorrectAnswer { get; set; }
+    public AnswerOption CorrectAnswer { get; set; }
 }
