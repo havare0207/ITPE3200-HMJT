@@ -10,10 +10,13 @@
 <!-- Show the game setup if no game has started yet. -->
 @if (!Model.HasActiveGame)
 {
+    <div class="card shadow-sm p-4 mb-4">
+
     <h2>Start New Game</h2>
 
     <!-- Sends the player names and difficulty to StartGame. -->
     <form asp-controller="Game"
+
           asp-action="StartGame"
           method="post">
 
@@ -113,6 +116,7 @@
             Start Game
         </button>
     </form>
+ </div>
 }
 else
 {
@@ -149,12 +153,14 @@ else
     else
     {
         <!-- Show whose turn it currently is. -->
-        <h2>Current Player</h2>
+        <div class="card shadow-sm p-3 mb-4">
+    <h2 class="h4 mb-2">Current Player</h2>
 
-        <p>
-            Player @Model.PlayerNumber:
-            <strong>@Model.PlayerName</strong>
-        </p>
+    <p class="mb-0">
+        Player @Model.PlayerNumber:
+        <strong>@Model.PlayerName</strong>
+    </p>
+</div>
 
         <!-- Normal turn before the dice has been rolled. -->
         @if (Model.CanRollDice)
