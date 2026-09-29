@@ -11,8 +11,7 @@ using HMJT.Models;
 namespace HMJT.Controllers;
 
 // Handles requests related to the game page.
-public class GameController : Controller
-{
+public class GameplayController : Controller{
     // Service used for starting and completing game turns.
     private readonly GameTurnService _gameTurnService;
 
@@ -25,7 +24,7 @@ public class GameController : Controller
 
     // Constructor for GameController.
     // The required services are provided through dependency injection.
-    public GameController(
+    public GameplayController(
         GameTurnService gameTurnService,
         GameStateService gameStateService,
         GameMechanicsService gameMechanicsService)

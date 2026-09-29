@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HMJT.Tests.Controllers;
 
-public class GameControllerTests
+public class GameplayControllerTests
 {
     // Creates a GameController with the services
     // needed for the controller tests.
-    private static GameController CreateController(
+    private static GameplayController  CreateController(
         GameStateService gameStateService)
     {
         var gameMechanicsService =
@@ -22,7 +22,7 @@ public class GameControllerTests
                 new QuestionService()
             );
 
-        return new GameController(
+        return new GameplayController(
             gameTurnService,
             gameStateService,
             gameMechanicsService

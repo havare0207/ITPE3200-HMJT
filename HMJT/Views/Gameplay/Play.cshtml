@@ -19,7 +19,7 @@
     <h2>Start New Game</h2>
 
     <!-- Sends the player names and difficulty to StartGame. -->
-    <form asp-controller="Game"
+    <form asp-controller="Gameplay"
           asp-action="StartGame"
           method="post">
 
@@ -132,7 +132,7 @@ else
 
     <!-- Allows the players to stop the current game
          and return to the player setup screen. -->
-    <form asp-controller="Game"
+    <form asp-controller="Gameplay"
           asp-action="ResetGame"
           method="post"
           class="mb-3">
@@ -172,7 +172,7 @@ else
             </p>
 
             <!-- Sends a POST request to RollDice. -->
-            <form asp-controller="Game"
+            <form asp-controller="Gameplay"
                   asp-action="RollDice"
                   method="post">
 
@@ -198,7 +198,7 @@ else
             </p>
 
             <!-- Each button sends one category to SelectFinalCategory. -->
-            <form asp-controller="Game"
+            <form asp-controller="Gameplay"
                   asp-action="SelectFinalCategory"
                   method="post">
 
@@ -276,7 +276,7 @@ else
 
             <!-- Each button sends the selected answer
                  to SubmitAnswer. -->
-            <form asp-controller="Game"
+            <form asp-controller="Gameplay"
                   asp-action="SubmitAnswer"
                   method="post">
 
