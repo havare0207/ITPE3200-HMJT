@@ -14,7 +14,7 @@ public class Question
     [StringLength(500, ErrorMessage = "Question text cannot exceed 500 characters.")]
     public string QuestionText { get; set; } = string.Empty;
 
-    // The category the question belongs to.
+    // The category the question belongs to. Later it will be replaced with a category model/database entity to store categories
     [Required(ErrorMessage = "Category is required.")]
     [StringLength(100, ErrorMessage = "Category cannot exceed 100 characters.")]
     public string Category { get; set; } = string.Empty;

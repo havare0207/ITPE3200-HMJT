@@ -4,8 +4,8 @@
 // Sets the title for the page.
 ViewData["Title"] = "Questions";
 }
-
-<h2>Questions</h2>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+<h2 class="mb-0">Questions</h2>
 
 <!-- Link to the page for creating a new question. -->
 
@@ -14,10 +14,10 @@ ViewData["Title"] = "Questions";
         Create New Question
     </a>
 </p>
-
+</div>
 <!-- Displays all questions in a table. -->
-
-<table class="table">
+<div class="table-responsive">
+<table class="table table-bordered table-striped table-hover align-middle">
     <thead>
         <tr>
             <th>Question</th>
@@ -67,3 +67,4 @@ ViewData["Title"] = "Questions";
 
 
 </table>
+</div>

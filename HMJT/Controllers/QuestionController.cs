@@ -120,6 +120,7 @@ public class QuestionController : Controller
 
     // Deletes the question from the database.
     [HttpPost]
+    [ActionName("Delete")] // Maps this POST method to the "Delete" action name used by the form.
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
