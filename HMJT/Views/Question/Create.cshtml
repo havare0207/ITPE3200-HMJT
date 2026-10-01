@@ -26,10 +26,23 @@ ViewData["Title"] = "Create Question";
     <span asp-validation-for="QuestionText" class="text-danger"></span>
 </div>
 
+<!-- Category -->
 <div class="form-group">
     <label asp-for="Category"></label>
     <span class="text-danger">*</span>
-    <input asp-for="Category" class="form-control" />
+
+<!-- Allow the user to select a category,which will later be replaced with a category database entity -->
+
+    <select asp-for="Category" class="form-select">
+        <option value="">-- Select a category --</option>
+        <option value="Java">Java</option>
+        <option value="JavaScript">JavaScript</option>
+        <option value="HTML/CSS">HTML/CSS</option>
+        <option value="Python">Python</option>
+        <option value="Game History">Game History</option>
+        <option value="C#">C#</option>
+    </select>
+
     <span asp-validation-for="Category" class="text-danger"></span>
 </div>
 
@@ -40,11 +53,14 @@ ViewData["Title"] = "Create Question";
     <!-- Creates a dropdown using the values from the Difficulty enum. -->
     <select asp-for="Difficulty"
             asp-items="Html.GetEnumSelectList<HMJT.Models.Difficulty>()"
-            class="form-control">
+            class="form-select">
     </select>
 
     <span asp-validation-for="Difficulty" class="text-danger"></span>
 </div>
+
+<!-- Answer options -->
+<h5 class="mt-4 mb-3">Answer Options</h5>
 
 <div class="form-group">
     <label asp-for="AnswerA"></label>
@@ -74,19 +90,20 @@ ViewData["Title"] = "Create Question";
     <span asp-validation-for="AnswerD" class="text-danger"></span>
 </div>
 
+<!-- Correct answer -->
+<h5 class="mt-4 mb-3">Correct Answer</h5>
+
 <div class="form-group">
     <label asp-for="CorrectAnswer"></label>
     <span class="text-danger">*</span>
 
-    <!-- Creates a dropdown containing A, B, C and D. -->
     <select asp-for="CorrectAnswer"
             asp-items="Html.GetEnumSelectList<HMJT.Models.AnswerOption>()"
-            class="form-control">
+            class="form-select">
     </select>
 
     <span asp-validation-for="CorrectAnswer" class="text-danger"></span>
 </div>
-
 <br />
 
 <!-- Submits the form to QuestionsController. -->
