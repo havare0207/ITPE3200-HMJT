@@ -10,5 +10,5 @@ public class Game
     [StringLength(50, MinimumLength = 2, ErrorMessage = "Game name must be between 2 and 50 characters.")]
     public string Name { get; set; } = string.Empty;
     public GameStatus Status { get; set; } = GameStatus.NotStarted;
-    public int CurrentPosition { get; set; } = 0;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
