@@ -44,17 +44,18 @@ public class GameController : Controller
 
     //POST: /Game/Create
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Game game)
     {
         if (ModelState.IsValid)
         {
             try
             {
-            game.Status = GameStatus.InProgress;
+            game.Status = GameStatus.NotStarted;
             _gameDbcontext.Games.Add(game);
             await _gameDbcontext.SaveChangesAsync();
             _logger.LogInformation("Game '{Name}' created.", game.Name);
-            return RedirectToAction(nameof(Index), new { id = game.GameId });
+            return RedirectToAction(nameof(Index));
             
             }
             catch (DbUpdateException ex)
@@ -116,6 +117,7 @@ public class GameController : Controller
 
     //POST: /Game/Delete/5
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var game = await _gameDbcontext.Games.FindAsync(id);
