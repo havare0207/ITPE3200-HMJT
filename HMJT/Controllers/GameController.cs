@@ -7,10 +7,12 @@ namespace HMJT.Controllers;
 public class GameController : Controller
 {
     private readonly GameDbContext _gameDbcontext;
+    private readonly ILogger<GameController> _logger;
 
-    public GameController(GameDbContext gameDbcontext)
+    public GameController(GameDbContext gameDbcontext, ILogger<GameController> logger)
     {
         _gameDbcontext = gameDbcontext;
+        _logger = logger;
     }
     
     //GET: /Game
@@ -28,6 +30,7 @@ public class GameController : Controller
         var game = await _gameDbcontext.Games.FindAsync(id);
         if (game == null)
         {
+            _logger.LogWarning("Game not found with ID: {GameId}", id);           
             return NotFound();
         }
         return View(game);
@@ -45,10 +48,21 @@ public class GameController : Controller
     {
         if (ModelState.IsValid)
         {
+            try
+            {
             game.Status = GameStatus.InProgress;
             _gameDbcontext.Games.Add(game);
             await _gameDbcontext.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            _logger.LogInformation("Game '{Name}' created.", game.Name);
+            return RedirectToAction(nameof(Index), new { id = game.GameId });
+            
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Error creating game.");
+                ModelState.AddModelError(string.Empty, "An error occurred while creating the game. Please try again.");
+                return View(game);
+            }
         }
         return View(game);
     }
@@ -67,13 +81,23 @@ public class GameController : Controller
 
     //POST: /Game/Update/5
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Update(Game game)
     {
         if (ModelState.IsValid)
         {
+            try
+            {
             _gameDbcontext.Games.Update(game);
             await _gameDbcontext.SaveChangesAsync();
+            _logger.LogInformation("Game '{Name}' updated.", game.Name);
             return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Error editing game.");
+                ModelState.AddModelError(string.Empty, "An error occurred while editing the game. Please try again.");
+            }
         }
         return View(game);
     }
