@@ -1,3 +1,5 @@
+using HMJT.Models;
+using Microsoft.EntityFrameworkCore;
 using HMJT.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// M - VS Code autofilled this differently, teacher's code line in MyShop: builder.Configuration["ConnectionStrings:ItemDbContextConnection"]);
+builder.Services.AddDbContext<GameDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("GameDbConnection")));
 // Registers the game services for dependency injection.
 // ASP.NET Core can then create these services automatically
 // when they are required by controllers or other services.
