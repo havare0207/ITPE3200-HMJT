@@ -153,3 +153,9 @@ h3 {
 .footer {
   margin-top: 3rem;
 }
+
+.home-category-image {
+    max-width: 500px;
+    width: 100%;
+    height: auto;
+}
