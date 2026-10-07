@@ -21,16 +21,18 @@ public class QuestionController : Controller
         _logger = logger ?? NullLogger<QuestionController>.Instance;
     }
 
-    // Shows all questions.
+     // Shows all questions.
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var questions = await _gameDbcontext.Questions.ToListAsync();
-        
+        var questions = await _gameDbcontext.Questions
+     .Include(q => q.Game)
+     .ToListAsync();
+
         return View(questions);
     }
 
-     // Shows one question.
+    // Shows one question.
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
@@ -46,10 +48,21 @@ public class QuestionController : Controller
         return View(question);
     }
 
-    // Shows the form for creating a new question.
+    // Shows the form for creating a new question for a specific game.
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create(int gameId)
     {
+        var game = await _gameDbcontext.Games.FindAsync(gameId);
+
+        // If the game does not exist, show "Not Found".
+        if (game == null)
+        {
+            return NotFound();
+        }
+
+        // Passes the game to the Create view.
+        ViewBag.Game = game;
+
         return View();
     }
 
@@ -61,6 +74,17 @@ public class QuestionController : Controller
         // Check if the question passes the validation rules.
         if (!ModelState.IsValid)
         {
+            // Reload the game so the view still knows which game
+            // the question belongs to.
+            var game = await _gameDbcontext.Games.FindAsync(question.GameId);
+
+            if (game == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Game = game;
+
             _logger.LogWarning("Creating a question failed validation");
             return View(question);
         }
@@ -71,10 +95,16 @@ public class QuestionController : Controller
         // Save the changes.
         await _gameDbcontext.SaveChangesAsync();
 
-        _logger.LogInformation("Question {QuestionId} was created", question.QuestionId);
+        _logger.LogInformation(
+            "Question {QuestionId} was created for Game {GameId}",
+            question.QuestionId,
+            question.GameId);
 
-        // Go back to the question list.
-        return RedirectToAction(nameof(Index));
+        // Go back to the questions for this game.
+        return RedirectToAction(
+            "Questions",
+            "Game",
+            new { id = question.GameId });
     }
 
     // Shows the form for editing a question.
@@ -101,7 +131,10 @@ public class QuestionController : Controller
         // Check if the edited question is valid.
         if (!ModelState.IsValid)
         {
-            _logger.LogWarning("Editing question {QuestionId} failed validation", question.QuestionId);
+            _logger.LogWarning(
+                "Editing question {QuestionId} failed validation",
+                question.QuestionId);
+
             return View(question);
         }
 
@@ -111,10 +144,15 @@ public class QuestionController : Controller
         // Save the changes.
         await _gameDbcontext.SaveChangesAsync();
 
-        _logger.LogInformation("Question {QuestionId} was updated", question.QuestionId);
+        _logger.LogInformation(
+            "Question {QuestionId} was updated",
+            question.QuestionId);
 
-        // Go back to the question list.
-        return RedirectToAction(nameof(Index));
+        // Go back to the questions for this game.
+        return RedirectToAction(
+            "Questions",
+            "Game",
+            new { id = question.GameId });
     }
 
     // Shows the delete confirmation page.
@@ -135,7 +173,7 @@ public class QuestionController : Controller
 
     // Deletes the question from the database.
     [HttpPost]
-    [ActionName("Delete")] // Maps this POST method to the "Delete" action name used by the form.
+    [ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
@@ -144,9 +182,15 @@ public class QuestionController : Controller
         // If the question does not exist, show "Not Found".
         if (question == null)
         {
-            _logger.LogWarning("Question {QuestionId} was not found (DeleteConfirmed)", id);
+            _logger.LogWarning(
+                "Question {QuestionId} was not found (DeleteConfirmed)",
+                id);
+
             return NotFound();
         }
+
+        // Remember which game the question belongs to.
+        var gameId = question.GameId;
 
         // Remove the question from the database.
         _gameDbcontext.Questions.Remove(question);
@@ -156,7 +200,10 @@ public class QuestionController : Controller
 
         _logger.LogInformation("Question {QuestionId} was deleted", id);
 
-        // Go back to the question list.
-        return RedirectToAction(nameof(Index));
+        // Go back to the questions for this game.
+        return RedirectToAction(
+            "Questions",
+            "Game",
+            new { id = gameId });
     }
 }

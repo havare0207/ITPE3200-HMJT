@@ -35,6 +35,24 @@ public class GameController : Controller
         }
         return View(game);
     }
+
+    // GET: /Game/Questions/5
+    // Shows all questions belonging to a specific game.
+    [HttpGet]
+    public async Task<IActionResult> Questions(int id)
+    {
+        var game = await _gameDbcontext.Games
+            .Include(g => g.Questions)
+            .FirstOrDefaultAsync(g => g.GameId == id);
+
+        if (game == null)
+        {
+            return NotFound();
+        }
+
+        return View(game);
+    }
+
     //GET: /Game/Create
     [HttpGet]
     public IActionResult Create()

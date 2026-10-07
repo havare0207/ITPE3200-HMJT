@@ -1,16 +1,16 @@
 @model HMJT.Models.Question
 
 @{
-// Sets the title for the page.
-ViewData["Title"] = "Create Question";
+    // Sets the title for the page.
+    ViewData["Title"] = "Create Question";
 }
-
 <h2>Create New Question</h2>
 
-<!-- Sends the completed form to the Create action in QuestionsController. -->
-
+<!-- Sends the completed form to the Create action in QuestionController. -->
 <form asp-action="Create" method="post">
 
+<!-- Stores the GameId so the question belongs to the selected game. -->
+<input type="hidden" asp-for="GameId" value="@ViewBag.Game.GameId" />
 
 <!-- Displays validation errors that are not connected to one specific field. -->
 
@@ -31,8 +31,7 @@ ViewData["Title"] = "Create Question";
     <label asp-for="Category"></label>
     <span class="text-danger">*</span>
 
-<!-- Allow the user to select a category,which will later be replaced with a category database entity -->
-
+    <!-- Allow the user to select a category, which will later be replaced with a category database entity. -->
     <select asp-for="Category" class="form-select">
         <option value="">-- Select a category --</option>
         <option value="Java">Java</option>
@@ -104,15 +103,20 @@ ViewData["Title"] = "Create Question";
 
     <span asp-validation-for="CorrectAnswer" class="text-danger"></span>
 </div>
+
 <br />
 
-<!-- Submits the form to QuestionsController. -->
+<!-- Submits the form to QuestionController. -->
 <button type="submit" class="btn btn-primary">
     Create
 </button>
 
-<!-- Returns to the list of questions. -->
-<a asp-action="Index" class="btn btn-secondary">
+<!-- Returns to the questions for the current game. -->
+<a asp-controller="Game"
+   asp-action="Questions"
+   asp-route-id="@ViewBag.Game.GameId"
+   class="btn btn-secondary">
     Back to Questions
 </a>
+
 </form>

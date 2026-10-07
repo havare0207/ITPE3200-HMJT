@@ -1,0 +1,100 @@
+@model HMJT.Models.Game
+@{
+    ViewData["Title"] = "Game Questions";
+}
+<!-- Page heading -->
+<h2>@Model.Name - Questions</h2>
+
+<!-- Action buttons -->
+<div class="mb-3">
+
+    <!-- Button to add a new question to this game -->
+    <a asp-controller="Question"
+       asp-action="Create"
+       asp-route-gameId="@Model.GameId"
+       class="btn btn-primary">
+        Add Question
+    </a>
+
+    <!-- Button to return to the game details page -->
+    <a asp-controller="Game"
+       asp-action="Details"
+       asp-route-id="@Model.GameId"
+       class="btn btn-secondary">
+        Back to Game
+    </a>
+
+</div>
+
+<!-- Check if the game has any questions -->
+@if (Model.Questions.Any())
+{
+    <!-- Questions table -->
+    <table class="table">
+
+        <!-- Table header -->
+        <thead>
+            <tr>
+                <th>Question</th>
+                <th>Category</th>
+                <th>Difficulty</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <!-- Table body -->
+        <tbody>
+
+            <!-- Loop through every question in the game -->
+            @foreach (var question in Model.Questions)
+            {
+                <tr>
+
+                    <!-- Question text -->
+                    <td>
+                        @question.QuestionText
+                    </td>
+
+                    <!-- Question category -->
+                    <td>
+                        @question.Category
+                    </td>
+
+                    <!-- Question difficulty -->
+                    <td>
+                        @question.Difficulty
+                    </td>
+
+                    <!-- Edit and Delete buttons -->
+                    <td>
+
+                        <!-- Edit question -->
+                        <a asp-controller="Question"
+                           asp-action="Edit"
+                           asp-route-id="@question.QuestionId"
+                           class="btn btn-sm btn-secondary">
+                            Edit
+                        </a>
+
+                        <!-- Delete question -->
+                        <a asp-controller="Question"
+                           asp-action="Delete"
+                           asp-route-id="@question.QuestionId"
+                           class="btn btn-sm btn-danger">
+                            Delete
+                        </a>
+
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+}
+else
+{
+    <!-- Message shown when the game has no questions -->
+    <p>This game does not have any questions yet.</p>
+}

@@ -11,4 +11,7 @@ public class Game
     public string Name { get; set; } = string.Empty;
     public GameStatus Status { get; set; } = GameStatus.NotStarted;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // The questions belonging to this game.
+    public ICollection<Question> Questions { get; set; } = new List<Question>();
 }

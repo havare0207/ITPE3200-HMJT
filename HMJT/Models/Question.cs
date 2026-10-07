@@ -45,4 +45,10 @@ public class Question
 
     // Stores which answer option is correct: A, B, C or D.
     public AnswerOption CorrectAnswer { get; set; }
+
+    // Identifies the game this question belongs to.
+    public int GameId { get; set; }
+
+    // Navigation property for the related game.
+    public Game? Game { get; set; }
 }

@@ -24,6 +24,7 @@ ViewData["Title"] = "Questions";
             <th>Category</th>
             <th>Difficulty</th>
             <th>Correct Answer</th>
+            <th>Game Name</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -38,6 +39,8 @@ ViewData["Title"] = "Questions";
             <td>@question.Category</td>
             <td>@question.Difficulty</td>
             <td>@question.CorrectAnswer</td>
+            <td>@question.Game?.Name</td>
+
 
             <td>
                 <!-- Opens the details page for this question. -->
