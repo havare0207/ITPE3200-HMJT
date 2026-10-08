@@ -5,13 +5,14 @@
     ViewData["Title"] = "Play";
 }
 
-<h1>Game</h1>
-
-<!-- Show the game setup if no game has started yet. -->
+<!-- Show the setup form if no game is currently active. -->
 @if (!Model.HasActiveGame)
 {
-<div class="card shadow-sm p-4 mb-4">
+    <h1>Game</h1>
 
+    <h2>Start New Game</h2>
+
+    <!-- Show validation or setup messages before the game starts. -->
     @if (!string.IsNullOrWhiteSpace(Model.Message))
     {
         <div class="alert alert-warning">
@@ -19,9 +20,7 @@
         </div>
     }
 
-    <h2>Start New Game</h2>
-
-    <!-- Sends the player names and difficulty to StartGame. -->
+    <!-- Sends player names and difficulty to StartGame. -->
     <form asp-controller="Gameplay"
           asp-action="StartGame"
           method="post">
@@ -97,7 +96,6 @@
                 Difficulty
             </label>
 
-            <!-- The selected value is sent to StartGame as Difficulty. -->
             <select id="difficulty"
                     name="difficulty"
                     class="form-select">
@@ -122,238 +120,692 @@
             Start Game
         </button>
     </form>
- </div>
 }
 else
 {
-    <!-- Show feedback from the previous action. -->
+    <!-- Top area containing the page title and reset button. -->
+    <div class="gameplay-heading">
+
+        <div>
+            <h1>Code Pursuit</h1>
+        </div>
+
+        <!-- Allows the current game to be reset at any time. -->
+        <form asp-controller="Gameplay"
+              asp-action="ResetGame"
+              method="post">
+
+            <button type="submit"
+                    class="btn btn-outline-danger">
+                Reset Game
+            </button>
+        </form>
+
+    </div>
+
+    <!-- Show feedback from the latest game action. -->
     @if (!string.IsNullOrWhiteSpace(Model.Message))
     {
-        <div class="alert alert-info">
+        <div class="gameplay-status">
             @Model.Message
         </div>
     }
 
-    <!-- Allows the players to stop the current game
-         and return to the player setup screen. -->
-    <form asp-controller="Gameplay"
-          asp-action="ResetGame"
-          method="post"
-          class="mb-3">
+    <!-- Main gameplay area.
+         The board is shown on the left and
+         game information is shown on the right. -->
+    <div class="gameplay-layout">
 
-        <button type="submit"
-                class="btn btn-outline-danger">
-            Reset Game
-        </button>
-    </form>
+        <!-- Board panel.
+             The actual interactive board will be added
+             in the next development step. -->
+        <section class="gameplay-board-panel">
 
-    <!-- Show the winner when the game is finished. -->
-    @if (Model.IsGameOver)
-    {
-        <h2>Game Over</h2>
+            <!-- Heading and explanation for the game board. -->
+            <h2>Interactive Board</h2>
 
-        <p>
-            Winner: <strong>@Model.WinnerName</strong>
-        </p>
-    }
-    else
-    {
-        <!-- Show whose turn it currently is. -->
-        <div class="card shadow-sm p-3 mb-4">
-    <h2 class="h4 mb-2">Current Player</h2>
-
-    <p class="mb-0">
-        Player @Model.PlayerNumber:
-        <strong>@Model.PlayerName</strong>
-    </p>
-</div>
-
-        <!-- Normal turn before the dice has been rolled. -->
-        @if (Model.CanRollDice)
-        {
-            <h2>Roll Dice</h2>
-
-            <p>
-                @Model.PlayerName can roll the dice.
+            <p class="text-muted">
+                Player positions and board movement will be added
+                in the next steps.
             </p>
 
-            <!-- Sends a POST request to RollDice. -->
-            <form asp-controller="Gameplay"
-                  asp-action="RollDice"
-                  method="post">
+            <!-- Shows which color belongs to each category. -->
+            <div class="board-key">
 
-                <button type="submit"
-                        class="btn btn-primary">
-                    Roll Dice
-                </button>
-            </form>
-        }
-
-        <!-- The player has all six wedges and must receive a final question. -->
-        @if (Model.NeedsFinalCategory)
-        {
-            <h2>Final Turn</h2>
-
-            <p>
-                @Model.PlayerName has collected all six wedges.
-            </p>
-
-            <p>
-                The other players must choose the category
-                for the final question.
-            </p>
-
-            <!-- Each button sends one category to SelectFinalCategory. -->
-            <form asp-controller="Gameplay"
-                  asp-action="SelectFinalCategory"
-                  method="post">
-
-                <button type="submit"
-                        name="category"
-                        value="Java"
-                        class="btn btn-secondary m-1">
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                        style="background: #3182e8;">
+                    </span>
                     Java
-                </button>
+                </span>
 
-                <button type="submit"
-                        name="category"
-                        value="JavaScript"
-                        class="btn btn-secondary m-1">
-                    JavaScript
-                </button>
-
-                <button type="submit"
-                        name="category"
-                        value="HTML/CSS"
-                        class="btn btn-secondary m-1">
-                    HTML/CSS
-                </button>
-
-                <button type="submit"
-                        name="category"
-                        value="Python"
-                        class="btn btn-secondary m-1">
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                        style="background: #f6ca46;">
+                    </span>
                     Python
-                </button>
+                </span>
 
-                <button type="submit"
-                        name="category"
-                        value="Game History"
-                        class="btn btn-secondary m-1">
-                    Game History
-                </button>
-
-                <button type="submit"
-                        name="category"
-                        value="C#"
-                        class="btn btn-secondary m-1">
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                        style="background: #9748dc;">
+                    </span>
                     C#
-                </button>
-            </form>
-        }
+                </span>
 
-        <!-- Show the question after the dice has been rolled
-             or after a final category has been selected. -->
-        @if (Model.HasActiveTurn)
-        {
-            @if (Model.IsFinalTurn)
-            {
-                <h2>Final Question</h2>
-            }
-            else
-            {
-                <h2>Turn</h2>
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                        style="background: #f59a45;">
+                    </span>
+                    HTML/CSS
+                </span>
 
-                <p>
-                    Dice roll: @Model.DiceRoll
-                </p>
-            }
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                        style="background: #ec407a;">
+                    </span>
+                    Game History
+                </span>
 
-            <p>
-                Category:
-                <strong>@Model.Category</strong>
-            </p>
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                        style="background: #25ad63;">
+                    </span>
+                    JavaScript
+                </span>
 
-            <h3>Question</h3>
+            </div>
 
-            <p>
-                @Model.Question.QuestionText
-            </p>
+            <!-- Circular six-category game board. -->
+            <div class="interactive-board-shell">
 
-            <!-- Each button sends the selected answer
-                 to SubmitAnswer. -->
-            <form asp-controller="Gameplay"
-                  asp-action="SubmitAnswer"
-                  method="post">
+                <div class="interactive-board">
 
-                <div class="d-grid gap-2">
+                    <!-- =====================================
+                        Category labels
+                        ===================================== -->
 
-                    <button type="submit"
-                            name="selectedAnswer"
-                            value="@AnswerOption.A"
-                            class="btn btn-outline-primary">
-                        A: @Model.Question.AnswerA
-                    </button>
+                    <span class="board-category-label
+                                board-category-history">
+                        Game<br />
+                        History
+                    </span>
 
-                    <button type="submit"
-                            name="selectedAnswer"
-                            value="@AnswerOption.B"
-                            class="btn btn-outline-primary">
-                        B: @Model.Question.AnswerB
-                    </button>
+                    <span class="board-category-label
+                                board-category-java">
+                        Java
+                    </span>
 
-                    <button type="submit"
-                            name="selectedAnswer"
-                            value="@AnswerOption.C"
-                            class="btn btn-outline-primary">
-                        C: @Model.Question.AnswerC
-                    </button>
+                    <span class="board-category-label
+                                board-category-python">
+                        Python
+                    </span>
 
-                    <button type="submit"
-                            name="selectedAnswer"
-                            value="@AnswerOption.D"
-                            class="btn btn-outline-primary">
-                        D: @Model.Question.AnswerD
-                    </button>
+                    <span class="board-category-label
+                                board-category-csharp">
+                        C#
+                    </span>
+
+                    <span class="board-category-label
+                                board-category-html">
+                        HTML/CSS
+                    </span>
+
+                    <span class="board-category-label
+                                board-category-javascript">
+                        JavaScript
+                    </span>
+
+
+                    <!-- =====================================
+                        Outer ring - top
+                        Three normal spaces between
+                        the two Roll Again spaces.
+                        ===================================== -->
+
+                    <div class="board-space roll-again"
+                        style="--x: 28%; --y: 15%;">
+                        <span class="roll-again-text">
+                            ROLL
+                        </span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 39%; --y: 10%;
+                                --space-color: #9748dc;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 50%; --y: 8%;
+                                --space-color: #ec407a;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 61%; --y: 10%;
+                                --space-color: #25ad63;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space roll-again"
+                        style="--x: 72%; --y: 15%;">
+                        <span class="roll-again-text">
+                            ROLL
+                        </span>
+                    </div>
+
+
+                    <!-- =====================================
+                        Outer ring - upper right
+                        ===================================== -->
+
+                    <div class="board-space"
+                        style="--x: 82%; --y: 22%;
+                                --space-color: #f6ca46;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 89%; --y: 32%;
+                                --space-color: #9748dc;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 93%; --y: 42%;
+                                --space-color: #3182e8;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space roll-again"
+                        style="--x: 95%; --y: 50%;">
+                        <span class="roll-again-text">
+                            ROLL
+                        </span>
+                    </div>
+
+
+                    <!-- =====================================
+                        Outer ring - lower right
+                        ===================================== -->
+
+                    <div class="board-space"
+                        style="--x: 93%; --y: 58%;
+                                --space-color: #f59a45;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 89%; --y: 68%;
+                                --space-color: #ec407a;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 82%; --y: 78%;
+                                --space-color: #f6ca46;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space roll-again"
+                        style="--x: 72%; --y: 85%;">
+                        <span class="roll-again-text">
+                            ROLL
+                        </span>
+                    </div>
+
+
+                    <!-- =====================================
+                        Outer ring - bottom
+                        ===================================== -->
+
+                    <div class="board-space"
+                        style="--x: 61%; --y: 90%;
+                                --space-color: #25ad63;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 50%; --y: 92%;
+                                --space-color: #3182e8;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 39%; --y: 90%;
+                                --space-color: #9748dc;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space roll-again"
+                        style="--x: 28%; --y: 85%;">
+                        <span class="roll-again-text">
+                            ROLL
+                        </span>
+                    </div>
+
+
+                    <!-- =====================================
+                        Outer ring - lower left
+                        ===================================== -->
+
+                    <div class="board-space"
+                        style="--x: 18%; --y: 78%;
+                                --space-color: #f59a45;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 11%; --y: 68%;
+                                --space-color: #f6ca46;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 7%; --y: 58%;
+                                --space-color: #ec407a;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space roll-again"
+                        style="--x: 5%; --y: 50%;">
+                        <span class="roll-again-text">
+                            ROLL
+                        </span>
+                    </div>
+
+
+                    <!-- =====================================
+                        Outer ring - upper left
+                        ===================================== -->
+
+                    <div class="board-space"
+                        style="--x: 7%; --y: 42%;
+                                --space-color: #3182e8;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 11%; --y: 32%;
+                                --space-color: #f59a45;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space"
+                        style="--x: 18%; --y: 22%;
+                                --space-color: #25ad63;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+
+                    <!-- =====================================
+                        Game History path
+                        Three spaces leading toward center.
+                        ===================================== -->
+
+                    <div class="board-space inner-space"
+                        style="--x: 50%; --y: 22%;
+                                --space-color: #ec407a;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 50%; --y: 31%;
+                                --space-color: #f6ca46;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 50%; --y: 40%;
+                                --space-color: #3182e8;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+
+                    <!-- =====================================
+                        Java path
+                        ===================================== -->
+
+                    <div class="board-space inner-space"
+                        style="--x: 76%; --y: 35%;
+                                --space-color: #3182e8;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 68%; --y: 39.5%;
+                                --space-color: #f59a45;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 60%; --y: 44%;
+                                --space-color: #9748dc;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+
+                    <!-- =====================================
+                        Python path
+                        ===================================== -->
+
+                    <div class="board-space inner-space"
+                        style="--x: 76%; --y: 65%;
+                                --space-color: #f6ca46;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 68%; --y: 60.5%;
+                                --space-color: #25ad63;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 60%; --y: 56%;
+                                --space-color: #ec407a;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+
+                    <!-- =====================================
+                        C# path
+                        ===================================== -->
+
+                    <div class="board-space inner-space"
+                        style="--x: 50%; --y: 78%;
+                                --space-color: #9748dc;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 50%; --y: 69%;
+                                --space-color: #3182e8;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 50%; --y: 60%;
+                                --space-color: #f59a45;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+
+                    <!-- =====================================
+                        HTML/CSS path
+                        ===================================== -->
+
+                    <div class="board-space inner-space"
+                        style="--x: 24%; --y: 65%;
+                                --space-color: #f59a45;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 32%; --y: 60.5%;
+                                --space-color: #f6ca46;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 40%; --y: 56%;
+                                --space-color: #25ad63;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+
+                    <!-- =====================================
+                        JavaScript path
+                        ===================================== -->
+
+                    <div class="board-space inner-space"
+                        style="--x: 24%; --y: 35%;
+                                --space-color: #25ad63;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 32%; --y: 39.5%;
+                                --space-color: #9748dc;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+                    <div class="board-space inner-space"
+                        style="--x: 40%; --y: 44%;
+                                --space-color: #3182e8;">
+                        <span class="board-space-marker"></span>
+                    </div>
+
+
+                    <!-- =====================================
+                        Center
+                        The center represents all six categories.
+                        Category-choice logic will be connected later.
+                        ===================================== -->
+
+                    <div class="board-center">
+                    </div>
 
                 </div>
-            </form>
-        }
 
-        <hr />
+            </div>
 
-        <!-- Show the wedges already collected by the current player. -->
-        <h3>Collected Wedges</h3>
+        </section>
 
-        @if (Model.Wedges.Count == 0)
-        {
-            <p>No wedges collected yet.</p>
-        }
-        else
-        {
-            <ul>
-                @foreach (string wedge in Model.Wedges)
+        <!-- Sidebar containing information and
+             controls for the current game. -->
+        <aside class="gameplay-sidebar">
+
+            <!-- Current player and turn controls. -->
+            <section class="gameplay-sidebar-card">
+
+                @if (Model.IsGameOver)
                 {
-                    <li>@wedge</li>
+                    <h2>Game Over</h2>
+
+                    <p>
+                        Winner:
+                        <strong>@Model.WinnerName</strong>
+                    </p>
                 }
-            </ul>
-        }
-
-        <!-- Show which wedges the current player still needs. -->
-        <h3>Missing Wedges</h3>
-
-        @if (Model.MissingWedges.Count == 0)
-        {
-            <p>All wedges collected!</p>
-        }
-        else
-        {
-            <ul>
-                @foreach (string wedge in Model.MissingWedges)
+                else
                 {
-                    <li>@wedge</li>
+                    <h3>Current Player</h3>
+
+                    <h2>
+                        @Model.PlayerName
+                    </h2>
+
+                    <p>
+                        Player @Model.PlayerNumber
+                    </p>
+
+                    <!-- Normal turn before the dice is rolled. -->
+                    @if (Model.CanRollDice)
+                    {
+                        <p>
+                            @Model.PlayerName can roll the dice.
+                        </p>
+
+                        <form asp-controller="Gameplay"
+                              asp-action="RollDice"
+                              method="post">
+
+                            <button type="submit"
+                                    class="btn btn-primary w-100">
+                                Roll Dice
+                            </button>
+                        </form>
+                    }
+
+                    <!-- Final category selection. -->
+                    @if (Model.NeedsFinalCategory)
+                    {
+                        <h3>Final Turn</h3>
+
+                        <p>
+                            The other players must choose
+                            the category for the final question.
+                        </p>
+
+                        <form asp-controller="Gameplay"
+                              asp-action="SelectFinalCategory"
+                              method="post">
+
+                            <div class="d-grid gap-2">
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Java"
+                                        class="btn btn-outline-primary">
+                                    Java
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="JavaScript"
+                                        class="btn btn-outline-primary">
+                                    JavaScript
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="HTML/CSS"
+                                        class="btn btn-outline-primary">
+                                    HTML/CSS
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Python"
+                                        class="btn btn-outline-primary">
+                                    Python
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Game History"
+                                        class="btn btn-outline-primary">
+                                    Game History
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="C#"
+                                        class="btn btn-outline-primary">
+                                    C#
+                                </button>
+
+                            </div>
+                        </form>
+                    }
+
+                    <!-- Show the current question after a turn starts. -->
+                    @if (Model.HasActiveTurn)
+                    {
+                        @if (!Model.IsFinalTurn)
+                        {
+                            <p>
+                                Dice roll:
+                                <strong>@Model.DiceRoll</strong>
+                            </p>
+                        }
+
+                        <p>
+                            Category:
+                            <strong>@Model.Category</strong>
+                        </p>
+
+                        <h3>
+                            @Model.Question.QuestionText
+                        </h3>
+
+                        <!-- Sends the selected answer
+                             to SubmitAnswer. -->
+                        <form asp-controller="Gameplay"
+                              asp-action="SubmitAnswer"
+                              method="post">
+
+                            <div class="d-grid gap-2">
+
+                                <button type="submit"
+                                        name="selectedAnswer"
+                                        value="@AnswerOption.A"
+                                        class="btn btn-outline-primary">
+                                    A: @Model.Question.AnswerA
+                                </button>
+
+                                <button type="submit"
+                                        name="selectedAnswer"
+                                        value="@AnswerOption.B"
+                                        class="btn btn-outline-primary">
+                                    B: @Model.Question.AnswerB
+                                </button>
+
+                                <button type="submit"
+                                        name="selectedAnswer"
+                                        value="@AnswerOption.C"
+                                        class="btn btn-outline-primary">
+                                    C: @Model.Question.AnswerC
+                                </button>
+
+                                <button type="submit"
+                                        name="selectedAnswer"
+                                        value="@AnswerOption.D"
+                                        class="btn btn-outline-primary">
+                                    D: @Model.Question.AnswerD
+                                </button>
+
+                            </div>
+                        </form>
+                    }
                 }
-            </ul>
-        }
-    }
+
+            </section>
+
+            <!-- Shows wedge progress for the current player. -->
+            <section class="gameplay-sidebar-card">
+
+                <h3>Collected Wedges</h3>
+
+                @if (Model.Wedges.Count == 0)
+                {
+                    <p>
+                        No wedges collected yet.
+                    </p>
+                }
+                else
+                {
+                    <ul>
+                        @foreach (string wedge in Model.Wedges)
+                        {
+                            <li>@wedge</li>
+                        }
+                    </ul>
+                }
+
+                <h3>Missing Wedges</h3>
+
+                @if (Model.MissingWedges.Count == 0)
+                {
+                    <p>
+                        All wedges collected!
+                    </p>
+                }
+                else
+                {
+                    <ul>
+                        @foreach (string wedge in Model.MissingWedges)
+                        {
+                            <li>@wedge</li>
+                        }
+                    </ul>
+                }
+
+            </section>
+
+        </aside>
+
+    </div>
 }

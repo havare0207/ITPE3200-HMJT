@@ -29,4 +29,8 @@ public class GameStateService
     // to the players on the Play page.
     public string Message { get; set; } = string.Empty;
 
+
+    // Stores the current board movement while
+    // the active player is choosing a destination.
+    public BoardMoveState? CurrentMove { get; set; }
 }

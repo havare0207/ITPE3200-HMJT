@@ -13,4 +13,9 @@ public class PlayerGameState
 
     // Stores the player's fixed number in the turn order.
     public int PlayerNumber { get; set; }
+
+    // Stores the ID of the board space where
+    // the player is currently standing.
+    // All players start in the center of the board.
+    public int BoardSpaceId { get; set; } = 43;
 }
