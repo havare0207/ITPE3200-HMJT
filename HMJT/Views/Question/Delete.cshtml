@@ -29,6 +29,8 @@ ViewData["Title"] = "Delete Question";
 
 <!-- Hidden field keeps track of which question should be deleted. -->
 <input type="hidden" asp-for="QuestionId" />
+<!-- Keeps the GameId when the form is submitted. -->
+<input type="hidden" asp-for="GameId" />
 
 <!-- Confirms deletion. -->
 <button type="submit" class="btn btn-danger">

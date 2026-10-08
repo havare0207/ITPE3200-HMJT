@@ -3,6 +3,7 @@ using System;
 using HMJT.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CodePursuit.Migrations
 {
     [DbContext(typeof(GameDbContext))]
-    partial class GameDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261003172607_AddCreatedAt")]
+    partial class AddCreatedAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
@@ -76,9 +79,6 @@ namespace CodePursuit.Migrations
                     b.Property<int>("Difficulty")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("GameId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("QuestionText")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -86,25 +86,7 @@ namespace CodePursuit.Migrations
 
                     b.HasKey("QuestionId");
 
-                    b.HasIndex("GameId");
-
                     b.ToTable("Questions");
-                });
-
-            modelBuilder.Entity("HMJT.Models.Question", b =>
-                {
-                    b.HasOne("HMJT.Models.Game", "Game")
-                        .WithMany("Questions")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-                });
-
-            modelBuilder.Entity("HMJT.Models.Game", b =>
-                {
-                    b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618
         }

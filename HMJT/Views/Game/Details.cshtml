@@ -6,6 +6,19 @@
 
 <div class="row gx-5">
         <h5>Status: @Model.Status</h5>
-        <h5>Current Position: @Model.CurrentPosition</h5>
-        <p><a href="Index">Back to Games</a></p>
+        <h5>Created At: @Model.CreatedAt</h5>
+
+<!-- Take the user to the question action in GameController. -->
+<div class="mt-3">
+<a asp-controller="Game"
+ asp-action="Questions"
+ asp-route-id="@Model.GameId"
+ class="btn btn-primary">
+ Manage Questions
+ </a>
+
+    <a asp-action="Index" 
+    class="btn btn-secondary">
+    Back to Games</a>
+</div>
 </div>

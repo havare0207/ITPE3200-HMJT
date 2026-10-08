@@ -21,11 +21,141 @@ body {
   margin-bottom: 60px;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
   text-align: start;
+}
+
+
+/* =========================================
+   Game-inspired styling
+   ========================================= */
+
+body {
+  background: linear-gradient(135deg, #f5f7ff, #eef1ff);
+  color: #212529;
+}
+
+
+/* Navigation */
+
+.navbar {
+  background: linear-gradient(90deg, #172554, #4338ca) !important;
+}
+
+.navbar-brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.navbar .nav-link {
+  color: white !important;
+  border-radius: 8px;
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+  margin-right: 4px;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.navbar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+
+/* Headings */
+
+h1 {
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+h2,
+h3 {
+  font-weight: 600;
+}
+
+
+/* Cards */
+
+.card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
+}
+
+
+/* Buttons */
+
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 9px 18px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.btn-primary {
+  background-color: #4f46e5;
+  border-color: #4f46e5;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;
+  border-color: #4338ca;
+}
+
+
+/* Forms */
+
+.form-control,
+.form-select {
+  border-radius: 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.15);
+}
+
+
+/* Game feedback */
+
+.alert {
+  border: none;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+
+/* Wedges */
+
+.badge {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border-radius: 20px;
+}
+
+
+/* Footer */
+
+.footer {
+  margin-top: 3rem;
+}
+
+.home-category-image {
+    max-width: 500px;
+    width: 100%;
+    height: auto;
 }
