@@ -59,4 +59,11 @@ public class HomeController : Controller
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
         });
     }
+
+    // Displays learning resources for
+    // all six Code Pursuit categories.
+    public IActionResult Categories()
+    {
+        return View();
+    }
 }

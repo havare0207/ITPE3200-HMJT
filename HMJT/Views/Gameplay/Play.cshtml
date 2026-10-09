@@ -1,359 +1,1640 @@
 @model HMJT.Models.GamePlayViewModel
 @using HMJT.Models
 
+@functions {
+    // Builds the CSS class list for a wedge token
+    // based on which category wedges the player owns.
+    public static string GetWedgeTokenClass(
+        HashSet<string> wedges,
+        bool small = false)
+    {
+        List<string> classes = new()
+        {
+            "wedge-token"
+        };
+
+        if (small)
+        {
+            classes.Add("wedge-token-small");
+        }
+
+        if (wedges.Contains("Java"))
+        {
+            classes.Add("has-java");
+        }
+
+        if (wedges.Contains("Python"))
+        {
+            classes.Add("has-python");
+        }
+
+        if (wedges.Contains("C#"))
+        {
+            classes.Add("has-csharp");
+        }
+
+        if (wedges.Contains("HTML/CSS"))
+        {
+            classes.Add("has-html");
+        }
+
+        if (wedges.Contains("Game History"))
+        {
+            classes.Add("has-history");
+        }
+
+        if (wedges.Contains("JavaScript"))
+        {
+            classes.Add("has-javascript");
+        }
+
+        return string.Join(" ", classes);
+    }
+    // Returns the visual position of a board space.
+    // The coordinates match the existing interactive board.
+    public static string GetBoardSpacePosition(int boardSpaceId)
+    {
+        return boardSpaceId switch
+        {
+            1 => "--player-x: 39%; --player-y: 10%;",
+            2 => "--player-x: 50%; --player-y: 8%;",
+            3 => "--player-x: 61%; --player-y: 10%;",
+            4 => "--player-x: 72%; --player-y: 15%;",
+            5 => "--player-x: 82%; --player-y: 22%;",
+            6 => "--player-x: 89%; --player-y: 32%;",
+            7 => "--player-x: 93%; --player-y: 42%;",
+            8 => "--player-x: 95%; --player-y: 50%;",
+            9 => "--player-x: 93%; --player-y: 58%;",
+            10 => "--player-x: 89%; --player-y: 68%;",
+            11 => "--player-x: 82%; --player-y: 78%;",
+            12 => "--player-x: 72%; --player-y: 85%;",
+            13 => "--player-x: 61%; --player-y: 90%;",
+            14 => "--player-x: 50%; --player-y: 92%;",
+            15 => "--player-x: 39%; --player-y: 90%;",
+            16 => "--player-x: 28%; --player-y: 85%;",
+            17 => "--player-x: 18%; --player-y: 78%;",
+            18 => "--player-x: 11%; --player-y: 68%;",
+            19 => "--player-x: 7%; --player-y: 58%;",
+            20 => "--player-x: 5%; --player-y: 50%;",
+            21 => "--player-x: 7%; --player-y: 42%;",
+            22 => "--player-x: 11%; --player-y: 32%;",
+            23 => "--player-x: 18%; --player-y: 22%;",
+            24 => "--player-x: 28%; --player-y: 15%;",
+
+            25 => "--player-x: 50%; --player-y: 22%;",
+            26 => "--player-x: 50%; --player-y: 31%;",
+            27 => "--player-x: 50%; --player-y: 40%;",
+
+            28 => "--player-x: 76%; --player-y: 35%;",
+            29 => "--player-x: 68%; --player-y: 39.5%;",
+            30 => "--player-x: 60%; --player-y: 44%;",
+
+            31 => "--player-x: 76%; --player-y: 65%;",
+            32 => "--player-x: 68%; --player-y: 60.5%;",
+            33 => "--player-x: 60%; --player-y: 56%;",
+
+            34 => "--player-x: 50%; --player-y: 78%;",
+            35 => "--player-x: 50%; --player-y: 69%;",
+            36 => "--player-x: 50%; --player-y: 60%;",
+
+            37 => "--player-x: 24%; --player-y: 65%;",
+            38 => "--player-x: 32%; --player-y: 60.5%;",
+            39 => "--player-x: 40%; --player-y: 56%;",
+
+            40 => "--player-x: 24%; --player-y: 35%;",
+            41 => "--player-x: 32%; --player-y: 39.5%;",
+            42 => "--player-x: 40%; --player-y: 44%;",
+
+            // Center
+            43 => "--player-x: 50%; --player-y: 50%;",
+
+            _ => "--player-x: 50%; --player-y: 50%;"
+        };
+    }
+}
+
 @{
     ViewData["Title"] = "Play";
 }
 
-<h1>Game</h1>
-
-<!-- Show the game setup if no game has started yet. -->
+<!-- Show the setup form if no game is currently active. -->
 @if (!Model.HasActiveGame)
 {
-<div class="card shadow-sm p-4 mb-4">
+    <!-- =====================================
+         Game setup
+         ===================================== -->
 
-    @if (!string.IsNullOrWhiteSpace(Model.Message))
-    {
-        <div class="alert alert-warning">
-            @Model.Message
-        </div>
-    }
+    <section class="game-setup-page">
 
-    <h2>Start New Game</h2>
+        <div class="setup-page-heading">
+            <p class="setup-eyebrow">
+                LOCAL HOT-SEAT GAME
+            </p>
 
-    <!-- Sends the player names and difficulty to StartGame. -->
-    <form asp-controller="Gameplay"
-          asp-action="StartGame"
-          method="post">
+            <h1>Set up a new game</h1>
 
-        <div class="mb-3">
-            <label for="player1" class="form-label">
-                Player 1
-            </label>
-
-            <input type="text"
-                   id="player1"
-                   name="player1"
-                   class="form-control" />
+            <p class="setup-intro">
+                Enter 2–6 player names, choose one difficulty deck,
+                then let the app randomly choose who starts.
+            </p>
         </div>
 
-        <div class="mb-3">
-            <label for="player2" class="form-label">
-                Player 2
-            </label>
 
-            <input type="text"
-                   id="player2"
-                   name="player2"
-                   class="form-control" />
+        <div class="setup-page-layout">
+
+            <!-- =====================================
+                 Main setup form
+                 ===================================== -->
+            <div class="setup-main-card">
+
+                <form asp-controller="Gameplay"
+                      asp-action="StartGame"
+                      method="post">
+
+                    <!-- Show validation or setup messages. -->
+                    @if (!string.IsNullOrWhiteSpace(Model.Message))
+                    {
+                        <div class="alert alert-warning">
+                            @Model.Message
+                        </div>
+                    }
+
+
+                    <!-- =====================================
+                         Player names
+                         ===================================== -->
+
+                    <h2>1. Players</h2>
+
+                    <div class="setup-player-grid">
+
+                        <div class="setup-player-field">
+                            <label for="player1">
+                                Player 1
+                            </label>
+
+                            <input type="text"
+                                   id="player1"
+                                   name="player1"
+                                   class="form-control"
+                                   placeholder="Alex" />
+                        </div>
+
+
+                        <div class="setup-player-field">
+                            <label for="player2">
+                                Player 2
+                            </label>
+
+                            <input type="text"
+                                   id="player2"
+                                   name="player2"
+                                   class="form-control"
+                                   placeholder="Emma" />
+                        </div>
+
+
+                        <div class="setup-player-field">
+                            <label for="player3">
+                                Player 3
+                                <span>(optional)</span>
+                            </label>
+
+                            <input type="text"
+                                   id="player3"
+                                   name="player3"
+                                   class="form-control"
+                                   placeholder="Optional" />
+                        </div>
+
+
+                        <div class="setup-player-field">
+                            <label for="player4">
+                                Player 4
+                                <span>(optional)</span>
+                            </label>
+
+                            <input type="text"
+                                   id="player4"
+                                   name="player4"
+                                   class="form-control"
+                                   placeholder="Optional" />
+                        </div>
+
+
+                        <div class="setup-player-field">
+                            <label for="player5">
+                                Player 5
+                                <span>(optional)</span>
+                            </label>
+
+                            <input type="text"
+                                   id="player5"
+                                   name="player5"
+                                   class="form-control"
+                                   placeholder="Optional" />
+                        </div>
+
+
+                        <div class="setup-player-field">
+                            <label for="player6">
+                                Player 6
+                                <span>(optional)</span>
+                            </label>
+
+                            <input type="text"
+                                   id="player6"
+                                   name="player6"
+                                   class="form-control"
+                                   placeholder="Optional" />
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         Difficulty
+                         ===================================== -->
+
+                    <h2 class="setup-difficulty-heading">
+                        2. Question difficulty
+                    </h2>
+
+                    <div class="difficulty-card-grid">
+
+                        <!-- Easy -->
+                        <label class="difficulty-card difficulty-easy">
+
+                            <input type="radio"
+                                   name="difficulty"
+                                   value="@Difficulty.Easy"
+                                   checked />
+
+                            <span class="difficulty-radio"></span>
+
+                            <span class="difficulty-icon">
+                                &lt;/&gt;
+                            </span>
+
+                            <strong>Easy</strong>
+
+                            <span class="difficulty-description">
+                                Core concepts and straightforward questions.
+                            </span>
+
+                        </label>
+
+
+                        <!-- Medium -->
+                        <label class="difficulty-card difficulty-medium">
+
+                            <input type="radio"
+                                   name="difficulty"
+                                   value="@Difficulty.Medium" />
+
+                            <span class="difficulty-radio"></span>
+
+                            <span class="difficulty-icon">
+                                💡
+                            </span>
+
+                            <strong>Medium</strong>
+
+                            <span class="difficulty-description">
+                                More reasoning and short code examples.
+                            </span>
+
+                        </label>
+
+
+                        <!-- Hard -->
+                        <label class="difficulty-card difficulty-hard">
+
+                            <input type="radio"
+                                   name="difficulty"
+                                   value="@Difficulty.Hard" />
+
+                            <span class="difficulty-radio"></span>
+
+                            <span class="difficulty-icon">
+                                ★
+                            </span>
+
+                            <strong>Hard</strong>
+
+                            <span class="difficulty-description">
+                                Trickier language details and deeper concepts.
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- The existing StartGame action is still used.
+                         The intermediate starter screen comes in step 2. -->
+                    <button type="submit"
+                            class="setup-start-button">
+
+                        Choose starting player
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- =====================================
+                 Setup information panel
+                 ===================================== -->
+            <aside class="setup-info-card">
+
+                <div class="setup-deck-preview"
+                     aria-hidden="true">
+
+                    <div class="setup-deck-card deck-easy">
+                        <span>&lt;/&gt;</span>
+                        <strong>EASY</strong>
+                    </div>
+
+                    <div class="setup-deck-card deck-medium">
+                        <span>💡</span>
+                        <strong>MEDIUM</strong>
+                    </div>
+
+                    <div class="setup-deck-card deck-hard">
+                        <span>★</span>
+                        <strong>HARD</strong>
+                    </div>
+
+                </div>
+
+
+                <h3>One deck per game</h3>
+
+                <p>
+                    The difficulty stays the same for all six
+                    categories until the game ends.
+                </p>
+
+
+                <div class="setup-info-stat">
+                    <strong>2–6</strong>
+                    <span>local players</span>
+                </div>
+
+                <div class="setup-info-stat">
+                    <strong>6</strong>
+                    <span>categories to collect</span>
+                </div>
+
+                <div class="setup-info-stat">
+                    <strong>1 PC</strong>
+                    <span>pass the screen between turns</span>
+                </div>
+
+            </aside>
+
         </div>
 
-        <div class="mb-3">
-            <label for="player3" class="form-label">
-                Player 3
-            </label>
+    </section>
 
-            <input type="text"
-                   id="player3"
-                   name="player3"
-                   class="form-control" />
+}
+else if (Model.IsAwaitingStartConfirmation)
+{
+    <!-- =====================================
+         Starter selected screen
+         ===================================== -->
+
+    <section class="starter-selected-page">
+
+        <div class="starter-selected-card">
+
+            <p class="starter-eyebrow">
+                STARTER SELECTED
+            </p>
+
+            <div class="starter-dice"
+                 aria-hidden="true">
+                🎲
+            </div>
+
+            <h1>
+                @Model.PlayerName starts!
+            </h1>
+
+            <p class="starter-description">
+                The starter was chosen randomly.
+                Difficulty:
+                <strong>@Model.SelectedDifficulty</strong>.
+            </p>
+
+            <!-- Shows all players in the game.
+                 The randomly selected starter is highlighted. -->
+            <div class="starter-player-list">
+
+                @foreach (PlayerGameState player in Model.Players)
+                {
+                    <span class="starter-player-chip
+                                 @(player.PlayerNumber == Model.PlayerNumber
+                                     ? "starter-player-chip-selected"
+                                     : "")">
+
+                        @player.PlayerName
+
+                    </span>
+                }
+
+            </div>
+
+            <!-- Continue to the actual game board. -->
+            <form asp-controller="Gameplay"
+                  asp-action="ConfirmStartGame"
+                  method="post">
+
+                <button type="submit"
+                        class="starter-start-button">
+
+                    Start game
+
+                </button>
+
+            </form>
+
+            <!-- Return to the setup screen. -->
+            <form asp-controller="Gameplay"
+                  asp-action="ChangeSetup"
+                  method="post">
+
+                <button type="submit"
+                        class="starter-change-button">
+
+                    Change setup
+
+                </button>
+
+            </form>
+
         </div>
 
-        <div class="mb-3">
-            <label for="player4" class="form-label">
-                Player 4
-            </label>
-
-            <input type="text"
-                   id="player4"
-                   name="player4"
-                   class="form-control" />
-        </div>
-
-        <div class="mb-3">
-            <label for="player5" class="form-label">
-                Player 5
-            </label>
-
-            <input type="text"
-                   id="player5"
-                   name="player5"
-                   class="form-control" />
-        </div>
-
-        <div class="mb-3">
-            <label for="player6" class="form-label">
-                Player 6
-            </label>
-
-            <input type="text"
-                   id="player6"
-                   name="player6"
-                   class="form-control" />
-        </div>
-
-        <div class="mb-3">
-            <label for="difficulty" class="form-label">
-                Difficulty
-            </label>
-
-            <!-- The selected value is sent to StartGame as Difficulty. -->
-            <select id="difficulty"
-                    name="difficulty"
-                    class="form-select">
-
-                <option value="@Difficulty.Easy">
-                    Easy
-                </option>
-
-                <option value="@Difficulty.Medium">
-                    Medium
-                </option>
-
-                <option value="@Difficulty.Hard">
-                    Hard
-                </option>
-
-            </select>
-        </div>
-
-        <button type="submit"
-                class="btn btn-primary">
-            Start Game
-        </button>
-    </form>
- </div>
+    </section>
 }
 else
 {
-    <!-- Show feedback from the previous action. -->
+    <!-- Top area containing the page title and reset button. -->
+    <div class="gameplay-heading">
+
+        <div>
+            <h1>Code Pursuit</h1>
+        </div>
+
+        <!-- Allows the current game to be reset at any time. -->
+        <form asp-controller="Gameplay"
+              asp-action="ResetGame"
+              method="post">
+
+            <button type="submit"
+                    class="btn btn-outline-danger">
+                Reset Game
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- Show feedback from the latest game action. -->
     @if (!string.IsNullOrWhiteSpace(Model.Message))
     {
-        <div class="alert alert-info">
+        <div class="gameplay-status">
             @Model.Message
         </div>
     }
 
-    <!-- Allows the players to stop the current game
-         and return to the player setup screen. -->
-    <form asp-controller="Gameplay"
-          asp-action="ResetGame"
-          method="post"
-          class="mb-3">
+    <!-- Main gameplay area.
+         The interactive board is shown on the left
+         and current game information is shown on the right. -->
+    <div class="gameplay-layout">
 
-        <button type="submit"
-                class="btn btn-outline-danger">
-            Reset Game
-        </button>
-    </form>
+        <!-- Interactive board panel. -->
+        <section class="gameplay-board-panel">
 
-    <!-- Show the winner when the game is finished. -->
-    @if (Model.IsGameOver)
-    {
-        <h2>Game Over</h2>
+            <h2>Interactive Board</h2>
 
-        <p>
-            Winner: <strong>@Model.WinnerName</strong>
-        </p>
-    }
-    else
-    {
-        <!-- Show whose turn it currently is. -->
-        <div class="card shadow-sm p-3 mb-4">
-    <h2 class="h4 mb-2">Current Player</h2>
-
-    <p class="mb-0">
-        Player @Model.PlayerNumber:
-        <strong>@Model.PlayerName</strong>
-    </p>
-</div>
-
-        <!-- Normal turn before the dice has been rolled. -->
-        @if (Model.CanRollDice)
-        {
-            <h2>Roll Dice</h2>
-
-            <p>
-                @Model.PlayerName can roll the dice.
-            </p>
-
-            <!-- Sends a POST request to RollDice. -->
-            <form asp-controller="Gameplay"
-                  asp-action="RollDice"
-                  method="post">
-
-                <button type="submit"
-                        class="btn btn-primary">
-                    Roll Dice
-                </button>
-            </form>
-        }
-
-        <!-- The player has all six wedges and must receive a final question. -->
-        @if (Model.NeedsFinalCategory)
-        {
-            <h2>Final Turn</h2>
-
-            <p>
-                @Model.PlayerName has collected all six wedges.
-            </p>
-
-            <p>
-                The other players must choose the category
-                for the final question.
-            </p>
-
-            <!-- Each button sends one category to SelectFinalCategory. -->
-            <form asp-controller="Gameplay"
-                  asp-action="SelectFinalCategory"
-                  method="post">
-
-                <button type="submit"
-                        name="category"
-                        value="Java"
-                        class="btn btn-secondary m-1">
-                    Java
-                </button>
-
-                <button type="submit"
-                        name="category"
-                        value="JavaScript"
-                        class="btn btn-secondary m-1">
-                    JavaScript
-                </button>
-
-                <button type="submit"
-                        name="category"
-                        value="HTML/CSS"
-                        class="btn btn-secondary m-1">
-                    HTML/CSS
-                </button>
-
-                <button type="submit"
-                        name="category"
-                        value="Python"
-                        class="btn btn-secondary m-1">
-                    Python
-                </button>
-
-                <button type="submit"
-                        name="category"
-                        value="Game History"
-                        class="btn btn-secondary m-1">
-                    Game History
-                </button>
-
-                <button type="submit"
-                        name="category"
-                        value="C#"
-                        class="btn btn-secondary m-1">
-                    C#
-                </button>
-            </form>
-        }
-
-        <!-- Show the question after the dice has been rolled
-             or after a final category has been selected. -->
-        @if (Model.HasActiveTurn)
-        {
-            @if (Model.IsFinalTurn)
+            <!-- Show movement instructions after the dice has been rolled. -->
+            @if (Model.IsWaitingForMove)
             {
-                <h2>Final Question</h2>
+                <p>
+                    Dice roll:
+                    <strong>@Model.DiceRoll</strong>.
+                    Choose one of the highlighted spaces.
+                </p>
             }
             else
             {
-                <h2>Turn</h2>
-
-                <p>
-                    Dice roll: @Model.DiceRoll
+                <p class="text-muted">
+                    Roll the dice to see where you can move.
                 </p>
             }
 
-            <p>
-                Category:
-                <strong>@Model.Category</strong>
-            </p>
+            <!-- Shows which color belongs to each question category. -->
+            <div class="board-key">
 
-            <h3>Question</h3>
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                          style="background: #3182e8;">
+                    </span>
+                    Java
+                </span>
 
-            <p>
-                @Model.Question.QuestionText
-            </p>
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                          style="background: #f6ca46;">
+                    </span>
+                    Python
+                </span>
 
-            <!-- Each button sends the selected answer
-                 to SubmitAnswer. -->
-            <form asp-controller="Gameplay"
-                  asp-action="SubmitAnswer"
-                  method="post">
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                          style="background: #9748dc;">
+                    </span>
+                    C#
+                </span>
 
-                <div class="d-grid gap-2">
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                          style="background: #f59a45;">
+                    </span>
+                    HTML/CSS
+                </span>
 
-                    <button type="submit"
-                            name="selectedAnswer"
-                            value="@AnswerOption.A"
-                            class="btn btn-outline-primary">
-                        A: @Model.Question.AnswerA
-                    </button>
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                          style="background: #ec407a;">
+                    </span>
+                    Game History
+                </span>
 
-                    <button type="submit"
-                            name="selectedAnswer"
-                            value="@AnswerOption.B"
-                            class="btn btn-outline-primary">
-                        B: @Model.Question.AnswerB
-                    </button>
+                <span class="board-key-item">
+                    <span class="board-key-color"
+                          style="background: #25ad63;">
+                    </span>
+                    JavaScript
+                </span>
 
-                    <button type="submit"
-                            name="selectedAnswer"
-                            value="@AnswerOption.C"
-                            class="btn btn-outline-primary">
-                        C: @Model.Question.AnswerC
-                    </button>
+            </div>
 
-                    <button type="submit"
-                            name="selectedAnswer"
-                            value="@AnswerOption.D"
-                            class="btn btn-outline-primary">
-                        D: @Model.Question.AnswerD
-                    </button>
+            @{
+                // Returns true when a board space is one of
+                // the legal destinations for the current dice roll.
+                bool IsLegalDestination(int boardSpaceId)
+                {
+                    return Model.IsWaitingForMove &&
+                           Model.LegalDestinationIds.Contains(boardSpaceId);
+                }
+            }
+
+            <!-- Contains the circular game board. -->
+            <div class="interactive-board-shell">
+
+                <!-- All board buttons use the same form.
+                     Clicking a legal space sends its BoardSpaceId
+                     to GameplayController.Move. -->
+                <form asp-controller="Gameplay"
+                      asp-action="Move"
+                      method="post"
+                      class="board-move-form">
+
+                    <div class="interactive-board">
+
+                        <!-- =====================================
+                             Category labels
+                             ===================================== -->
+
+                        <span class="board-category-label
+                                     board-category-history">
+                            Game<br />
+                            History
+                        </span>
+
+                        <span class="board-category-label
+                                     board-category-java">
+                            Java
+                        </span>
+
+                        <span class="board-category-label
+                                     board-category-python">
+                            Python
+                        </span>
+
+                        <span class="board-category-label
+                                     board-category-csharp">
+                            C#
+                        </span>
+
+                        <span class="board-category-label
+                                     board-category-html">
+                            HTML/CSS
+                        </span>
+
+                        <span class="board-category-label
+                                     board-category-javascript">
+                            JavaScript
+                        </span>
+
+
+                        <!-- =====================================
+                             Outer ring - top
+                             ===================================== -->
+
+                        <!-- Space 24: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="24"
+                                class="board-space roll-again @(IsLegalDestination(24) ? "legal-destination" : "")"
+                                style="--x: 28%; --y: 15%;"
+                                disabled="@(IsLegalDestination(24) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+                        <!-- Space 1: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="1"
+                                class="board-space @(IsLegalDestination(1) ? "legal-destination" : "")"
+                                style="--x: 39%; --y: 10%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(1) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 2: Game History -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="2"
+                                class="board-space @(IsLegalDestination(2) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 8%;
+                                       --space-color: #ec407a;"
+                                disabled="@(IsLegalDestination(2) ? null : "disabled")"
+                                aria-label="Move to Game History space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 3: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="3"
+                                class="board-space @(IsLegalDestination(3) ? "legal-destination" : "")"
+                                style="--x: 61%; --y: 10%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(3) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 4: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="4"
+                                class="board-space roll-again @(IsLegalDestination(4) ? "legal-destination" : "")"
+                                style="--x: 72%; --y: 15%;"
+                                disabled="@(IsLegalDestination(4) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Outer ring - upper right
+                             ===================================== -->
+
+                        <!-- Space 5: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="5"
+                                class="board-space @(IsLegalDestination(5) ? "legal-destination" : "")"
+                                style="--x: 82%; --y: 22%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(5) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 6: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="6"
+                                class="board-space @(IsLegalDestination(6) ? "legal-destination" : "")"
+                                style="--x: 89%; --y: 32%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(6) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 7: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="7"
+                                class="board-space @(IsLegalDestination(7) ? "legal-destination" : "")"
+                                style="--x: 93%; --y: 42%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(7) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 8: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="8"
+                                class="board-space roll-again @(IsLegalDestination(8) ? "legal-destination" : "")"
+                                style="--x: 95%; --y: 50%;"
+                                disabled="@(IsLegalDestination(8) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Outer ring - lower right
+                             ===================================== -->
+
+                        <!-- Space 9: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="9"
+                                class="board-space @(IsLegalDestination(9) ? "legal-destination" : "")"
+                                style="--x: 93%; --y: 58%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(9) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 10: Game History -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="10"
+                                class="board-space @(IsLegalDestination(10) ? "legal-destination" : "")"
+                                style="--x: 89%; --y: 68%;
+                                       --space-color: #ec407a;"
+                                disabled="@(IsLegalDestination(10) ? null : "disabled")"
+                                aria-label="Move to Game History space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 11: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="11"
+                                class="board-space @(IsLegalDestination(11) ? "legal-destination" : "")"
+                                style="--x: 82%; --y: 78%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(11) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 12: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="12"
+                                class="board-space roll-again @(IsLegalDestination(12) ? "legal-destination" : "")"
+                                style="--x: 72%; --y: 85%;"
+                                disabled="@(IsLegalDestination(12) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Outer ring - bottom
+                             ===================================== -->
+
+                        <!-- Space 13: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="13"
+                                class="board-space @(IsLegalDestination(13) ? "legal-destination" : "")"
+                                style="--x: 61%; --y: 90%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(13) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 14: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="14"
+                                class="board-space @(IsLegalDestination(14) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 92%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(14) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 15: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="15"
+                                class="board-space @(IsLegalDestination(15) ? "legal-destination" : "")"
+                                style="--x: 39%; --y: 90%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(15) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 16: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="16"
+                                class="board-space roll-again @(IsLegalDestination(16) ? "legal-destination" : "")"
+                                style="--x: 28%; --y: 85%;"
+                                disabled="@(IsLegalDestination(16) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Outer ring - lower left
+                             ===================================== -->
+
+                        <!-- Space 17: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="17"
+                                class="board-space @(IsLegalDestination(17) ? "legal-destination" : "")"
+                                style="--x: 18%; --y: 78%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(17) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 18: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="18"
+                                class="board-space @(IsLegalDestination(18) ? "legal-destination" : "")"
+                                style="--x: 11%; --y: 68%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(18) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 19: Game History -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="19"
+                                class="board-space @(IsLegalDestination(19) ? "legal-destination" : "")"
+                                style="--x: 7%; --y: 58%;
+                                       --space-color: #ec407a;"
+                                disabled="@(IsLegalDestination(19) ? null : "disabled")"
+                                aria-label="Move to Game History space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 20: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="20"
+                                class="board-space roll-again @(IsLegalDestination(20) ? "legal-destination" : "")"
+                                style="--x: 5%; --y: 50%;"
+                                disabled="@(IsLegalDestination(20) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Outer ring - upper left
+                             ===================================== -->
+
+                        <!-- Space 21: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="21"
+                                class="board-space @(IsLegalDestination(21) ? "legal-destination" : "")"
+                                style="--x: 7%; --y: 42%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(21) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 22: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="22"
+                                class="board-space @(IsLegalDestination(22) ? "legal-destination" : "")"
+                                style="--x: 11%; --y: 32%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(22) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 23: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="23"
+                                class="board-space @(IsLegalDestination(23) ? "legal-destination" : "")"
+                                style="--x: 18%; --y: 22%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(23) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Game History path
+                             ===================================== -->
+
+                        <!-- Space 25: Game History -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="25"
+                                class="board-space inner-space @(IsLegalDestination(25) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 22%;
+                                       --space-color: #ec407a;"
+                                disabled="@(IsLegalDestination(25) ? null : "disabled")"
+                                aria-label="Move to Game History space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 26: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="26"
+                                class="board-space inner-space @(IsLegalDestination(26) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 31%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(26) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 27: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="27"
+                                class="board-space inner-space @(IsLegalDestination(27) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 40%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(27) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Java path
+                             ===================================== -->
+
+                        <!-- Space 28: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="28"
+                                class="board-space inner-space @(IsLegalDestination(28) ? "legal-destination" : "")"
+                                style="--x: 76%; --y: 35%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(28) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 29: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="29"
+                                class="board-space inner-space @(IsLegalDestination(29) ? "legal-destination" : "")"
+                                style="--x: 68%; --y: 39.5%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(29) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 30: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="30"
+                                class="board-space inner-space @(IsLegalDestination(30) ? "legal-destination" : "")"
+                                style="--x: 60%; --y: 44%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(30) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Python path
+                             ===================================== -->
+
+                        <!-- Space 31: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="31"
+                                class="board-space inner-space @(IsLegalDestination(31) ? "legal-destination" : "")"
+                                style="--x: 76%; --y: 65%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(31) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 32: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="32"
+                                class="board-space inner-space @(IsLegalDestination(32) ? "legal-destination" : "")"
+                                style="--x: 68%; --y: 60.5%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(32) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 33: Game History -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="33"
+                                class="board-space inner-space @(IsLegalDestination(33) ? "legal-destination" : "")"
+                                style="--x: 60%; --y: 56%;
+                                       --space-color: #ec407a;"
+                                disabled="@(IsLegalDestination(33) ? null : "disabled")"
+                                aria-label="Move to Game History space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             C# path
+                             ===================================== -->
+
+                        <!-- Space 34: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="34"
+                                class="board-space inner-space @(IsLegalDestination(34) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 78%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(34) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 35: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="35"
+                                class="board-space inner-space @(IsLegalDestination(35) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 69%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(35) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 36: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="36"
+                                class="board-space inner-space @(IsLegalDestination(36) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 60%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(36) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             HTML/CSS path
+                             ===================================== -->
+
+                        <!-- Space 37: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="37"
+                                class="board-space inner-space @(IsLegalDestination(37) ? "legal-destination" : "")"
+                                style="--x: 24%; --y: 65%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(37) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 38: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="38"
+                                class="board-space inner-space @(IsLegalDestination(38) ? "legal-destination" : "")"
+                                style="--x: 32%; --y: 60.5%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(38) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 39: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="39"
+                                class="board-space inner-space @(IsLegalDestination(39) ? "legal-destination" : "")"
+                                style="--x: 40%; --y: 56%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(39) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             JavaScript path
+                             ===================================== -->
+
+                        <!-- Space 40: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="40"
+                                class="board-space inner-space @(IsLegalDestination(40) ? "legal-destination" : "")"
+                                style="--x: 24%; --y: 35%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(40) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 41: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="41"
+                                class="board-space inner-space @(IsLegalDestination(41) ? "legal-destination" : "")"
+                                style="--x: 32%; --y: 39.5%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(41) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 42: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="42"
+                                class="board-space inner-space @(IsLegalDestination(42) ? "legal-destination" : "")"
+                                style="--x: 40%; --y: 44%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(42) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Center - space 43
+                             The center can be reached from all six
+                             inner paths and will later allow category choice.
+                             ===================================== -->
+
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="43"
+                                class="board-center @(IsLegalDestination(43) ? "legal-destination" : "")"
+                                disabled="@(IsLegalDestination(43) ? null : "disabled")"
+                                aria-label="Move to the center of the board">
+                        </button>
+
+                        <!-- =====================================
+                            Player pieces
+                            ===================================== -->
+
+                        <!-- Draw each player's physical piece
+                            on the board space stored in BoardSpaceId. -->
+                        @foreach (PlayerGameState player in Model.Players)
+                        {
+                            // Find all players currently standing
+                            // on the same board space.
+                            List<PlayerGameState> playersOnSameSpace =
+                                Model.Players
+                                    .Where(p => p.BoardSpaceId == player.BoardSpaceId)
+                                    .OrderBy(p => p.PlayerNumber)
+                                    .ToList();
+
+                            // Find this player's position inside that group.
+                            // This is used to slightly separate pieces
+                            // when multiple players share the same space.
+                            int playerOffsetIndex =
+                                playersOnSameSpace.FindIndex(
+                                    p => p.PlayerNumber == player.PlayerNumber
+                                );
+
+                            <div class="board-player-piece
+                                        board-player-offset-@playerOffsetIndex
+                                        @(player.PlayerNumber == Model.PlayerNumber
+                                            ? "current-board-player"
+                                            : "")"
+                                style="@GetBoardSpacePosition(player.BoardSpaceId)"
+                                aria-label="@player.PlayerName, player @player.PlayerNumber">
+
+                                <!-- Uses the same wedge system as
+                                    the sidebar player token. -->
+                                <div class="@GetWedgeTokenClass(player.Wedges) board-wedge-token">
+
+                                    <!-- Player number remains visible
+                                        even when wedges are collected. -->
+                                    <span class="board-player-number">
+                                        @player.PlayerNumber
+                                    </span>
+
+                                </div>
+
+                            </div>
+                        }
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- Sidebar containing information and
+             controls for the current game. -->
+        <aside class="gameplay-sidebar">
+
+            <!-- Current player and turn controls. -->
+            <section class="gameplay-sidebar-card">
+
+                @if (Model.IsGameOver)
+                {
+                    <h2>Game Over</h2>
+
+                    <p>
+                        Winner:
+                        <strong>@Model.WinnerName</strong>
+                    </p>
+                }
+                else
+                {
+                    <h3>Current Player</h3>
+
+                    <h2>
+                        @Model.PlayerName
+                    </h2>
+
+                    <p>
+                        Player @Model.PlayerNumber
+                    </p>
+
+                    <!-- Temporarily shows the player's current
+                         board position while movement is developed. -->
+                    <p>
+                        Board position:
+                        <strong>@Model.CurrentBoardSpaceId</strong>
+                    </p>
+
+                    <!-- Show the current dice roll while the player
+                         is choosing a legal movement destination. -->
+                    @if (Model.IsWaitingForMove)
+                    {
+                        <p>
+                            Dice roll:
+                            <strong>@Model.DiceRoll</strong>
+                        </p>
+
+                        <p>
+                            Choose one of the highlighted spaces
+                            on the board.
+                        </p>
+                    }
+
+                    <!-- Normal turn before the dice is rolled. -->
+                    @if (Model.CanRollDice)
+                    {
+                        <p>
+                            @Model.PlayerName can roll the dice.
+                        </p>
+
+                        <form asp-controller="Gameplay"
+                              asp-action="RollDice"
+                              method="post">
+
+                            <button type="submit"
+                                    class="btn btn-primary w-100">
+                                Roll Dice
+                            </button>
+
+                        </form>
+                    }
+
+                    <!-- Normal center category selection.
+                        Used when the player reaches the center
+                        without having collected all six wedges. -->
+                    @if (Model.NeedsCenterCategory)
+                    {
+                        <h3>Choose Category</h3>
+
+                        <p>
+                            You reached the center.
+                            Choose the category for your question.
+                        </p>
+
+                        <form asp-controller="Gameplay"
+                            asp-action="SelectCenterCategory"
+                            method="post">
+
+                            <div class="d-grid gap-2">
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Java"
+                                        class="btn btn-outline-primary">
+                                    Java
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="JavaScript"
+                                        class="btn btn-outline-primary">
+                                    JavaScript
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="HTML/CSS"
+                                        class="btn btn-outline-primary">
+                                    HTML/CSS
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Python"
+                                        class="btn btn-outline-primary">
+                                    Python
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Game History"
+                                        class="btn btn-outline-primary">
+                                    Game History
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="C#"
+                                        class="btn btn-outline-primary">
+                                    C#
+                                </button>
+
+                            </div>
+
+                        </form>
+                    }
+
+                    <!-- Final category selection.
+                         This will later be connected to reaching
+                         the center after collecting all six wedges. -->
+                    @if (Model.NeedsFinalCategory)
+                    {
+                        <h3>Final Turn</h3>
+
+                        <p>
+                            The other players must choose
+                            the category for the final question.
+                        </p>
+
+                        <form asp-controller="Gameplay"
+                              asp-action="SelectFinalCategory"
+                              method="post">
+
+                            <div class="d-grid gap-2">
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Java"
+                                        class="btn btn-outline-primary">
+                                    Java
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="JavaScript"
+                                        class="btn btn-outline-primary">
+                                    JavaScript
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="HTML/CSS"
+                                        class="btn btn-outline-primary">
+                                    HTML/CSS
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Python"
+                                        class="btn btn-outline-primary">
+                                    Python
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Game History"
+                                        class="btn btn-outline-primary">
+                                    Game History
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="C#"
+                                        class="btn btn-outline-primary">
+                                    C#
+                                </button>
+
+                            </div>
+
+                        </form>
+                    }
+
+                    <!-- Show the current question after
+                         a question turn has started. -->
+                    @if (Model.HasActiveTurn)
+                    {
+                        @if (!Model.IsFinalTurn)
+                        {
+                            <p>
+                                Dice roll:
+                                <strong>@Model.DiceRoll</strong>
+                            </p>
+                        }
+
+                        <p>
+                            Category:
+                            <strong>@Model.Category</strong>
+                        </p>
+
+                        <h3>
+                            @Model.Question.QuestionText
+                        </h3>
+
+                        <!-- Sends the selected answer
+                             to GameplayController.SubmitAnswer. -->
+                        <form asp-controller="Gameplay"
+                              asp-action="SubmitAnswer"
+                              method="post">
+
+                            <div class="d-grid gap-2">
+
+                                <button type="submit"
+                                        name="selectedAnswer"
+                                        value="@AnswerOption.A"
+                                        class="btn btn-outline-primary">
+                                    A: @Model.Question.AnswerA
+                                </button>
+
+                                <button type="submit"
+                                        name="selectedAnswer"
+                                        value="@AnswerOption.B"
+                                        class="btn btn-outline-primary">
+                                    B: @Model.Question.AnswerB
+                                </button>
+
+                                <button type="submit"
+                                        name="selectedAnswer"
+                                        value="@AnswerOption.C"
+                                        class="btn btn-outline-primary">
+                                    C: @Model.Question.AnswerC
+                                </button>
+
+                                <button type="submit"
+                                        name="selectedAnswer"
+                                        value="@AnswerOption.D"
+                                        class="btn btn-outline-primary">
+                                    D: @Model.Question.AnswerD
+                                </button>
+
+                            </div>
+
+                        </form>
+                    }
+                }
+
+            </section>
+
+
+            <!-- Shows wedge progress for the current player.
+                 A visual six-piece player token will be added later
+                 in addition to this text representation. -->
+            <section class="gameplay-sidebar-card">
+
+                <h3>Collected Wedges</h3>
+
+                <!-- Shows a visual token that fills up
+                    as the player collects wedges. -->
+                <div class="wedge-progress-visual">
+
+                    <div class="@GetWedgeTokenClass(Model.Wedges)"
+                        aria-label="Visual wedge progress for current player">
+                    </div>
+
+                    <div>
+                        @if (Model.Wedges.Count == 0)
+                        {
+                            <p>
+                                No wedges collected yet.
+                            </p>
+                        }
+                        else
+                        {
+                            <ul>
+                                @foreach (string wedge in Model.Wedges)
+                                {
+                                    <li>@wedge</li>
+                                }
+                            </ul>
+                        }
+                    </div>
 
                 </div>
-            </form>
-        }
 
-        <hr />
+                <h3>Missing Wedges</h3>
 
-        <!-- Show the wedges already collected by the current player. -->
-        <h3>Collected Wedges</h3>
-
-        @if (Model.Wedges.Count == 0)
-        {
-            <p>No wedges collected yet.</p>
-        }
-        else
-        {
-            <ul>
-                @foreach (string wedge in Model.Wedges)
+                @if (Model.MissingWedges.Count == 0)
                 {
-                    <li>@wedge</li>
+                    <p>
+                        All wedges collected!
+                    </p>
                 }
-            </ul>
-        }
-
-        <!-- Show which wedges the current player still needs. -->
-        <h3>Missing Wedges</h3>
-
-        @if (Model.MissingWedges.Count == 0)
-        {
-            <p>All wedges collected!</p>
-        }
-        else
-        {
-            <ul>
-                @foreach (string wedge in Model.MissingWedges)
+                else
                 {
-                    <li>@wedge</li>
+                    <ul>
+                        @foreach (string wedge in Model.MissingWedges)
+                        {
+                            <li>@wedge</li>
+                        }
+                    </ul>
                 }
-            </ul>
-        }
-    }
+
+                <h3>Players</h3>
+
+                <div class="player-token-list">
+
+                    @foreach (PlayerGameState player in Model.Players)
+                    {
+                        <div class="player-token-item @(player.PlayerNumber == Model.PlayerNumber ? "current-player-token" : "")">
+
+                            <div class="@GetWedgeTokenClass(player.Wedges, true)"
+                                aria-label="Collected wedges for @player.PlayerName">
+                            </div>
+
+                            <div class="player-token-text">
+                                <p class="player-token-name">
+                                    P@player.PlayerNumber · @player.PlayerName
+                                </p>
+
+                                <p class="player-token-space">
+                                    Board space: @player.BoardSpaceId
+                                </p>
+
+                                <p class="player-token-space">
+                                    @player.Wedges.Count / 6 wedges collected
+                                </p>
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </section>
+
+        </aside>
+
+    </div>
 }

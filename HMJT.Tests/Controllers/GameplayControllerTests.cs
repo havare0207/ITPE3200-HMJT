@@ -15,6 +15,9 @@ public class GameplayControllerTests
         var gameMechanicsService =
             new GameMechanicsService();
 
+        var diceService =
+            new DiceService();
+
         var gameTurnService =
             new GameTurnService(
                 new DiceService(),
@@ -22,10 +25,15 @@ public class GameplayControllerTests
                 new QuestionService()
             );
 
+        var boardService =
+            new BoardService();
+
         return new GameplayController(
             gameTurnService,
             gameStateService,
-            gameMechanicsService
+            gameMechanicsService,
+            boardService,
+            diceService
         );
     }
 
@@ -129,60 +137,50 @@ public class GameplayControllerTests
     // Tests that pressing Roll Dice creates
     // a new active turn for the current player.
     [Fact]
-    public void RollDice_CreatesCurrentTurn()
+    public void RollDice_CreatesCurrentMove()
     {
         // Arrange
-        var gameStateService =
-            new GameStateService
-            {
-                GameSession =
-                    new GameSessionState
-                    {
-                        Players =
-                        [
-                            new PlayerGameState
-                            {
-                                PlayerNumber = 1,
-                                PlayerName = "Alice"
-                            }
-                        ],
-                        CurrentPlayerIndex = 0
-                    },
-
-                Difficulty =
-                    Difficulty.Easy
-            };
+        var gameStateService = new GameStateService();
 
         var controller =
             CreateController(gameStateService);
 
+        var gameState =
+            new GameSessionState();
+
+        gameState.Players.Add(
+            new PlayerGameState
+            {
+                PlayerNumber = 1,
+                PlayerName = "Alice"
+            }
+        );
+
+        gameState.CurrentPlayerIndex = 0;
+
+        gameStateService.GameSession =
+            gameState;
+
         // Act
-        IActionResult result =
-            controller.RollDice();
+        controller.RollDice();
 
         // Assert
         Assert.NotNull(
+            gameStateService.CurrentMove
+        );
+
+        Assert.True(
+            gameStateService.CurrentMove!
+                .IsWaitingForMove
+        );
+
+        Assert.NotEmpty(
+            gameStateService.CurrentMove
+                .LegalDestinationIds
+        );
+
+        Assert.Null(
             gameStateService.CurrentTurn
-        );
-
-        Assert.Equal(
-            "Alice",
-            gameStateService
-                .CurrentTurn!
-                .Player
-                .PlayerName
-        );
-
-        Assert.InRange(
-            gameStateService
-                .CurrentTurn
-                .DiceRoll,
-            1,
-            6
-        );
-
-        Assert.IsType<RedirectToActionResult>(
-            result
         );
     }
 
@@ -292,47 +290,47 @@ public class GameplayControllerTests
     public void SelectFinalCategory_CreatesFinalQuestion()
     {
         // Arrange
+        var gameStateService =
+            new GameStateService();
+
+        var controller =
+            CreateController(gameStateService);
+
         var player =
             new PlayerGameState
             {
                 PlayerNumber = 1,
                 PlayerName = "Alice",
-                Wedges =
-                [
-                    "Java",
-                    "JavaScript",
-                    "HTML/CSS",
-                    "Python",
-                    "Game History",
-                    "C#"
-                ]
+                BoardSpaceId = 43
             };
 
-        var gameStateService =
-            new GameStateService
-            {
-                GameSession =
-                    new GameSessionState
-                    {
-                        Players =
-                        [
-                            player
-                        ],
-                        CurrentPlayerIndex = 0
-                    },
+        // Give the player all six wedges.
+        player.Wedges.Add("Java");
+        player.Wedges.Add("JavaScript");
+        player.Wedges.Add("HTML/CSS");
+        player.Wedges.Add("Python");
+        player.Wedges.Add("Game History");
+        player.Wedges.Add("C#");
 
-                Difficulty =
-                    Difficulty.Medium
-            };
+        var gameState =
+            new GameSessionState();
 
-        var controller =
-            CreateController(gameStateService);
+        gameState.Players.Add(player);
+        gameState.CurrentPlayerIndex = 0;
+
+        gameStateService.GameSession =
+            gameState;
+
+        gameStateService.Difficulty =
+            Difficulty.Easy;
+
+        // Simulate that the player has just moved
+        // into the center of the board.
+        gameStateService.IsCenterChoicePending =
+            true;
 
         // Act
-        IActionResult result =
-            controller.SelectFinalCategory(
-                "Python"
-            );
+        controller.SelectFinalCategory("Java");
 
         // Assert
         Assert.NotNull(
@@ -340,28 +338,16 @@ public class GameplayControllerTests
         );
 
         Assert.True(
-            gameStateService
-                .CurrentTurn!
-                .IsFinalTurn
+            gameStateService.CurrentTurn!.IsFinalTurn
         );
 
         Assert.Equal(
-            "Python",
-            gameStateService
-                .CurrentTurn
-                .Category
+            "Java",
+            gameStateService.CurrentTurn.Category
         );
 
-        Assert.Equal(
-            Difficulty.Medium,
-            gameStateService
-                .CurrentTurn
-                .Question
-                .Difficulty
-        );
-
-        Assert.IsType<RedirectToActionResult>(
-            result
+        Assert.False(
+            gameStateService.IsCenterChoicePending
         );
     }
 
@@ -493,6 +479,7 @@ public class GameplayControllerTests
 
     // Tests that players must be entered in order.
     // Player 3 cannot be used if Player 2 is empty.
+    // There must be at least two players to start a game.
     [Fact]
     public void StartGame_RejectsSkippedPlayerNumber()
     {
@@ -504,30 +491,304 @@ public class GameplayControllerTests
             CreateController(gameStateService);
 
         // Act
-        IActionResult result =
-            controller.StartGame(
-                "Alice",
-                "",
-                "Charlie",
-                "",
-                "",
-                "",
-                Difficulty.Easy
-            );
+        controller.StartGame(
+            "Alice",
+            "Bob",
+            "",
+            "Diana",
+            "",
+            "",
+            Difficulty.Easy
+        );
 
         // Assert
-        Assert.Null(
-            gameStateService.GameSession
+        Assert.False(
+            gameStateService.HasActiveGame
         );
 
         Assert.Equal(
-            "Player 2 must be entered before Player 3.",
+            "Player 3 must be entered before Player 4.",
             gameStateService.Message
         );
+    }
 
-        Assert.IsType<RedirectToActionResult>(
-            result
+    // Tests that a new player starts
+    // in the center of the game board.
+    [Fact]
+    public void PlayerGameState_ShouldStartInCenter()
+    {
+        // Arrange and Act
+        var player = new PlayerGameState
+        {
+            PlayerNumber = 1,
+            PlayerName = "Alice"
+        };
+
+        // Assert
+        Assert.Equal(
+            43,
+            player.BoardSpaceId
+        );
+    }
+
+    // Tests that the current player can move
+    // to a legal board destination.
+    [Fact]
+    public void Move_LegalDestination_ShouldUpdatePlayerPosition()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService();
+
+        var controller =
+            CreateController(gameStateService);
+
+        var player =
+            new PlayerGameState
+            {
+                PlayerNumber = 1,
+                PlayerName = "Alice",
+                BoardSpaceId = 43
+            };
+
+        var gameState =
+            new GameSessionState();
+
+        gameState.Players.Add(player);
+        gameState.CurrentPlayerIndex = 0;
+
+        gameStateService.GameSession =
+            gameState;
+
+        gameStateService.CurrentMove =
+            new BoardMoveState
+            {
+                DiceRoll = 1,
+                LegalDestinationIds =
+                    new List<int> { 27, 30, 33, 36, 39, 42 },
+
+                IsWaitingForMove = true
+            };
+
+        // Act
+        controller.Move(27);
+
+        // Assert
+        Assert.Equal(
+            27,
+            player.BoardSpaceId
+        );
+
+        Assert.Null(
+            gameStateService.CurrentMove
+        );
+    }
+
+    // Tests that the player cannot move
+    // to a space that was not calculated
+    // as a legal destination.
+    [Fact]
+    public void Move_IllegalDestination_ShouldNotMovePlayer()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService();
+
+        var controller =
+            CreateController(gameStateService);
+
+        var player =
+            new PlayerGameState
+            {
+                PlayerNumber = 1,
+                PlayerName = "Alice",
+                BoardSpaceId = 43
+            };
+
+        var gameState =
+            new GameSessionState();
+
+        gameState.Players.Add(player);
+        gameState.CurrentPlayerIndex = 0;
+
+        gameStateService.GameSession =
+            gameState;
+
+        gameStateService.CurrentMove =
+            new BoardMoveState
+            {
+                DiceRoll = 1,
+                LegalDestinationIds =
+                    new List<int> { 27, 30, 33, 36, 39, 42 },
+
+                IsWaitingForMove = true
+            };
+
+        // Act
+        controller.Move(1);
+
+        // Assert
+        Assert.Equal(
+            43,
+            player.BoardSpaceId
+        );
+
+        Assert.NotNull(
+            gameStateService.CurrentMove
+        );
+    }
+
+    // Tests that landing on a colored board space
+    // starts a question from that space's category.
+    [Fact]
+    public void Move_CategorySpace_ShouldCreateQuestionTurn()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService();
+
+        var controller =
+            CreateController(gameStateService);
+
+        var player =
+            new PlayerGameState
+            {
+                PlayerNumber = 1,
+                PlayerName = "Alice",
+                BoardSpaceId = 43
+            };
+
+        var gameState =
+            new GameSessionState();
+
+        gameState.Players.Add(player);
+        gameState.CurrentPlayerIndex = 0;
+
+        gameStateService.GameSession = gameState;
+        gameStateService.Difficulty = Difficulty.Easy;
+
+        gameStateService.CurrentMove =
+            new BoardMoveState
+            {
+                DiceRoll = 1,
+                LegalDestinationIds =
+                    new List<int> { 27 },
+
+                IsWaitingForMove = true
+            };
+
+        // Act
+        controller.Move(27);
+
+        // Assert
+        Assert.Equal(
+            27,
+            player.BoardSpaceId
+        );
+
+        Assert.NotNull(
+            gameStateService.CurrentTurn
+        );
+
+        Assert.Equal(
+            "Java",
+            gameStateService.CurrentTurn!.Category
+        );
+    }
+
+    // Tests that landing on a Roll Again space
+    // keeps the same player's turn and does not
+    // create a question.
+    [Fact]
+    public void Move_RollAgainSpace_ShouldAllowSamePlayerToRollAgain()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService();
+
+        var controller =
+            CreateController(gameStateService);
+
+        var player =
+            new PlayerGameState
+            {
+                PlayerNumber = 1,
+                PlayerName = "Alice",
+                BoardSpaceId = 3
+            };
+
+        var gameState =
+            new GameSessionState();
+
+        gameState.Players.Add(player);
+        gameState.CurrentPlayerIndex = 0;
+
+        gameStateService.GameSession = gameState;
+
+        gameStateService.CurrentMove =
+            new BoardMoveState
+            {
+                DiceRoll = 1,
+                LegalDestinationIds =
+                    new List<int> { 4 },
+
+                IsWaitingForMove = true
+            };
+
+        // Act
+        controller.Move(4);
+
+        // Assert
+        Assert.Equal(
+            4,
+            player.BoardSpaceId
+        );
+
+        Assert.Null(
+            gameStateService.CurrentMove
+        );
+
+        Assert.Null(
+            gameStateService.CurrentTurn
+        );
+
+        Assert.Equal(
+            0,
+            gameState.CurrentPlayerIndex
+        );
+    }
+
+    [Fact]
+    public void StartGame_RequiresAtLeastTwoPlayers()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService();
+
+        var controller =
+            CreateController(gameStateService);
+
+        // Act
+        controller.StartGame(
+            "Alice",
+            "",
+            "",
+            "",
+            "",
+            "",
+            Difficulty.Easy
+        );
+
+        // Assert
+        Assert.False(
+            gameStateService.HasActiveGame
+        );
+
+        Assert.Equal(
+            "At least two players are required.",
+            gameStateService.Message
         );
     }
 
 }
+
