@@ -1,6 +1,57 @@
 @model HMJT.Models.GamePlayViewModel
 @using HMJT.Models
 
+@functions {
+    // Builds the CSS class list for a wedge token
+    // based on which category wedges the player owns.
+    public static string GetWedgeTokenClass(
+        HashSet<string> wedges,
+        bool small = false)
+    {
+        List<string> classes = new()
+        {
+            "wedge-token"
+        };
+
+        if (small)
+        {
+            classes.Add("wedge-token-small");
+        }
+
+        if (wedges.Contains("Java"))
+        {
+            classes.Add("has-java");
+        }
+
+        if (wedges.Contains("Python"))
+        {
+            classes.Add("has-python");
+        }
+
+        if (wedges.Contains("C#"))
+        {
+            classes.Add("has-csharp");
+        }
+
+        if (wedges.Contains("HTML/CSS"))
+        {
+            classes.Add("has-html");
+        }
+
+        if (wedges.Contains("Game History"))
+        {
+            classes.Add("has-history");
+        }
+
+        if (wedges.Contains("JavaScript"))
+        {
+            classes.Add("has-javascript");
+        }
+
+        return string.Join(" ", classes);
+    }
+}
+
 @{
     ViewData["Title"] = "Play";
 }
@@ -119,6 +170,7 @@
                 class="btn btn-primary">
             Start Game
         </button>
+
     </form>
 }
 else
@@ -139,6 +191,7 @@ else
                     class="btn btn-outline-danger">
                 Reset Game
             </button>
+
         </form>
 
     </div>
@@ -152,446 +205,729 @@ else
     }
 
     <!-- Main gameplay area.
-         The board is shown on the left and
-         game information is shown on the right. -->
+         The interactive board is shown on the left
+         and current game information is shown on the right. -->
     <div class="gameplay-layout">
 
-        <!-- Board panel.
-             The actual interactive board will be added
-             in the next development step. -->
+        <!-- Interactive board panel. -->
         <section class="gameplay-board-panel">
 
-            <!-- Heading and explanation for the game board. -->
             <h2>Interactive Board</h2>
 
-            <p class="text-muted">
-                Player positions and board movement will be added
-                in the next steps.
-            </p>
+            <!-- Show movement instructions after the dice has been rolled. -->
+            @if (Model.IsWaitingForMove)
+            {
+                <p>
+                    Dice roll:
+                    <strong>@Model.DiceRoll</strong>.
+                    Choose one of the highlighted spaces.
+                </p>
+            }
+            else
+            {
+                <p class="text-muted">
+                    Roll the dice to see where you can move.
+                </p>
+            }
 
-            <!-- Shows which color belongs to each category. -->
+            <!-- Shows which color belongs to each question category. -->
             <div class="board-key">
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                        style="background: #3182e8;">
+                          style="background: #3182e8;">
                     </span>
                     Java
                 </span>
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                        style="background: #f6ca46;">
+                          style="background: #f6ca46;">
                     </span>
                     Python
                 </span>
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                        style="background: #9748dc;">
+                          style="background: #9748dc;">
                     </span>
                     C#
                 </span>
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                        style="background: #f59a45;">
+                          style="background: #f59a45;">
                     </span>
                     HTML/CSS
                 </span>
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                        style="background: #ec407a;">
+                          style="background: #ec407a;">
                     </span>
                     Game History
                 </span>
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                        style="background: #25ad63;">
+                          style="background: #25ad63;">
                     </span>
                     JavaScript
                 </span>
 
             </div>
 
-            <!-- Circular six-category game board. -->
+            @{
+                // Returns true when a board space is one of
+                // the legal destinations for the current dice roll.
+                bool IsLegalDestination(int boardSpaceId)
+                {
+                    return Model.IsWaitingForMove &&
+                           Model.LegalDestinationIds.Contains(boardSpaceId);
+                }
+            }
+
+            <!-- Contains the circular game board. -->
             <div class="interactive-board-shell">
 
-                <div class="interactive-board">
+                <!-- All board buttons use the same form.
+                     Clicking a legal space sends its BoardSpaceId
+                     to GameplayController.Move. -->
+                <form asp-controller="Gameplay"
+                      asp-action="Move"
+                      method="post"
+                      class="board-move-form">
 
-                    <!-- =====================================
-                        Category labels
-                        ===================================== -->
+                    <div class="interactive-board">
 
-                    <span class="board-category-label
-                                board-category-history">
-                        Game<br />
-                        History
-                    </span>
+                        <!-- =====================================
+                             Category labels
+                             ===================================== -->
 
-                    <span class="board-category-label
-                                board-category-java">
-                        Java
-                    </span>
-
-                    <span class="board-category-label
-                                board-category-python">
-                        Python
-                    </span>
-
-                    <span class="board-category-label
-                                board-category-csharp">
-                        C#
-                    </span>
-
-                    <span class="board-category-label
-                                board-category-html">
-                        HTML/CSS
-                    </span>
-
-                    <span class="board-category-label
-                                board-category-javascript">
-                        JavaScript
-                    </span>
-
-
-                    <!-- =====================================
-                        Outer ring - top
-                        Three normal spaces between
-                        the two Roll Again spaces.
-                        ===================================== -->
-
-                    <div class="board-space roll-again"
-                        style="--x: 28%; --y: 15%;">
-                        <span class="roll-again-text">
-                            ROLL
+                        <span class="board-category-label
+                                     board-category-history">
+                            Game<br />
+                            History
                         </span>
-                    </div>
 
-                    <div class="board-space"
-                        style="--x: 39%; --y: 10%;
-                                --space-color: #9748dc;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 50%; --y: 8%;
-                                --space-color: #ec407a;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 61%; --y: 10%;
-                                --space-color: #25ad63;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space roll-again"
-                        style="--x: 72%; --y: 15%;">
-                        <span class="roll-again-text">
-                            ROLL
+                        <span class="board-category-label
+                                     board-category-java">
+                            Java
                         </span>
-                    </div>
 
-
-                    <!-- =====================================
-                        Outer ring - upper right
-                        ===================================== -->
-
-                    <div class="board-space"
-                        style="--x: 82%; --y: 22%;
-                                --space-color: #f6ca46;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 89%; --y: 32%;
-                                --space-color: #9748dc;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 93%; --y: 42%;
-                                --space-color: #3182e8;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space roll-again"
-                        style="--x: 95%; --y: 50%;">
-                        <span class="roll-again-text">
-                            ROLL
+                        <span class="board-category-label
+                                     board-category-python">
+                            Python
                         </span>
-                    </div>
 
-
-                    <!-- =====================================
-                        Outer ring - lower right
-                        ===================================== -->
-
-                    <div class="board-space"
-                        style="--x: 93%; --y: 58%;
-                                --space-color: #f59a45;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 89%; --y: 68%;
-                                --space-color: #ec407a;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 82%; --y: 78%;
-                                --space-color: #f6ca46;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space roll-again"
-                        style="--x: 72%; --y: 85%;">
-                        <span class="roll-again-text">
-                            ROLL
+                        <span class="board-category-label
+                                     board-category-csharp">
+                            C#
                         </span>
-                    </div>
 
-
-                    <!-- =====================================
-                        Outer ring - bottom
-                        ===================================== -->
-
-                    <div class="board-space"
-                        style="--x: 61%; --y: 90%;
-                                --space-color: #25ad63;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 50%; --y: 92%;
-                                --space-color: #3182e8;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 39%; --y: 90%;
-                                --space-color: #9748dc;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space roll-again"
-                        style="--x: 28%; --y: 85%;">
-                        <span class="roll-again-text">
-                            ROLL
+                        <span class="board-category-label
+                                     board-category-html">
+                            HTML/CSS
                         </span>
-                    </div>
 
-
-                    <!-- =====================================
-                        Outer ring - lower left
-                        ===================================== -->
-
-                    <div class="board-space"
-                        style="--x: 18%; --y: 78%;
-                                --space-color: #f59a45;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 11%; --y: 68%;
-                                --space-color: #f6ca46;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 7%; --y: 58%;
-                                --space-color: #ec407a;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space roll-again"
-                        style="--x: 5%; --y: 50%;">
-                        <span class="roll-again-text">
-                            ROLL
+                        <span class="board-category-label
+                                     board-category-javascript">
+                            JavaScript
                         </span>
+
+
+                        <!-- =====================================
+                             Outer ring - top
+                             ===================================== -->
+
+                        <!-- Space 24: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="24"
+                                class="board-space roll-again @(IsLegalDestination(24) ? "legal-destination" : "")"
+                                style="--x: 28%; --y: 15%;"
+                                disabled="@(IsLegalDestination(24) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+                        <!-- Space 1: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="1"
+                                class="board-space @(IsLegalDestination(1) ? "legal-destination" : "")"
+                                style="--x: 39%; --y: 10%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(1) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 2: Game History -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="2"
+                                class="board-space @(IsLegalDestination(2) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 8%;
+                                       --space-color: #ec407a;"
+                                disabled="@(IsLegalDestination(2) ? null : "disabled")"
+                                aria-label="Move to Game History space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 3: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="3"
+                                class="board-space @(IsLegalDestination(3) ? "legal-destination" : "")"
+                                style="--x: 61%; --y: 10%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(3) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 4: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="4"
+                                class="board-space roll-again @(IsLegalDestination(4) ? "legal-destination" : "")"
+                                style="--x: 72%; --y: 15%;"
+                                disabled="@(IsLegalDestination(4) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Outer ring - upper right
+                             ===================================== -->
+
+                        <!-- Space 5: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="5"
+                                class="board-space @(IsLegalDestination(5) ? "legal-destination" : "")"
+                                style="--x: 82%; --y: 22%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(5) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 6: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="6"
+                                class="board-space @(IsLegalDestination(6) ? "legal-destination" : "")"
+                                style="--x: 89%; --y: 32%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(6) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 7: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="7"
+                                class="board-space @(IsLegalDestination(7) ? "legal-destination" : "")"
+                                style="--x: 93%; --y: 42%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(7) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 8: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="8"
+                                class="board-space roll-again @(IsLegalDestination(8) ? "legal-destination" : "")"
+                                style="--x: 95%; --y: 50%;"
+                                disabled="@(IsLegalDestination(8) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Outer ring - lower right
+                             ===================================== -->
+
+                        <!-- Space 9: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="9"
+                                class="board-space @(IsLegalDestination(9) ? "legal-destination" : "")"
+                                style="--x: 93%; --y: 58%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(9) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 10: Game History -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="10"
+                                class="board-space @(IsLegalDestination(10) ? "legal-destination" : "")"
+                                style="--x: 89%; --y: 68%;
+                                       --space-color: #ec407a;"
+                                disabled="@(IsLegalDestination(10) ? null : "disabled")"
+                                aria-label="Move to Game History space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 11: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="11"
+                                class="board-space @(IsLegalDestination(11) ? "legal-destination" : "")"
+                                style="--x: 82%; --y: 78%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(11) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 12: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="12"
+                                class="board-space roll-again @(IsLegalDestination(12) ? "legal-destination" : "")"
+                                style="--x: 72%; --y: 85%;"
+                                disabled="@(IsLegalDestination(12) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Outer ring - bottom
+                             ===================================== -->
+
+                        <!-- Space 13: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="13"
+                                class="board-space @(IsLegalDestination(13) ? "legal-destination" : "")"
+                                style="--x: 61%; --y: 90%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(13) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 14: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="14"
+                                class="board-space @(IsLegalDestination(14) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 92%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(14) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 15: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="15"
+                                class="board-space @(IsLegalDestination(15) ? "legal-destination" : "")"
+                                style="--x: 39%; --y: 90%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(15) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 16: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="16"
+                                class="board-space roll-again @(IsLegalDestination(16) ? "legal-destination" : "")"
+                                style="--x: 28%; --y: 85%;"
+                                disabled="@(IsLegalDestination(16) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Outer ring - lower left
+                             ===================================== -->
+
+                        <!-- Space 17: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="17"
+                                class="board-space @(IsLegalDestination(17) ? "legal-destination" : "")"
+                                style="--x: 18%; --y: 78%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(17) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 18: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="18"
+                                class="board-space @(IsLegalDestination(18) ? "legal-destination" : "")"
+                                style="--x: 11%; --y: 68%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(18) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 19: Game History -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="19"
+                                class="board-space @(IsLegalDestination(19) ? "legal-destination" : "")"
+                                style="--x: 7%; --y: 58%;
+                                       --space-color: #ec407a;"
+                                disabled="@(IsLegalDestination(19) ? null : "disabled")"
+                                aria-label="Move to Game History space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 20: Roll Again -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="20"
+                                class="board-space roll-again @(IsLegalDestination(20) ? "legal-destination" : "")"
+                                style="--x: 5%; --y: 50%;"
+                                disabled="@(IsLegalDestination(20) ? null : "disabled")"
+                                aria-label="Move to Roll Again space">
+                            <span class="roll-again-text">
+                                ROLL
+                            </span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Outer ring - upper left
+                             ===================================== -->
+
+                        <!-- Space 21: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="21"
+                                class="board-space @(IsLegalDestination(21) ? "legal-destination" : "")"
+                                style="--x: 7%; --y: 42%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(21) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 22: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="22"
+                                class="board-space @(IsLegalDestination(22) ? "legal-destination" : "")"
+                                style="--x: 11%; --y: 32%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(22) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 23: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="23"
+                                class="board-space @(IsLegalDestination(23) ? "legal-destination" : "")"
+                                style="--x: 18%; --y: 22%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(23) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Game History path
+                             ===================================== -->
+
+                        <!-- Space 25: Game History -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="25"
+                                class="board-space inner-space @(IsLegalDestination(25) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 22%;
+                                       --space-color: #ec407a;"
+                                disabled="@(IsLegalDestination(25) ? null : "disabled")"
+                                aria-label="Move to Game History space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 26: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="26"
+                                class="board-space inner-space @(IsLegalDestination(26) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 31%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(26) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 27: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="27"
+                                class="board-space inner-space @(IsLegalDestination(27) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 40%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(27) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Java path
+                             ===================================== -->
+
+                        <!-- Space 28: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="28"
+                                class="board-space inner-space @(IsLegalDestination(28) ? "legal-destination" : "")"
+                                style="--x: 76%; --y: 35%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(28) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 29: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="29"
+                                class="board-space inner-space @(IsLegalDestination(29) ? "legal-destination" : "")"
+                                style="--x: 68%; --y: 39.5%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(29) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 30: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="30"
+                                class="board-space inner-space @(IsLegalDestination(30) ? "legal-destination" : "")"
+                                style="--x: 60%; --y: 44%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(30) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Python path
+                             ===================================== -->
+
+                        <!-- Space 31: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="31"
+                                class="board-space inner-space @(IsLegalDestination(31) ? "legal-destination" : "")"
+                                style="--x: 76%; --y: 65%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(31) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 32: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="32"
+                                class="board-space inner-space @(IsLegalDestination(32) ? "legal-destination" : "")"
+                                style="--x: 68%; --y: 60.5%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(32) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 33: Game History -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="33"
+                                class="board-space inner-space @(IsLegalDestination(33) ? "legal-destination" : "")"
+                                style="--x: 60%; --y: 56%;
+                                       --space-color: #ec407a;"
+                                disabled="@(IsLegalDestination(33) ? null : "disabled")"
+                                aria-label="Move to Game History space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             C# path
+                             ===================================== -->
+
+                        <!-- Space 34: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="34"
+                                class="board-space inner-space @(IsLegalDestination(34) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 78%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(34) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 35: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="35"
+                                class="board-space inner-space @(IsLegalDestination(35) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 69%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(35) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 36: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="36"
+                                class="board-space inner-space @(IsLegalDestination(36) ? "legal-destination" : "")"
+                                style="--x: 50%; --y: 60%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(36) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             HTML/CSS path
+                             ===================================== -->
+
+                        <!-- Space 37: HTML/CSS -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="37"
+                                class="board-space inner-space @(IsLegalDestination(37) ? "legal-destination" : "")"
+                                style="--x: 24%; --y: 65%;
+                                       --space-color: #f59a45;"
+                                disabled="@(IsLegalDestination(37) ? null : "disabled")"
+                                aria-label="Move to HTML CSS space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 38: Python -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="38"
+                                class="board-space inner-space @(IsLegalDestination(38) ? "legal-destination" : "")"
+                                style="--x: 32%; --y: 60.5%;
+                                       --space-color: #f6ca46;"
+                                disabled="@(IsLegalDestination(38) ? null : "disabled")"
+                                aria-label="Move to Python space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 39: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="39"
+                                class="board-space inner-space @(IsLegalDestination(39) ? "legal-destination" : "")"
+                                style="--x: 40%; --y: 56%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(39) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             JavaScript path
+                             ===================================== -->
+
+                        <!-- Space 40: JavaScript -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="40"
+                                class="board-space inner-space @(IsLegalDestination(40) ? "legal-destination" : "")"
+                                style="--x: 24%; --y: 35%;
+                                       --space-color: #25ad63;"
+                                disabled="@(IsLegalDestination(40) ? null : "disabled")"
+                                aria-label="Move to JavaScript space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 41: C# -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="41"
+                                class="board-space inner-space @(IsLegalDestination(41) ? "legal-destination" : "")"
+                                style="--x: 32%; --y: 39.5%;
+                                       --space-color: #9748dc;"
+                                disabled="@(IsLegalDestination(41) ? null : "disabled")"
+                                aria-label="Move to C sharp space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+                        <!-- Space 42: Java -->
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="42"
+                                class="board-space inner-space @(IsLegalDestination(42) ? "legal-destination" : "")"
+                                style="--x: 40%; --y: 44%;
+                                       --space-color: #3182e8;"
+                                disabled="@(IsLegalDestination(42) ? null : "disabled")"
+                                aria-label="Move to Java space">
+                            <span class="board-space-marker"></span>
+                        </button>
+
+
+                        <!-- =====================================
+                             Center - space 43
+                             The center can be reached from all six
+                             inner paths and will later allow category choice.
+                             ===================================== -->
+
+                        <button type="submit"
+                                name="boardSpaceId"
+                                value="43"
+                                class="board-center @(IsLegalDestination(43) ? "legal-destination" : "")"
+                                disabled="@(IsLegalDestination(43) ? null : "disabled")"
+                                aria-label="Move to the center of the board">
+                        </button>
+
                     </div>
 
-
-                    <!-- =====================================
-                        Outer ring - upper left
-                        ===================================== -->
-
-                    <div class="board-space"
-                        style="--x: 7%; --y: 42%;
-                                --space-color: #3182e8;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 11%; --y: 32%;
-                                --space-color: #f59a45;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space"
-                        style="--x: 18%; --y: 22%;
-                                --space-color: #25ad63;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-
-                    <!-- =====================================
-                        Game History path
-                        Three spaces leading toward center.
-                        ===================================== -->
-
-                    <div class="board-space inner-space"
-                        style="--x: 50%; --y: 22%;
-                                --space-color: #ec407a;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 50%; --y: 31%;
-                                --space-color: #f6ca46;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 50%; --y: 40%;
-                                --space-color: #3182e8;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-
-                    <!-- =====================================
-                        Java path
-                        ===================================== -->
-
-                    <div class="board-space inner-space"
-                        style="--x: 76%; --y: 35%;
-                                --space-color: #3182e8;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 68%; --y: 39.5%;
-                                --space-color: #f59a45;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 60%; --y: 44%;
-                                --space-color: #9748dc;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-
-                    <!-- =====================================
-                        Python path
-                        ===================================== -->
-
-                    <div class="board-space inner-space"
-                        style="--x: 76%; --y: 65%;
-                                --space-color: #f6ca46;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 68%; --y: 60.5%;
-                                --space-color: #25ad63;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 60%; --y: 56%;
-                                --space-color: #ec407a;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-
-                    <!-- =====================================
-                        C# path
-                        ===================================== -->
-
-                    <div class="board-space inner-space"
-                        style="--x: 50%; --y: 78%;
-                                --space-color: #9748dc;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 50%; --y: 69%;
-                                --space-color: #3182e8;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 50%; --y: 60%;
-                                --space-color: #f59a45;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-
-                    <!-- =====================================
-                        HTML/CSS path
-                        ===================================== -->
-
-                    <div class="board-space inner-space"
-                        style="--x: 24%; --y: 65%;
-                                --space-color: #f59a45;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 32%; --y: 60.5%;
-                                --space-color: #f6ca46;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 40%; --y: 56%;
-                                --space-color: #25ad63;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-
-                    <!-- =====================================
-                        JavaScript path
-                        ===================================== -->
-
-                    <div class="board-space inner-space"
-                        style="--x: 24%; --y: 35%;
-                                --space-color: #25ad63;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 32%; --y: 39.5%;
-                                --space-color: #9748dc;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-                    <div class="board-space inner-space"
-                        style="--x: 40%; --y: 44%;
-                                --space-color: #3182e8;">
-                        <span class="board-space-marker"></span>
-                    </div>
-
-
-                    <!-- =====================================
-                        Center
-                        The center represents all six categories.
-                        Category-choice logic will be connected later.
-                        ===================================== -->
-
-                    <div class="board-center">
-                    </div>
-
-                </div>
+                </form>
 
             </div>
 
         </section>
+
 
         <!-- Sidebar containing information and
              controls for the current game. -->
@@ -621,6 +957,28 @@ else
                         Player @Model.PlayerNumber
                     </p>
 
+                    <!-- Temporarily shows the player's current
+                         board position while movement is developed. -->
+                    <p>
+                        Board position:
+                        <strong>@Model.CurrentBoardSpaceId</strong>
+                    </p>
+
+                    <!-- Show the current dice roll while the player
+                         is choosing a legal movement destination. -->
+                    @if (Model.IsWaitingForMove)
+                    {
+                        <p>
+                            Dice roll:
+                            <strong>@Model.DiceRoll</strong>
+                        </p>
+
+                        <p>
+                            Choose one of the highlighted spaces
+                            on the board.
+                        </p>
+                    }
+
                     <!-- Normal turn before the dice is rolled. -->
                     @if (Model.CanRollDice)
                     {
@@ -636,10 +994,78 @@ else
                                     class="btn btn-primary w-100">
                                 Roll Dice
                             </button>
+
                         </form>
                     }
 
-                    <!-- Final category selection. -->
+                    <!-- Normal center category selection.
+                        Used when the player reaches the center
+                        without having collected all six wedges. -->
+                    @if (Model.NeedsCenterCategory)
+                    {
+                        <h3>Choose Category</h3>
+
+                        <p>
+                            You reached the center.
+                            Choose the category for your question.
+                        </p>
+
+                        <form asp-controller="Gameplay"
+                            asp-action="SelectCenterCategory"
+                            method="post">
+
+                            <div class="d-grid gap-2">
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Java"
+                                        class="btn btn-outline-primary">
+                                    Java
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="JavaScript"
+                                        class="btn btn-outline-primary">
+                                    JavaScript
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="HTML/CSS"
+                                        class="btn btn-outline-primary">
+                                    HTML/CSS
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Python"
+                                        class="btn btn-outline-primary">
+                                    Python
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="Game History"
+                                        class="btn btn-outline-primary">
+                                    Game History
+                                </button>
+
+                                <button type="submit"
+                                        name="category"
+                                        value="C#"
+                                        class="btn btn-outline-primary">
+                                    C#
+                                </button>
+
+                            </div>
+
+                        </form>
+                    }
+
+                    <!-- Final category selection.
+                         This will later be connected to reaching
+                         the center after collecting all six wedges. -->
                     @if (Model.NeedsFinalCategory)
                     {
                         <h3>Final Turn</h3>
@@ -698,10 +1124,12 @@ else
                                 </button>
 
                             </div>
+
                         </form>
                     }
 
-                    <!-- Show the current question after a turn starts. -->
+                    <!-- Show the current question after
+                         a question turn has started. -->
                     @if (Model.HasActiveTurn)
                     {
                         @if (!Model.IsFinalTurn)
@@ -722,7 +1150,7 @@ else
                         </h3>
 
                         <!-- Sends the selected answer
-                             to SubmitAnswer. -->
+                             to GameplayController.SubmitAnswer. -->
                         <form asp-controller="Gameplay"
                               asp-action="SubmitAnswer"
                               method="post">
@@ -758,32 +1186,48 @@ else
                                 </button>
 
                             </div>
+
                         </form>
                     }
                 }
 
             </section>
 
-            <!-- Shows wedge progress for the current player. -->
+
+            <!-- Shows wedge progress for the current player.
+                 A visual six-piece player token will be added later
+                 in addition to this text representation. -->
             <section class="gameplay-sidebar-card">
 
                 <h3>Collected Wedges</h3>
 
-                @if (Model.Wedges.Count == 0)
-                {
-                    <p>
-                        No wedges collected yet.
-                    </p>
-                }
-                else
-                {
-                    <ul>
-                        @foreach (string wedge in Model.Wedges)
+                <!-- Shows a visual token that fills up
+                    as the player collects wedges. -->
+                <div class="wedge-progress-visual">
+
+                    <div class="@GetWedgeTokenClass(Model.Wedges)"
+                        aria-label="Visual wedge progress for current player">
+                    </div>
+
+                    <div>
+                        @if (Model.Wedges.Count == 0)
                         {
-                            <li>@wedge</li>
+                            <p>
+                                No wedges collected yet.
+                            </p>
                         }
-                    </ul>
-                }
+                        else
+                        {
+                            <ul>
+                                @foreach (string wedge in Model.Wedges)
+                                {
+                                    <li>@wedge</li>
+                                }
+                            </ul>
+                        }
+                    </div>
+
+                </div>
 
                 <h3>Missing Wedges</h3>
 
@@ -802,6 +1246,37 @@ else
                         }
                     </ul>
                 }
+
+                <h3>Players</h3>
+
+                <div class="player-token-list">
+
+                    @foreach (PlayerGameState player in Model.Players)
+                    {
+                        <div class="player-token-item @(player.PlayerNumber == Model.PlayerNumber ? "current-player-token" : "")">
+
+                            <div class="@GetWedgeTokenClass(player.Wedges, true)"
+                                aria-label="Collected wedges for @player.PlayerName">
+                            </div>
+
+                            <div class="player-token-text">
+                                <p class="player-token-name">
+                                    P@player.PlayerNumber · @player.PlayerName
+                                </p>
+
+                                <p class="player-token-space">
+                                    Board space: @player.BoardSpaceId
+                                </p>
+
+                                <p class="player-token-space">
+                                    @player.Wedges.Count / 6 wedges collected
+                                </p>
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
 
             </section>
 

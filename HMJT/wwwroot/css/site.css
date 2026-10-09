@@ -532,3 +532,165 @@ h3 {
     }
 }
 
+/* =========================================
+   Legal board destinations
+   ========================================= */
+
+/* Board spaces normally behave like
+   visual game spaces instead of buttons. */
+.board-space {
+    cursor: default;
+}
+
+/* A legal destination becomes clearly
+   interactive after the dice has been rolled. */
+.board-space.legal-destination {
+    cursor: pointer;
+    outline: 4px solid #111827;
+    outline-offset: 3px;
+    transform: translate(-50%, -50%) scale(1.12);
+    z-index: 8;
+}
+
+/* Gives keyboard users a clear focus indicator. */
+.board-space.legal-destination:focus-visible {
+    outline: 5px solid #000;
+    outline-offset: 4px;
+}
+
+/* Disabled board spaces keep their normal appearance
+   instead of receiving the browser's faded button style. */
+.board-space:disabled {
+    opacity: 1;
+}
+
+/* =========================================
+   Player wedge tokens
+   ========================================= */
+
+/* Visual token that shows collected wedges.
+   Each slice starts as empty and becomes colored
+   when the player has collected that category. */
+.wedge-token {
+    --history-color: #f4efe4;
+    --java-color: #f4efe4;
+    --python-color: #f4efe4;
+    --csharp-color: #f4efe4;
+    --html-color: #f4efe4;
+    --javascript-color: #f4efe4;
+
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    position: relative;
+    border: 4px solid #1e2a5a;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+
+    /* The slices are arranged to match the board:
+       top = Game History
+       top-right = Java
+       bottom-right = Python
+       bottom = C#
+       bottom-left = HTML/CSS
+       top-left = JavaScript */
+    background: conic-gradient(
+        from -60deg,
+        var(--history-color) 0deg 60deg,
+        var(--java-color) 60deg 120deg,
+        var(--python-color) 120deg 180deg,
+        var(--csharp-color) 180deg 240deg,
+        var(--html-color) 240deg 300deg,
+        var(--javascript-color) 300deg 360deg
+    );
+}
+
+/* Creates the inner circle so the token
+   looks more like a Trivial Pursuit-style piece. */
+.wedge-token-small::after {
+    width: 12px;
+    height: 24px;
+    border-width: 2px;
+}
+
+/* Small version used in player lists or later on the board. */
+.wedge-token-small {
+    width: 54px;
+    height: 54px;
+}
+
+.wedge-token-small::after {
+    inset: 12px;
+    border-width: 2px;
+}
+
+/* Category classes that fill the slices
+   when a wedge has been collected. */
+.wedge-token.has-java {
+    --java-color: #3182e8;
+}
+
+.wedge-token.has-python {
+    --python-color: #f6ca46;
+}
+
+.wedge-token.has-csharp {
+    --csharp-color: #9748dc;
+}
+
+.wedge-token.has-html {
+    --html-color: #f59a45;
+}
+
+.wedge-token.has-history {
+    --history-color: #ec407a;
+}
+
+.wedge-token.has-javascript {
+    --javascript-color: #25ad63;
+}
+
+/* Layout for the wedge progress section. */
+.wedge-progress-visual {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+/* Layout for all players in the sidebar. */
+.player-token-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.player-token-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #f8faff;
+    border: 1px solid #dbe4ff;
+}
+
+.player-token-item.current-player-token {
+    border: 2px solid #4f46e5;
+    background: #eef2ff;
+}
+
+.player-token-text p {
+    margin: 0;
+}
+
+.player-token-name {
+    font-weight: 700;
+    color: #172554;
+}
+
+.player-token-space {
+    color: #5b6478;
+    font-size: 0.95rem;
+}
+

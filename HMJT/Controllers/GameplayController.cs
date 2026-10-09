@@ -7,40 +7,52 @@ using HMJT.Services;
 // Gives this controller access to the game models.
 using HMJT.Models;
 
-// Places GameController in the HMJT.Controllers namespace.
+// Places GameplayController in the HMJT.Controllers namespace.
 namespace HMJT.Controllers;
 
-// Handles requests related to the game page.
-public class GameplayController : Controller{
-    // Service used for starting and completing game turns.
+// Handles requests related to the playable Code Pursuit game.
+public class GameplayController : Controller
+{
+    // Service used for starting and completing question turns.
     private readonly GameTurnService _gameTurnService;
 
     // Stores the current temporary in-memory game state.
     private readonly GameStateService _gameStateService;
 
-    // Service used for game rules such as selecting
-    // the random starting player.
+    // Service used for game rules such as player order
+    // and checking collected wedges.
     private readonly GameMechanicsService _gameMechanicsService;
 
-    // Constructor for GameController.
+    // Service used for the board structure
+    // and calculating legal movement.
+    private readonly BoardService _boardService;
+
+    // Service used for rolling the game dice.
+    private readonly DiceService _diceService;
+
+
+    // Constructor for GameplayController.
     // The required services are provided through dependency injection.
     public GameplayController(
         GameTurnService gameTurnService,
         GameStateService gameStateService,
-        GameMechanicsService gameMechanicsService)
+        GameMechanicsService gameMechanicsService,
+        BoardService boardService,
+        DiceService diceService)
     {
         _gameTurnService = gameTurnService;
         _gameStateService = gameStateService;
         _gameMechanicsService = gameMechanicsService;
+        _boardService = boardService;
+        _diceService = diceService;
     }
 
+
     // Displays the main game page.
-    // If no game has been started yet, the ViewModel
-    // will contain empty/default game data.
+    // If no game has been started yet,
+    // the setup form is shown instead.
     public IActionResult Play()
     {
-        // If no game is currently active,
-        // return an empty ViewModel to the Play view.
         // If no game is currently active,
         // return an empty ViewModel to the Play view.
         if (!_gameStateService.HasActiveGame)
@@ -62,105 +74,164 @@ public class GameplayController : Controller{
         PlayerGameState currentPlayer =
             _gameMechanicsService.GetCurrentPlayer(gameState);
 
-        // Get the current active turn.
-        // This can be null before the player rolls the dice.
+        // Get the current active question turn.
+        // This is null when no question is being answered.
         GameTurnState? turnState =
             _gameStateService.CurrentTurn;
+
+        // Get the current board movement.
+        // This is null before rolling and after moving.
+        BoardMoveState? moveState =
+            _gameStateService.CurrentMove;
+
+        // Check whether the player has rolled the dice
+        // and is currently choosing a destination.
+        bool isWaitingForMove =
+            moveState?.IsWaitingForMove == true;
 
         // Check whether a question is currently active.
         bool hasActiveTurn =
             turnState != null;
 
-        // Check whether the current player has all six wedges
-        // and therefore needs a final category instead of a dice roll.
+        // A center choice is only pending after the player
+        // has actually moved into the center.
+        //
+        // Simply starting the game on space 43 must not
+        // automatically trigger a center question.
+        bool centerChoicePending =
+            _gameStateService.IsCenterChoicePending;
+
+        // Normal center category choice:
+        // the player reached the center but does not yet
+        // have all six category wedges.
+        bool needsCenterCategory =
+            !gameState.IsGameOver &&
+            !hasActiveTurn &&
+            !isWaitingForMove &&
+            centerChoicePending &&
+            !_gameMechanicsService.HasAllWedges(currentPlayer);
+
+        // Final center category choice:
+        // the player reached the center,
+        // has collected all six wedges,
+        // and is allowed to attempt the final question.
         bool needsFinalCategory =
             !gameState.IsGameOver &&
             !hasActiveTurn &&
-            _gameMechanicsService.HasAllWedges(currentPlayer);
+            !isWaitingForMove &&
+            centerChoicePending &&
+            _gameMechanicsService.HasAllWedges(currentPlayer) &&
+            !currentPlayer.MustLeaveCenterBeforeFinalRetry;
 
         // Create a ViewModel containing all data
-        // needed by the Play view.
+        // required by Play.cshtml.
         var viewModel = new GamePlayViewModel
         {
-            // A game session is currently active.
+            // A game session is active.
             HasActiveGame = true,
 
-            // Store the current player's name.
+            // Current player information.
             PlayerName = currentPlayer.PlayerName,
-
-            // Store the current player's number.
             PlayerNumber = currentPlayer.PlayerNumber,
 
-            // Store the dice roll from the active turn.
-            // If no turn exists yet, use 0.
+            // Show the dice roll from movement first.
+            // If no movement exists, use the question turn value.
+            // Otherwise use zero.
             DiceRoll =
-                turnState?.DiceRoll ?? 0,
+                moveState?.DiceRoll
+                ?? turnState?.DiceRoll
+                ?? 0,
 
-            // Store the category from the active turn.
-            // If no turn exists yet, use an empty string.
+            // Current board position.
+            CurrentBoardSpaceId =
+                currentPlayer.BoardSpaceId,
+
+            // Board spaces that can currently be selected.
+            LegalDestinationIds =
+                moveState?.LegalDestinationIds
+                ?? new List<int>(),
+
+            // Shows whether the player must choose
+            // a movement destination.
+            IsWaitingForMove =
+                isWaitingForMove,
+
+            // Current question category.
             Category =
-                turnState?.Category ?? string.Empty,
+                turnState?.Category
+                ?? string.Empty,
 
-            // Store the current question.
-            // If no turn exists yet, create an empty Question object.
+            // Current question.
             Question =
-                turnState?.Question ?? new Question(),
+                turnState?.Question
+                ?? new Question(),
 
-            // Store all wedges collected by the current player.
-            Wedges = currentPlayer.Wedges,
+            // Wedges already collected by the player.
+            Wedges =
+                currentPlayer.Wedges,
 
-            // Calculate and store the wedges
-            // the current player is still missing.
+            // Wedges the player is still missing.
             MissingWedges =
                 _gameMechanicsService.GetMissingWedges(
                     currentPlayer
                 ),
 
-            // Shows whether a question is currently active.
-            HasActiveTurn = hasActiveTurn,
+            // Shows whether a question is active.
+            HasActiveTurn =
+                hasActiveTurn,
 
-            // The player can roll the dice only if:
-            // the game is not over,
-            // no question is currently active,
-            // and this is not a final-category turn.
+            // The player may roll only when:
+            // - the game is not over,
+            // - no question is active,
+            // - no movement choice is active,
+            // - and no center category choice is pending.
             CanRollDice =
                 !gameState.IsGameOver &&
                 !hasActiveTurn &&
-                !needsFinalCategory,
+                !isWaitingForMove &&
+                !centerChoicePending,
+
+            // Shows whether a normal center category
+            // must be selected by the current player.
+            NeedsCenterCategory =
+                needsCenterCategory,
 
             // Shows whether the other players must choose
-            // a category for the current player's final question.
+            // the category for the final question.
             NeedsFinalCategory =
                 needsFinalCategory,
 
-            // If a turn exists, use its IsFinalTurn value.
-            // Otherwise, use needsFinalCategory.
+            // If a question exists, use its final-turn value.
+            // Otherwise use the pending final state.
             IsFinalTurn =
                 turnState?.IsFinalTurn
                 ?? needsFinalCategory,
 
-            // Store whether the game has ended.
+            // Game-over information.
             IsGameOver =
                 gameState.IsGameOver,
 
-            // Store the winner's name if a winner exists.
-            // Otherwise, use an empty string.
             WinnerName =
                 gameState.Winner?.PlayerName
                 ?? string.Empty,
 
-            // Store the temporary feedback message
-            // shown on the Play page.
+            // Temporary feedback shown on the page.
             Message =
-                _gameStateService.Message
+                _gameStateService.Message,
+
+            // Store all players so the view can later
+            // render player pieces and wedge progress.
+            Players =
+                gameState.Players
         };
 
-        // Sends the ViewModel to Views/Game/Play.cshtml.
+        // Sends the ViewModel to Views/Gameplay/Play.cshtml.
         return View(viewModel);
     }
 
-    // Starts a new game using player names and
-    // the selected difficulty from the Play page.
+
+    // Starts a new game using player names
+    // and the selected question difficulty.
     [HttpPost]
     public IActionResult StartGame(
         string player1,
@@ -180,8 +251,8 @@ public class GameplayController : Controller{
             return RedirectToAction(nameof(Play));
         }
 
-        // Players must be entered in order.
-        // Player 3 cannot be used unless Player 2 is also entered, etc.
+        // Players must be entered in numerical order.
+        // Player 3 cannot be used unless Player 2 exists, etc.
         if (!string.IsNullOrWhiteSpace(player3) &&
             string.IsNullOrWhiteSpace(player2))
         {
@@ -219,7 +290,8 @@ public class GameplayController : Controller{
         }
 
         // Create a new game session.
-        var gameState = new GameSessionState();
+        var gameState =
+            new GameSessionState();
 
         // Player 1 is required.
         gameState.Players.Add(
@@ -230,7 +302,8 @@ public class GameplayController : Controller{
             }
         );
 
-        // Add the remaining players only if their names were entered.
+        // Add the remaining players only
+        // when a name has been entered.
         if (!string.IsNullOrWhiteSpace(player2))
         {
             gameState.Players.Add(
@@ -291,14 +364,26 @@ public class GameplayController : Controller{
             .SelectRandomStartingPlayer(gameState);
 
         // Store the new game session.
-        _gameStateService.GameSession = gameState;
+        _gameStateService.GameSession =
+            gameState;
 
-        // Store the selected difficulty.
-        _gameStateService.Difficulty = difficulty;
+        // Store the selected question difficulty.
+        _gameStateService.Difficulty =
+            difficulty;
 
-        // No turn has started yet.
-        // The randomly selected player must press Roll Dice.
-        _gameStateService.CurrentTurn = null;
+        // No question is active at game start.
+        _gameStateService.CurrentTurn =
+            null;
+
+        // No movement is active at game start.
+        _gameStateService.CurrentMove =
+            null;
+
+        // Although every player starts physically
+        // in the center, they have not moved into it yet.
+        // Therefore no center category choice is pending.
+        _gameStateService.IsCenterChoicePending =
+            false;
 
         _gameStateService.Message =
             "Game started. The first player can roll the dice.";
@@ -306,13 +391,25 @@ public class GameplayController : Controller{
         return RedirectToAction(nameof(Play));
     }
 
-    // Starts a normal turn when the current player
-    // presses the Roll Dice button.
+
+    // Rolls the dice and calculates every legal
+    // destination for the current player.
     [HttpPost]
     public IActionResult RollDice()
     {
-        // Make sure a game is currently active.
+        // A game must currently be active.
         if (!_gameStateService.HasActiveGame)
+        {
+            return RedirectToAction(nameof(Play));
+        }
+
+        // Do not allow another roll while:
+        // - a question is active,
+        // - movement is already waiting,
+        // - or a center category choice is pending.
+        if (_gameStateService.CurrentTurn != null ||
+            _gameStateService.CurrentMove != null ||
+            _gameStateService.IsCenterChoicePending)
         {
             return RedirectToAction(nameof(Play));
         }
@@ -324,33 +421,396 @@ public class GameplayController : Controller{
         PlayerGameState player =
             _gameMechanicsService.GetCurrentPlayer(gameState);
 
-        // Players with all six wedges do not roll the dice.
-        // They must receive a final question instead.
+        // Roll the dice.
+        int diceRoll =
+            _diceService.RollDice();
+
+        // Calculate legal destinations.
+        List<BoardSpace> legalDestinations =
+            _boardService.GetLegalDestinations(
+                player.BoardSpaceId,
+                diceRoll
+            );
+
+        // Special final-retry rule:
+        //
+        // After answering the final question incorrectly,
+        // the player normally has to leave the center
+        // before attempting it again.
+        //
+        // However, rolling a 6 while still in the center
+        // allows the player to select the center again.
+        if (diceRoll == 6 &&
+            player.BoardSpaceId == 43 &&
+            player.MustLeaveCenterBeforeFinalRetry)
+        {
+            // BoardService normally excludes the player's
+            // current position from wildcard destinations.
+            // Add center manually for this special rule.
+            BoardSpace center =
+                _boardService.GetSpace(43);
+
+            if (!legalDestinations.Any(
+                    space => space.BoardSpaceId == 43))
+            {
+                legalDestinations.Add(center);
+            }
+        }
+
+        // Store the movement state while the player
+        // chooses where to move.
+        _gameStateService.CurrentMove =
+            new BoardMoveState
+            {
+                DiceRoll =
+                    diceRoll,
+
+                LegalDestinationIds =
+                    legalDestinations
+                        .Select(
+                            space =>
+                                space.BoardSpaceId
+                        )
+                        .ToList(),
+
+                IsWaitingForMove =
+                    true
+            };
+
+        // No question is active until movement is completed.
+        _gameStateService.CurrentTurn =
+            null;
+
+        _gameStateService.Message =
+            $"Rolled {diceRoll}. Choose a space to move to.";
+
+        return RedirectToAction(nameof(Play));
+    }
+
+
+    // Moves the current player to one of the legal
+    // board destinations created by the dice roll.
+    [HttpPost]
+    public IActionResult Move(int boardSpaceId)
+    {
+        // A game must be active and the player
+        // must currently be waiting to move.
+        if (!_gameStateService.HasActiveGame ||
+            _gameStateService.CurrentMove == null ||
+            !_gameStateService.CurrentMove.IsWaitingForMove)
+        {
+            return RedirectToAction(nameof(Play));
+        }
+
+        BoardMoveState moveState =
+            _gameStateService.CurrentMove;
+
+        // The requested destination must be one
+        // of the calculated legal destinations.
+        if (!moveState
+            .LegalDestinationIds
+            .Contains(boardSpaceId))
+        {
+            _gameStateService.Message =
+                "That space is not a legal destination.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
+        GameSessionState gameState =
+            _gameStateService.GameSession!;
+
+        // Get the current player.
+        PlayerGameState player =
+            _gameMechanicsService.GetCurrentPlayer(gameState);
+
+        // Move the player's piece.
+        player.BoardSpaceId =
+            boardSpaceId;
+
+        // Get the board-space information
+        // for the selected destination.
+        BoardSpace landedSpace =
+            _boardService.GetSpace(boardSpaceId);
+
+        // The movement itself is now complete.
+        _gameStateService.CurrentMove =
+            null;
+
+        // No center choice is pending unless
+        // this movement specifically lands in center.
+        _gameStateService.IsCenterChoicePending =
+            false;
+
+
+        // -------------------------------------------------
+        // FINAL-RETRY MOVEMENT
+        // -------------------------------------------------
+
+        // If the player previously failed the final question
+        // and now leaves the center, they have satisfied
+        // the requirement to move away before trying again.
+        if (player.MustLeaveCenterBeforeFinalRetry &&
+            boardSpaceId != 43)
+        {
+            player.MustLeaveCenterBeforeFinalRetry =
+                false;
+        }
+
+        // Special exception:
+        // rolling a 6 while still in center allows
+        // the player to select center again immediately.
+        if (player.MustLeaveCenterBeforeFinalRetry &&
+            boardSpaceId == 43 &&
+            moveState.DiceRoll == 6)
+        {
+            player.MustLeaveCenterBeforeFinalRetry =
+                false;
+        }
+
+
+        // -------------------------------------------------
+        // CENTER
+        // -------------------------------------------------
+
+        // Center has no fixed category.
+        // The next screen must therefore ask
+        // somebody to choose a category.
+        if (landedSpace.SpaceType ==
+            BoardSpaceType.Center)
+        {
+            _gameStateService.CurrentTurn =
+                null;
+
+            // Record that center was reached through movement.
+            _gameStateService.IsCenterChoicePending =
+                true;
+
+            // A player with all six wedges is attempting
+            // the final question.
+            if (_gameMechanicsService
+                .HasAllWedges(player))
+            {
+                _gameStateService.Message =
+                    $"{player.PlayerName} reached the center. " +
+                    "The other players must choose the final category.";
+            }
+            else
+            {
+                // During a normal round, the current player
+                // chooses their own center category.
+                _gameStateService.Message =
+                    $"{player.PlayerName} reached the center " +
+                    "and may choose a category.";
+            }
+
+            return RedirectToAction(nameof(Play));
+        }
+
+
+        // -------------------------------------------------
+        // ROLL AGAIN
+        // -------------------------------------------------
+
+        // Roll Again does not create a question.
+        // The current player keeps the same turn
+        // and may immediately roll again.
+        if (landedSpace.SpaceType ==
+            BoardSpaceType.RollAgain)
+        {
+            _gameStateService.CurrentTurn =
+                null;
+
+            _gameStateService.Message =
+                $"{player.PlayerName} landed on Roll Again " +
+                "and can roll again.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
+
+        // -------------------------------------------------
+        // NORMAL CATEGORY SPACE
+        // -------------------------------------------------
+
+        // A normal colored board space creates a question.
+        // The small triangle/color of the exact space
+        // determines the question category.
+        if (landedSpace.SpaceType ==
+            BoardSpaceType.Category)
+        {
+            _gameStateService.CurrentTurn =
+                _gameTurnService.StartBoardQuestion(
+                    player,
+                    landedSpace.Category!,
+                    _gameStateService.Difficulty
+                );
+
+            _gameStateService.Message =
+                $"{player.PlayerName} landed on " +
+                $"{landedSpace.Category}.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
+
+        // Fallback for an unexpected board-space type.
+        _gameStateService.CurrentTurn =
+            null;
+
+        _gameStateService.Message =
+            "The selected board space could not be handled.";
+
+        return RedirectToAction(nameof(Play));
+    }
+
+
+    // Starts a normal question after the current player
+    // reaches the center and chooses a category.
+    [HttpPost]
+    public IActionResult SelectCenterCategory(
+        string category)
+    {
+        // A game must currently be active.
+        if (!_gameStateService.HasActiveGame)
+        {
+            return RedirectToAction(nameof(Play));
+        }
+
+        GameSessionState gameState =
+            _gameStateService.GameSession!;
+
+        PlayerGameState player =
+            _gameMechanicsService.GetCurrentPlayer(gameState);
+
+        // This action is only valid after the player
+        // has actually moved into center.
+        if (!_gameStateService.IsCenterChoicePending ||
+            player.BoardSpaceId != 43)
+        {
+            return RedirectToAction(nameof(Play));
+        }
+
+        // Players with all six wedges must use
+        // the final-category flow instead.
         if (_gameMechanicsService.HasAllWedges(player))
         {
             return RedirectToAction(nameof(Play));
         }
 
-        // StartTurn rolls the dice, finds the category
-        // and selects the matching question.
+        // Reject category names that do not belong
+        // to the six supported game categories.
+        if (!IsValidCategory(category))
+        {
+            _gameStateService.Message =
+                "Invalid category.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
+        // Create a normal question using
+        // the category selected by the player.
         _gameStateService.CurrentTurn =
+            _gameTurnService.StartBoardQuestion(
+                player,
+                category,
+                _gameStateService.Difficulty
+            );
+
+        // The center choice has now been completed.
+        _gameStateService.IsCenterChoicePending =
+            false;
+
+        _gameStateService.Message =
+            $"{player.PlayerName} chose {category} in the center.";
+
+        return RedirectToAction(nameof(Play));
+    }
+
+
+    // Starts the final question using the category
+    // selected by the other players.
+    [HttpPost]
+    public IActionResult SelectFinalCategory(
+        string category)
+    {
+        // A game must currently be active.
+        if (!_gameStateService.HasActiveGame)
+        {
+            return RedirectToAction(nameof(Play));
+        }
+
+        GameSessionState gameState =
+            _gameStateService.GameSession!;
+
+        PlayerGameState player =
+            _gameMechanicsService.GetCurrentPlayer(gameState);
+
+        // Final category selection is only valid when:
+        // - the player moved into center,
+        // - the player has all six wedges,
+        // - and a retry is currently allowed.
+        if (!_gameStateService.IsCenterChoicePending ||
+            player.BoardSpaceId != 43 ||
+            !_gameMechanicsService.HasAllWedges(player) ||
+            player.MustLeaveCenterBeforeFinalRetry)
+        {
+            return RedirectToAction(nameof(Play));
+        }
+
+        // Reject unknown categories.
+        if (!IsValidCategory(category))
+        {
+            _gameStateService.Message =
+                "Invalid category.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
+        // StartTurn recognizes that a player with
+        // all six wedges needs a final turn.
+        GameTurnState finalTurn =
             _gameTurnService.StartTurn(
                 gameState,
                 _gameStateService.Difficulty
             );
 
-        _gameStateService.Message = string.Empty;
+        // Protect against entering this action
+        // when the generated turn is not actually final.
+        if (!finalTurn.IsFinalTurn)
+        {
+            return RedirectToAction(nameof(Play));
+        }
+
+        // Use the category selected by the other players
+        // to generate the final question.
+        _gameTurnService.SetFinalQuestion(
+            finalTurn,
+            category,
+            _gameStateService.Difficulty
+        );
+
+        _gameStateService.CurrentTurn =
+            finalTurn;
+
+        // Category selection has now been completed.
+        _gameStateService.IsCenterChoicePending =
+            false;
+
+        _gameStateService.Message =
+            string.Empty;
 
         return RedirectToAction(nameof(Play));
     }
 
-    // Processes the answer selected by the current player.
-    // Processes the answer selected by the current player.
+
+    // Processes the answer selected
+    // for the current question.
     [HttpPost]
     public IActionResult SubmitAnswer(
         AnswerOption selectedAnswer)
     {
-        // A game and an active question must exist.
+        // A game and active question must exist.
         if (!_gameStateService.HasActiveGame ||
             _gameStateService.CurrentTurn == null)
         {
@@ -365,7 +825,11 @@ public class GameplayController : Controller{
 
         GameTurnResult result;
 
-        // Final turns use the special win-condition logic.
+
+        // -------------------------------------------------
+        // FINAL QUESTION
+        // -------------------------------------------------
+
         if (turnState.IsFinalTurn)
         {
             result =
@@ -378,17 +842,34 @@ public class GameplayController : Controller{
             if (result.GameAnswer.IsCorrect)
             {
                 _gameStateService.Message =
-                    $"{turnState.Player.PlayerName} answered correctly and won the game!";
+                    $"{turnState.Player.PlayerName} " +
+                    "answered correctly and won the game!";
             }
             else
             {
+                // A wrong final answer does not immediately
+                // allow another final attempt.
+                //
+                // The player must normally leave center
+                // and return later.
+                turnState.Player
+                    .MustLeaveCenterBeforeFinalRetry =
+                    true;
+
                 _gameStateService.Message =
-                    "Wrong final answer. The game continues.";
+                    "Wrong final answer. " +
+                    "The player must leave the center " +
+                    "before trying again.";
             }
         }
+
+
+        // -------------------------------------------------
+        // NORMAL QUESTION
+        // -------------------------------------------------
+
         else
         {
-            // Complete a normal turn.
             result =
                 _gameTurnService.CompleteTurn(
                     gameState,
@@ -404,84 +885,78 @@ public class GameplayController : Controller{
             else if (result.WedgeAwarded)
             {
                 _gameStateService.Message =
-                    $"Correct! {turnState.Player.PlayerName} earned the {turnState.Category} wedge.";
+                    $"Correct! " +
+                    $"{turnState.Player.PlayerName} earned " +
+                    $"the {turnState.Category} wedge.";
             }
             else
             {
                 _gameStateService.Message =
-                    $"Correct! {turnState.Player.PlayerName} already has the {turnState.Category} wedge.";
+                    $"Correct! " +
+                    $"{turnState.Player.PlayerName} already has " +
+                    $"the {turnState.Category} wedge.";
             }
         }
 
         // The completed question is no longer active.
-        _gameStateService.CurrentTurn = null;
+        _gameStateService.CurrentTurn =
+            null;
+
+        // A completed question also ends
+        // any previous center-choice state.
+        _gameStateService.IsCenterChoicePending =
+            false;
 
         return RedirectToAction(nameof(Play));
     }
 
-    // Starts the final question using the category
-    // selected by the other players.
-    [HttpPost]
-    public IActionResult SelectFinalCategory(
-        string category)
-    {
-        if (!_gameStateService.HasActiveGame)
-        {
-            return RedirectToAction(nameof(Play));
-        }
 
-        GameSessionState gameState =
-            _gameStateService.GameSession!;
-
-        // StartTurn recognizes that the current player
-        // has all wedges and creates a final turn.
-        GameTurnState finalTurn =
-            _gameTurnService.StartTurn(
-                gameState,
-                _gameStateService.Difficulty
-            );
-
-        // Protect against using this action
-        // when the player is not actually in the final stage.
-        if (!finalTurn.IsFinalTurn)
-        {
-            return RedirectToAction(nameof(Play));
-        }
-
-        // Use the category chosen by the other players
-        // to select the final question.
-        _gameTurnService.SetFinalQuestion(
-            finalTurn,
-            category,
-            _gameStateService.Difficulty
-        );
-
-        _gameStateService.CurrentTurn = finalTurn;
-        _gameStateService.Message = string.Empty;
-
-        return RedirectToAction(nameof(Play));
-    }
-
-    // Resets the current game and returns to the game setup screen.
+    // Resets the current game
+    // and returns to the setup screen.
     [HttpPost]
     public IActionResult ResetGame()
     {
-        // Remove the current game session.
-        _gameStateService.GameSession = null;
+        // Remove the active game session.
+        _gameStateService.GameSession =
+            null;
 
-        // Remove the current active turn.
-        _gameStateService.CurrentTurn = null;
+        // Remove the active question.
+        _gameStateService.CurrentTurn =
+            null;
 
-        // Reset the selected difficulty to the default value.
-        _gameStateService.Difficulty = Difficulty.Easy;
+        // Remove unfinished board movement.
+        _gameStateService.CurrentMove =
+            null;
 
-        // Remove any temporary feedback message.
-        _gameStateService.Message = string.Empty;
+        // Remove unfinished center-category selection.
+        _gameStateService.IsCenterChoicePending =
+            false;
 
-        // Return to the Play page.
-        // Because there is no active game anymore,
-        // the player setup form will be shown again.
+        // Reset the selected difficulty.
+        _gameStateService.Difficulty =
+            Difficulty.Easy;
+
+        // Remove temporary feedback.
+        _gameStateService.Message =
+            string.Empty;
+
+        // Return to Play.
+        // Because no active game exists,
+        // the setup screen will be displayed.
         return RedirectToAction(nameof(Play));
     }
 
+
+    // Checks whether a category name belongs
+    // to one of the six supported question categories.
+    private static bool IsValidCategory(
+        string category)
+    {
+        return category == "Java" ||
+               category == "JavaScript" ||
+               category == "HTML/CSS" ||
+               category == "Python" ||
+               category == "Game History" ||
+               category == "C#";
+    }
 }

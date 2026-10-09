@@ -201,6 +201,34 @@ public class GameTurnService
         };
     }
 
+    // Starts a question turn after the player
+    // has moved to a colored board space.
+    // The category comes from the board space
+    // instead of from the dice roll.
+    public GameTurnState StartBoardQuestion(
+        PlayerGameState player,
+        string category,
+        Difficulty difficulty)
+    {
+        // Select a random question that matches
+        // the category of the board space and
+        // the difficulty chosen for the game.
+        Question question =
+            _questionService.GetRandomQuestion(
+                category,
+                difficulty
+            );
 
+        // Create a new turn containing the
+        // question from the landed board space.
+        return new GameTurnState
+        {
+            Player = player,
+            DiceRoll = 0,
+            Category = category,
+            Question = question,
+            IsFinalTurn = false
+        };
+    }
 
 }

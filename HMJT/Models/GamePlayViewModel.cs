@@ -1,9 +1,10 @@
 // Places GamePlayViewModel in the HMJT.Models namespace.
 namespace HMJT.Models;
 
-// ViewModel used to send game data from GameController to Play.cshtml.
+// ViewModel used to send game data from GameplayController to Play.cshtml.
 // It combines information from the current player, turn, question,
-// wedge progress, and game state into one object for the user interface.
+// wedge progress, board movement, and game state into one object
+// for the user interface.
 public class GamePlayViewModel
 {
     // Shows whether a game session is currently active.
@@ -51,4 +52,22 @@ public class GamePlayViewModel
 
     // Stores temporary feedback for the players.
     public string Message { get; set; } = string.Empty;
+
+    // Stores the board space where the current player is standing.
+    public int CurrentBoardSpaceId { get; set; }
+
+    // Stores the board spaces that the current player
+    // is allowed to move to after rolling the dice.
+    public List<int> LegalDestinationIds { get; set; } = new();
+
+    // Indicates whether the game is currently waiting
+    // for the player to choose a destination on the board.
+    public bool IsWaitingForMove { get; set; }
+    // Stores all players in the current game.
+    // This is used to show player information
+    // and later to render player tokens on the board.
+    public List<PlayerGameState> Players { get; set; } = new();
+    // Shows whether the current player has reached the center
+    // during a normal turn and may choose the question category.
+    public bool NeedsCenterCategory { get; set; }
 }

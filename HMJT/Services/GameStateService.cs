@@ -33,4 +33,8 @@ public class GameStateService
     // Stores the current board movement while
     // the active player is choosing a destination.
     public BoardMoveState? CurrentMove { get; set; }
+    
+    // Shows whether the current player has just moved
+    // into the center and must choose a category.
+    public bool IsCenterChoicePending { get; set; }
 }
