@@ -694,3 +694,116 @@ h3 {
     font-size: 0.95rem;
 }
 
+/* =========================================
+   Physical player pieces on the board
+   ========================================= */
+
+/* Positions a player piece over the
+   board space where the player is standing. */
+.board-player-piece {
+    position: absolute;
+
+    left: var(--player-x);
+    top: var(--player-y);
+
+    width: 38px;
+    height: 38px;
+
+    transform: translate(-50%, -50%);
+
+    z-index: 20;
+
+    /* The piece is visual only.
+       Board-space buttons underneath
+       must remain clickable. */
+    pointer-events: none;
+}
+
+/* Smaller version of the wedge token
+   used directly on the board. */
+.board-wedge-token {
+    width: 38px;
+    height: 38px;
+
+    border-width: 3px;
+
+    position: relative;
+}
+
+/* The center opening must also become
+   smaller for the physical board piece. */
+.board-wedge-token::after {
+    width: 8px;
+    height: 16px;
+
+    border-width: 1px;
+
+    z-index: 1;
+}
+
+/* Shows the player number in the middle
+   of the physical piece. */
+.board-player-number {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    z-index: 3;
+
+    font-size: 0.65rem;
+    font-weight: 800;
+
+    color: #111827;
+
+    line-height: 1;
+}
+
+/* Makes the current player's piece
+   slightly easier to identify. */
+.current-board-player .board-wedge-token {
+    box-shadow:
+        0 0 0 3px #ffffff,
+        0 0 0 5px #111827,
+        0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+
+/* =========================================
+   Multiple players on the same space
+   ========================================= */
+
+/* Pieces are moved slightly apart when
+   several players occupy one board space. */
+
+.board-player-offset-0 {
+    margin-left: -12px;
+    margin-top: -12px;
+}
+
+.board-player-offset-1 {
+    margin-left: 12px;
+    margin-top: -12px;
+}
+
+.board-player-offset-2 {
+    margin-left: 12px;
+    margin-top: 12px;
+}
+
+.board-player-offset-3 {
+    margin-left: -12px;
+    margin-top: 12px;
+}
+
+.board-player-offset-4 {
+    margin-left: 0;
+    margin-top: -20px;
+}
+
+.board-player-offset-5 {
+    margin-left: 0;
+    margin-top: 20px;
+}

@@ -50,6 +50,67 @@
 
         return string.Join(" ", classes);
     }
+    // Returns the visual position of a board space.
+    // The coordinates match the existing interactive board.
+    public static string GetBoardSpacePosition(int boardSpaceId)
+    {
+        return boardSpaceId switch
+        {
+            1 => "--player-x: 39%; --player-y: 10%;",
+            2 => "--player-x: 50%; --player-y: 8%;",
+            3 => "--player-x: 61%; --player-y: 10%;",
+            4 => "--player-x: 72%; --player-y: 15%;",
+            5 => "--player-x: 82%; --player-y: 22%;",
+            6 => "--player-x: 89%; --player-y: 32%;",
+            7 => "--player-x: 93%; --player-y: 42%;",
+            8 => "--player-x: 95%; --player-y: 50%;",
+            9 => "--player-x: 93%; --player-y: 58%;",
+            10 => "--player-x: 89%; --player-y: 68%;",
+            11 => "--player-x: 82%; --player-y: 78%;",
+            12 => "--player-x: 72%; --player-y: 85%;",
+            13 => "--player-x: 61%; --player-y: 90%;",
+            14 => "--player-x: 50%; --player-y: 92%;",
+            15 => "--player-x: 39%; --player-y: 90%;",
+            16 => "--player-x: 28%; --player-y: 85%;",
+            17 => "--player-x: 18%; --player-y: 78%;",
+            18 => "--player-x: 11%; --player-y: 68%;",
+            19 => "--player-x: 7%; --player-y: 58%;",
+            20 => "--player-x: 5%; --player-y: 50%;",
+            21 => "--player-x: 7%; --player-y: 42%;",
+            22 => "--player-x: 11%; --player-y: 32%;",
+            23 => "--player-x: 18%; --player-y: 22%;",
+            24 => "--player-x: 28%; --player-y: 15%;",
+
+            25 => "--player-x: 50%; --player-y: 22%;",
+            26 => "--player-x: 50%; --player-y: 31%;",
+            27 => "--player-x: 50%; --player-y: 40%;",
+
+            28 => "--player-x: 76%; --player-y: 35%;",
+            29 => "--player-x: 68%; --player-y: 39.5%;",
+            30 => "--player-x: 60%; --player-y: 44%;",
+
+            31 => "--player-x: 76%; --player-y: 65%;",
+            32 => "--player-x: 68%; --player-y: 60.5%;",
+            33 => "--player-x: 60%; --player-y: 56%;",
+
+            34 => "--player-x: 50%; --player-y: 78%;",
+            35 => "--player-x: 50%; --player-y: 69%;",
+            36 => "--player-x: 50%; --player-y: 60%;",
+
+            37 => "--player-x: 24%; --player-y: 65%;",
+            38 => "--player-x: 32%; --player-y: 60.5%;",
+            39 => "--player-x: 40%; --player-y: 56%;",
+
+            40 => "--player-x: 24%; --player-y: 35%;",
+            41 => "--player-x: 32%; --player-y: 39.5%;",
+            42 => "--player-x: 40%; --player-y: 44%;",
+
+            // Center
+            43 => "--player-x: 50%; --player-y: 50%;",
+
+            _ => "--player-x: 50%; --player-y: 50%;"
+        };
+    }
 }
 
 @{
@@ -919,6 +980,53 @@ else
                                 disabled="@(IsLegalDestination(43) ? null : "disabled")"
                                 aria-label="Move to the center of the board">
                         </button>
+
+                        <!-- =====================================
+                            Player pieces
+                            ===================================== -->
+
+                        <!-- Draw each player's physical piece
+                            on the board space stored in BoardSpaceId. -->
+                        @foreach (PlayerGameState player in Model.Players)
+                        {
+                            // Find all players currently standing
+                            // on the same board space.
+                            List<PlayerGameState> playersOnSameSpace =
+                                Model.Players
+                                    .Where(p => p.BoardSpaceId == player.BoardSpaceId)
+                                    .OrderBy(p => p.PlayerNumber)
+                                    .ToList();
+
+                            // Find this player's position inside that group.
+                            // This is used to slightly separate pieces
+                            // when multiple players share the same space.
+                            int playerOffsetIndex =
+                                playersOnSameSpace.FindIndex(
+                                    p => p.PlayerNumber == player.PlayerNumber
+                                );
+
+                            <div class="board-player-piece
+                                        board-player-offset-@playerOffsetIndex
+                                        @(player.PlayerNumber == Model.PlayerNumber
+                                            ? "current-board-player"
+                                            : "")"
+                                style="@GetBoardSpacePosition(player.BoardSpaceId)"
+                                aria-label="@player.PlayerName, player @player.PlayerNumber">
+
+                                <!-- Uses the same wedge system as
+                                    the sidebar player token. -->
+                                <div class="@GetWedgeTokenClass(player.Wedges) board-wedge-token">
+
+                                    <!-- Player number remains visible
+                                        even when wedges are collected. -->
+                                    <span class="board-player-number">
+                                        @player.PlayerNumber
+                                    </span>
+
+                                </div>
+
+                            </div>
+                        }
 
                     </div>
 
