@@ -37,4 +37,8 @@ public class GameStateService
     // Shows whether the current player has just moved
     // into the center and must choose a category.
     public bool IsCenterChoicePending { get; set; }
+    
+    // Shows whether the players are currently
+    // on the starter confirmation screen.
+    public bool IsAwaitingStartConfirmation { get; set; }
 }

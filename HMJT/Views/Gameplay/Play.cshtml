@@ -120,119 +120,365 @@
 <!-- Show the setup form if no game is currently active. -->
 @if (!Model.HasActiveGame)
 {
-    <h1>Game</h1>
+    <!-- =====================================
+         Game setup
+         ===================================== -->
 
-    <h2>Start New Game</h2>
+    <section class="game-setup-page">
 
-    <!-- Show validation or setup messages before the game starts. -->
-    @if (!string.IsNullOrWhiteSpace(Model.Message))
-    {
-        <div class="alert alert-warning">
-            @Model.Message
-        </div>
-    }
+        <div class="setup-page-heading">
+            <p class="setup-eyebrow">
+                LOCAL HOT-SEAT GAME
+            </p>
 
-    <!-- Sends player names and difficulty to StartGame. -->
-    <form asp-controller="Gameplay"
-          asp-action="StartGame"
-          method="post">
+            <h1>Set up a new game</h1>
 
-        <div class="mb-3">
-            <label for="player1" class="form-label">
-                Player 1
-            </label>
-
-            <input type="text"
-                   id="player1"
-                   name="player1"
-                   class="form-control" />
+            <p class="setup-intro">
+                Enter 2–6 player names, choose one difficulty deck,
+                then let the app randomly choose who starts.
+            </p>
         </div>
 
-        <div class="mb-3">
-            <label for="player2" class="form-label">
-                Player 2
-            </label>
 
-            <input type="text"
-                   id="player2"
-                   name="player2"
-                   class="form-control" />
+        <div class="setup-page-layout">
+
+            <!-- =====================================
+                 Main setup form
+                 ===================================== -->
+            <div class="setup-main-card">
+
+                <form asp-controller="Gameplay"
+                      asp-action="StartGame"
+                      method="post">
+
+                    <!-- Show validation or setup messages. -->
+                    @if (!string.IsNullOrWhiteSpace(Model.Message))
+                    {
+                        <div class="alert alert-warning">
+                            @Model.Message
+                        </div>
+                    }
+
+
+                    <!-- =====================================
+                         Player names
+                         ===================================== -->
+
+                    <h2>1. Players</h2>
+
+                    <div class="setup-player-grid">
+
+                        <div class="setup-player-field">
+                            <label for="player1">
+                                Player 1
+                            </label>
+
+                            <input type="text"
+                                   id="player1"
+                                   name="player1"
+                                   class="form-control"
+                                   placeholder="Alex" />
+                        </div>
+
+
+                        <div class="setup-player-field">
+                            <label for="player2">
+                                Player 2
+                            </label>
+
+                            <input type="text"
+                                   id="player2"
+                                   name="player2"
+                                   class="form-control"
+                                   placeholder="Emma" />
+                        </div>
+
+
+                        <div class="setup-player-field">
+                            <label for="player3">
+                                Player 3
+                                <span>(optional)</span>
+                            </label>
+
+                            <input type="text"
+                                   id="player3"
+                                   name="player3"
+                                   class="form-control"
+                                   placeholder="Optional" />
+                        </div>
+
+
+                        <div class="setup-player-field">
+                            <label for="player4">
+                                Player 4
+                                <span>(optional)</span>
+                            </label>
+
+                            <input type="text"
+                                   id="player4"
+                                   name="player4"
+                                   class="form-control"
+                                   placeholder="Optional" />
+                        </div>
+
+
+                        <div class="setup-player-field">
+                            <label for="player5">
+                                Player 5
+                                <span>(optional)</span>
+                            </label>
+
+                            <input type="text"
+                                   id="player5"
+                                   name="player5"
+                                   class="form-control"
+                                   placeholder="Optional" />
+                        </div>
+
+
+                        <div class="setup-player-field">
+                            <label for="player6">
+                                Player 6
+                                <span>(optional)</span>
+                            </label>
+
+                            <input type="text"
+                                   id="player6"
+                                   name="player6"
+                                   class="form-control"
+                                   placeholder="Optional" />
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         Difficulty
+                         ===================================== -->
+
+                    <h2 class="setup-difficulty-heading">
+                        2. Question difficulty
+                    </h2>
+
+                    <div class="difficulty-card-grid">
+
+                        <!-- Easy -->
+                        <label class="difficulty-card difficulty-easy">
+
+                            <input type="radio"
+                                   name="difficulty"
+                                   value="@Difficulty.Easy"
+                                   checked />
+
+                            <span class="difficulty-radio"></span>
+
+                            <span class="difficulty-icon">
+                                &lt;/&gt;
+                            </span>
+
+                            <strong>Easy</strong>
+
+                            <span class="difficulty-description">
+                                Core concepts and straightforward questions.
+                            </span>
+
+                        </label>
+
+
+                        <!-- Medium -->
+                        <label class="difficulty-card difficulty-medium">
+
+                            <input type="radio"
+                                   name="difficulty"
+                                   value="@Difficulty.Medium" />
+
+                            <span class="difficulty-radio"></span>
+
+                            <span class="difficulty-icon">
+                                💡
+                            </span>
+
+                            <strong>Medium</strong>
+
+                            <span class="difficulty-description">
+                                More reasoning and short code examples.
+                            </span>
+
+                        </label>
+
+
+                        <!-- Hard -->
+                        <label class="difficulty-card difficulty-hard">
+
+                            <input type="radio"
+                                   name="difficulty"
+                                   value="@Difficulty.Hard" />
+
+                            <span class="difficulty-radio"></span>
+
+                            <span class="difficulty-icon">
+                                ★
+                            </span>
+
+                            <strong>Hard</strong>
+
+                            <span class="difficulty-description">
+                                Trickier language details and deeper concepts.
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- The existing StartGame action is still used.
+                         The intermediate starter screen comes in step 2. -->
+                    <button type="submit"
+                            class="setup-start-button">
+
+                        Choose starting player
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- =====================================
+                 Setup information panel
+                 ===================================== -->
+            <aside class="setup-info-card">
+
+                <div class="setup-deck-preview"
+                     aria-hidden="true">
+
+                    <div class="setup-deck-card deck-easy">
+                        <span>&lt;/&gt;</span>
+                        <strong>EASY</strong>
+                    </div>
+
+                    <div class="setup-deck-card deck-medium">
+                        <span>💡</span>
+                        <strong>MEDIUM</strong>
+                    </div>
+
+                    <div class="setup-deck-card deck-hard">
+                        <span>★</span>
+                        <strong>HARD</strong>
+                    </div>
+
+                </div>
+
+
+                <h3>One deck per game</h3>
+
+                <p>
+                    The difficulty stays the same for all six
+                    categories until the game ends.
+                </p>
+
+
+                <div class="setup-info-stat">
+                    <strong>2–6</strong>
+                    <span>local players</span>
+                </div>
+
+                <div class="setup-info-stat">
+                    <strong>6</strong>
+                    <span>categories to collect</span>
+                </div>
+
+                <div class="setup-info-stat">
+                    <strong>1 PC</strong>
+                    <span>pass the screen between turns</span>
+                </div>
+
+            </aside>
+
         </div>
 
-        <div class="mb-3">
-            <label for="player3" class="form-label">
-                Player 3
-            </label>
+    </section>
 
-            <input type="text"
-                   id="player3"
-                   name="player3"
-                   class="form-control" />
+}
+else if (Model.IsAwaitingStartConfirmation)
+{
+    <!-- =====================================
+         Starter selected screen
+         ===================================== -->
+
+    <section class="starter-selected-page">
+
+        <div class="starter-selected-card">
+
+            <p class="starter-eyebrow">
+                STARTER SELECTED
+            </p>
+
+            <div class="starter-dice"
+                 aria-hidden="true">
+                🎲
+            </div>
+
+            <h1>
+                @Model.PlayerName starts!
+            </h1>
+
+            <p class="starter-description">
+                The starter was chosen randomly.
+                Difficulty:
+                <strong>@Model.SelectedDifficulty</strong>.
+            </p>
+
+            <!-- Shows all players in the game.
+                 The randomly selected starter is highlighted. -->
+            <div class="starter-player-list">
+
+                @foreach (PlayerGameState player in Model.Players)
+                {
+                    <span class="starter-player-chip
+                                 @(player.PlayerNumber == Model.PlayerNumber
+                                     ? "starter-player-chip-selected"
+                                     : "")">
+
+                        @player.PlayerName
+
+                    </span>
+                }
+
+            </div>
+
+            <!-- Continue to the actual game board. -->
+            <form asp-controller="Gameplay"
+                  asp-action="ConfirmStartGame"
+                  method="post">
+
+                <button type="submit"
+                        class="starter-start-button">
+
+                    Start game
+
+                </button>
+
+            </form>
+
+            <!-- Return to the setup screen. -->
+            <form asp-controller="Gameplay"
+                  asp-action="ChangeSetup"
+                  method="post">
+
+                <button type="submit"
+                        class="starter-change-button">
+
+                    Change setup
+
+                </button>
+
+            </form>
+
         </div>
 
-        <div class="mb-3">
-            <label for="player4" class="form-label">
-                Player 4
-            </label>
-
-            <input type="text"
-                   id="player4"
-                   name="player4"
-                   class="form-control" />
-        </div>
-
-        <div class="mb-3">
-            <label for="player5" class="form-label">
-                Player 5
-            </label>
-
-            <input type="text"
-                   id="player5"
-                   name="player5"
-                   class="form-control" />
-        </div>
-
-        <div class="mb-3">
-            <label for="player6" class="form-label">
-                Player 6
-            </label>
-
-            <input type="text"
-                   id="player6"
-                   name="player6"
-                   class="form-control" />
-        </div>
-
-        <div class="mb-3">
-            <label for="difficulty" class="form-label">
-                Difficulty
-            </label>
-
-            <select id="difficulty"
-                    name="difficulty"
-                    class="form-select">
-
-                <option value="@Difficulty.Easy">
-                    Easy
-                </option>
-
-                <option value="@Difficulty.Medium">
-                    Medium
-                </option>
-
-                <option value="@Difficulty.Hard">
-                    Hard
-                </option>
-
-            </select>
-        </div>
-
-        <button type="submit"
-                class="btn btn-primary">
-            Start Game
-        </button>
-
-    </form>
+    </section>
 }
 else
 {

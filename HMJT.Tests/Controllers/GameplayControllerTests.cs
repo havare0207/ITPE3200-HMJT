@@ -479,6 +479,7 @@ public class GameplayControllerTests
 
     // Tests that players must be entered in order.
     // Player 3 cannot be used if Player 2 is empty.
+    // There must be at least two players to start a game.
     [Fact]
     public void StartGame_RejectsSkippedPlayerNumber()
     {
@@ -490,29 +491,24 @@ public class GameplayControllerTests
             CreateController(gameStateService);
 
         // Act
-        IActionResult result =
-            controller.StartGame(
-                "Alice",
-                "",
-                "Charlie",
-                "",
-                "",
-                "",
-                Difficulty.Easy
-            );
+        controller.StartGame(
+            "Alice",
+            "Bob",
+            "",
+            "Diana",
+            "",
+            "",
+            Difficulty.Easy
+        );
 
         // Assert
-        Assert.Null(
-            gameStateService.GameSession
+        Assert.False(
+            gameStateService.HasActiveGame
         );
 
         Assert.Equal(
-            "Player 2 must be entered before Player 3.",
+            "Player 3 must be entered before Player 4.",
             gameStateService.Message
-        );
-
-        Assert.IsType<RedirectToActionResult>(
-            result
         );
     }
 
@@ -759,6 +755,38 @@ public class GameplayControllerTests
         Assert.Equal(
             0,
             gameState.CurrentPlayerIndex
+        );
+    }
+
+    [Fact]
+    public void StartGame_RequiresAtLeastTwoPlayers()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService();
+
+        var controller =
+            CreateController(gameStateService);
+
+        // Act
+        controller.StartGame(
+            "Alice",
+            "",
+            "",
+            "",
+            "",
+            "",
+            Difficulty.Easy
+        );
+
+        // Assert
+        Assert.False(
+            gameStateService.HasActiveGame
+        );
+
+        Assert.Equal(
+            "At least two players are required.",
+            gameStateService.Message
         );
     }
 

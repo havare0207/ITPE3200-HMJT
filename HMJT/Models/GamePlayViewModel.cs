@@ -63,11 +63,21 @@ public class GamePlayViewModel
     // Indicates whether the game is currently waiting
     // for the player to choose a destination on the board.
     public bool IsWaitingForMove { get; set; }
+    
     // Stores all players in the current game.
     // This is used to show player information
     // and later to render player tokens on the board.
     public List<PlayerGameState> Players { get; set; } = new();
+    
     // Shows whether the current player has reached the center
     // during a normal turn and may choose the question category.
     public bool NeedsCenterCategory { get; set; }
+    
+    // Shows whether the game setup is complete
+    // but gameplay has not started yet.
+    public bool IsAwaitingStartConfirmation { get; set; }
+
+    // Stores the selected question difficulty
+    // so it can be shown on the starter screen.
+    public Difficulty SelectedDifficulty { get; set; }
 }

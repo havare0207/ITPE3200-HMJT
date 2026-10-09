@@ -222,7 +222,16 @@ public class GameplayController : Controller
             // Store all players so the view can later
             // render player pieces and wedge progress.
             Players =
-                gameState.Players
+                gameState.Players,
+            
+            // Shows the intermediate starter screen
+            // before the board becomes active.
+            IsAwaitingStartConfirmation =
+                _gameStateService.IsAwaitingStartConfirmation,
+
+            // Store the selected game difficulty.
+            SelectedDifficulty =
+                _gameStateService.Difficulty,
         };
 
         // Sends the ViewModel to Views/Gameplay/Play.cshtml.
@@ -247,6 +256,16 @@ public class GameplayController : Controller
         {
             _gameStateService.Message =
                 "Player 1 must be entered.";
+
+            return RedirectToAction(nameof(Play));
+        }
+
+        // At least two players are required
+        // for a local multiplayer game.
+        if (string.IsNullOrWhiteSpace(player2))
+        {
+            _gameStateService.Message =
+                "At least two players are required.";
 
             return RedirectToAction(nameof(Play));
         }
@@ -385,8 +404,76 @@ public class GameplayController : Controller
         _gameStateService.IsCenterChoicePending =
             false;
 
+        // The setup is finished, but gameplay does
+        // not begin until the players confirm the starter.
+        _gameStateService.IsAwaitingStartConfirmation =
+            true;
+
+        // No gameplay message is needed on
+        // the starter confirmation screen.
         _gameStateService.Message =
-            "Game started. The first player can roll the dice.";
+            string.Empty;
+
+        return RedirectToAction(nameof(Play));
+    }
+
+    // Confirms the randomly selected starting player
+    // and continues from the starter screen
+    // to the actual game board.
+    [HttpPost]
+    public IActionResult ConfirmStartGame()
+    {
+        // A prepared game must exist.
+        if (!_gameStateService.HasActiveGame)
+        {
+            return RedirectToAction(nameof(Play));
+        }
+
+        // The starter screen has now been confirmed.
+        _gameStateService.IsAwaitingStartConfirmation =
+            false;
+
+        GameSessionState gameState =
+            _gameStateService.GameSession!;
+
+        // Get the randomly selected starting player.
+        PlayerGameState startingPlayer =
+            _gameMechanicsService.GetCurrentPlayer(gameState);
+
+        _gameStateService.Message =
+            $"{startingPlayer.PlayerName} starts the game.";
+
+        return RedirectToAction(nameof(Play));
+    }
+
+    // Cancels the prepared game and returns
+    // to the player and difficulty setup screen.
+    [HttpPost]
+    public IActionResult ChangeSetup()
+    {
+        // Remove the prepared game session.
+        _gameStateService.GameSession =
+            null;
+
+        // Remove any question state.
+        _gameStateService.CurrentTurn =
+            null;
+
+        // Remove any movement state.
+        _gameStateService.CurrentMove =
+            null;
+
+        // Remove any pending center choice.
+        _gameStateService.IsCenterChoicePending =
+            false;
+
+        // Leave the starter confirmation screen.
+        _gameStateService.IsAwaitingStartConfirmation =
+            false;
+
+        // Remove temporary messages.
+        _gameStateService.Message =
+            string.Empty;
 
         return RedirectToAction(nameof(Play));
     }
@@ -404,12 +491,14 @@ public class GameplayController : Controller
         }
 
         // Do not allow another roll while:
+        // - the starter screen is still active,
         // - a question is active,
         // - movement is already waiting,
         // - or a center category choice is pending.
         if (_gameStateService.CurrentTurn != null ||
             _gameStateService.CurrentMove != null ||
-            _gameStateService.IsCenterChoicePending)
+            _gameStateService.IsCenterChoicePending ||
+            _gameStateService.IsAwaitingStartConfirmation)
         {
             return RedirectToAction(nameof(Play));
         }
@@ -932,6 +1021,11 @@ public class GameplayController : Controller
         _gameStateService.IsCenterChoicePending =
             false;
 
+        // Remove the starter confirmation state.
+        _gameStateService.IsAwaitingStartConfirmation =
+            false;
+
+
         // Reset the selected difficulty.
         _gameStateService.Difficulty =
             Difficulty.Easy;
@@ -959,4 +1053,6 @@ public class GameplayController : Controller
                category == "Game History" ||
                category == "C#";
     }
+
+
 }
