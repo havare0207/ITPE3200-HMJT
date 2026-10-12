@@ -17,6 +17,8 @@ builder.Services.AddScoped<DiceService>();
 builder.Services.AddScoped<GameMechanicsService>();
 builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<GameTurnService>();
+builder.Services.AddScoped<BoardService>();
+
 builder.Services.AddSingleton<GameStateService>();
 
 

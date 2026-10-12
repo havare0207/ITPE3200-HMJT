@@ -69,23 +69,29 @@ public class QuestionController : Controller
     // Saves a new question to the database.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    
     public async Task<IActionResult> Create(Question question)
     {
+        // Find the game that the question belongs to.
+        var game = await _gameDbcontext.Games.FindAsync(question.GameId);
+
+        // If the game does not exist, return "Not Found".
+        if (game == null)
+        {
+            return NotFound();
+        }
+
         // Check if the question passes the validation rules.
         if (!ModelState.IsValid)
         {
-            // Reload the game so the view still knows which game
-            // the question belongs to.
-            var game = await _gameDbcontext.Games.FindAsync(question.GameId);
-
-            if (game == null)
-            {
-                return NotFound();
-            }
-
+            // Pass the game back to the view so the page
+            // still knows which game the question belongs to.
             ViewBag.Game = game;
 
-            _logger.LogWarning("Creating a question failed validation");
+            _logger.LogWarning(
+                "Creating a question failed validation"
+            );
+
             return View(question);
         }
 
@@ -98,13 +104,15 @@ public class QuestionController : Controller
         _logger.LogInformation(
             "Question {QuestionId} was created for Game {GameId}",
             question.QuestionId,
-            question.GameId);
+            question.GameId
+        );
 
         // Go back to the questions for this game.
         return RedirectToAction(
             "Questions",
             "Game",
-            new { id = question.GameId });
+            new { id = question.GameId }
+        );
     }
 
     // Shows the form for editing a question.

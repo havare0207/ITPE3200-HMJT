@@ -1,42 +1,369 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome to CodePursuit</h1>
-    <h2>The rules of CodePursuit are simple:</h2>
-    
-        <p>You choose the name for up to 6 players. </p>
-        <p>Then one of you are choosen randomly as the 
-            first player to role the dice. </p>
-        <p>When you roll a die, you get one of the categories 
-            decided by your roll:
-            1. Java
-            2. JavaScript
-            3. HTML/CSS
-            4. Python
-            5. Game History
-            6. C#
-        </p>
-        <p>Then you will be asked a question from the 
-            category you rolled. 
-            If you answer correctly, 
-            you get a wedge. If you answer incorrectly, 
-            you do not get a wedge.</p>
-        <p>When a player gets all 6 wedges, 
-            then on his/her/their turn, 
-            the other players choose a category 
-            for them to answer.</p>
-        <p>If the player answers correctly,
-            then they win the game.</p>
-        <p>If answered incorrectly, then the game continues  
-            until one of the other players gets all 6 wedges 
-            and answers correctly to win the game, 
-            or a player with all 6 wedges answers correctly.
+<!-- =====================================
+     Home hero
+     ===================================== -->
+
+<section class="home-hero">
+
+    <div class="home-hero-content">
+
+        <p class="home-eyebrow">
+            CODING • TRIVIA • STRATEGY
         </p>
 
-        <img src="~/images/home/categories.png"
-         alt="Coding categories"
-         class="home-category-image" />
-        
-</div>
+        <h1>
+            Learn. Compete.
+            <span>Conquer the Code.</span>
+        </h1>
+
+        <p class="home-hero-text">
+            Code Pursuit is a local multiplayer trivia game where
+            2–6 players move around the board, answer programming
+            questions and collect all six category wedges.
+        </p>
+
+        <div class="home-hero-actions">
+
+            <a asp-controller="Gameplay"
+               asp-action="Play"
+               class="home-primary-button">
+
+                Start a Game
+
+            </a>
+
+            <a href="#how-to-play"
+               class="home-secondary-button">
+
+                How to Play
+
+            </a>
+
+        </div>
+
+        <div class="home-hero-stats">
+
+            <div>
+                <strong>2–6</strong>
+                <span>Players</span>
+            </div>
+
+            <div>
+                <strong>6</strong>
+                <span>Categories</span>
+            </div>
+
+            <div>
+                <strong>3</strong>
+                <span>Difficulties</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Category artwork already stored
+         in wwwroot/images/home. -->
+    <div class="home-hero-visual">
+
+        <div class="home-category-image-card">
+
+            <img src="~/images/home/categories.png"
+                 alt="The six Code Pursuit programming categories"
+                 class="home-category-image" />
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     Category overview
+     ===================================== -->
+
+<section class="home-section">
+
+    <div class="home-section-heading">
+
+        <p class="home-eyebrow">
+            SIX CATEGORIES
+        </p>
+
+        <h2>
+            Collect every wedge
+        </h2>
+
+        <p>
+            Answer questions from all six categories to complete
+            your player piece and unlock your chance to win.
+        </p>
+
+    </div>
+
+
+    <div class="home-category-grid">
+
+        <article class="home-category-card category-java">
+
+            <div class="home-category-symbol">
+                ☕
+            </div>
+
+            <h3>Java</h3>
+
+            <p>
+                Syntax, classes, objects and core Java concepts.
+            </p>
+
+        </article>
+
+
+        <article class="home-category-card category-javascript">
+
+            <div class="home-category-symbol">
+                ⚡
+            </div>
+
+            <h3>JavaScript</h3>
+
+            <p>
+                Web programming, logic, functions and scripting.
+            </p>
+
+        </article>
+
+
+        <article class="home-category-card category-html">
+
+            <div class="home-category-symbol">
+                🌐
+            </div>
+
+            <h3>HTML/CSS</h3>
+
+            <p>
+                Web structure, styling and frontend fundamentals.
+            </p>
+
+        </article>
+
+
+        <article class="home-category-card category-python">
+
+            <div class="home-category-symbol">
+                🐍
+            </div>
+
+            <h3>Python</h3>
+
+            <p>
+                Python syntax, data structures and programming logic.
+            </p>
+
+        </article>
+
+
+        <article class="home-category-card category-history">
+
+            <div class="home-category-symbol">
+                🎮
+            </div>
+
+            <h3>Game History</h3>
+
+            <p>
+                Games, developers, consoles and gaming history.
+            </p>
+
+        </article>
+
+
+        <article class="home-category-card category-csharp">
+
+            <div class="home-category-symbol">
+                #️⃣
+            </div>
+
+            <h3>C#</h3>
+
+            <p>
+                C# syntax, .NET concepts and object-oriented programming.
+            </p>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     How to play
+     ===================================== -->
+
+<section id="how-to-play"
+         class="home-section home-rules-section">
+
+    <div class="home-section-heading">
+
+        <p class="home-eyebrow">
+            HOW TO PLAY
+        </p>
+
+        <h2>
+            Simple rules. Six wedges. One winner.
+        </h2>
+
+    </div>
+
+
+    <div class="home-rule-grid">
+
+        <!-- Step 1 -->
+        <article class="home-rule-card">
+
+            <span class="home-rule-number">
+                1
+            </span>
+
+            <h3>Set up the game</h3>
+
+            <p>
+                Enter names for 2–6 local players and choose
+                Easy, Medium or Hard question difficulty.
+            </p>
+
+        </article>
+
+
+        <!-- Step 2 -->
+        <article class="home-rule-card">
+
+            <span class="home-rule-number">
+                2
+            </span>
+
+            <h3>Choose who starts</h3>
+
+            <p>
+                Code Pursuit randomly selects the first player.
+                Players then take turns in order.
+            </p>
+
+        </article>
+
+
+        <!-- Step 3 -->
+        <article class="home-rule-card">
+
+            <span class="home-rule-number">
+                3
+            </span>
+
+            <h3>Roll and move</h3>
+
+            <p>
+                Roll the die and move the exact number of spaces.
+                A six lets you choose any available destination.
+            </p>
+
+        </article>
+
+
+        <!-- Step 4 -->
+        <article class="home-rule-card">
+
+            <span class="home-rule-number">
+                4
+            </span>
+
+            <h3>Answer a question</h3>
+
+            <p>
+                The colored field you land on determines the
+                question category. Answer correctly to collect
+                its wedge if you do not already own it.
+            </p>
+
+        </article>
+
+
+        <!-- Step 5 -->
+        <article class="home-rule-card">
+
+            <span class="home-rule-number">
+                5
+            </span>
+
+            <h3>Use special spaces</h3>
+
+            <p>
+                Landing on Roll Again gives you another roll.
+                Reaching the center during a normal round lets
+                you choose your question category.
+            </p>
+
+        </article>
+
+
+        <!-- Step 6 -->
+        <article class="home-rule-card">
+
+            <span class="home-rule-number">
+                6
+            </span>
+
+            <h3>Win the game</h3>
+
+            <p>
+                Collect all six wedges and return to the center.
+                The other players choose your final category.
+                Answer correctly to win Code Pursuit.
+            </p>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     Final call to action
+     ===================================== -->
+
+<section class="home-play-banner">
+
+    <div>
+
+        <p class="home-eyebrow home-eyebrow-light">
+            READY TO PLAY?
+        </p>
+
+        <h2>
+            Begin your Code Pursuit
+        </h2>
+
+        <p>
+            Gather your players, choose a difficulty and see
+            who can collect all six wedges first.
+        </p>
+
+    </div>
+
+
+    <a asp-controller="Gameplay"
+       asp-action="Play"
+       class="home-banner-button">
+
+        Start Game
+
+    </a>
+
+</section>

@@ -1,0 +1,10 @@
+[33m7523836[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mperson3-game-mechanics-v2[m[33m, [m[1;31morigin/person3-game-mechanics-v2[m[33m)[m Add center category and final turn movement logic
+[33m633a63f[m Add board structure and movement logic
+[33m00b607c[m Merge pull request #17 from havare0207/feature/game-question-crud
+[33m4e0233a[m Added test to the changes of Question controller
+[33mc5e364b[m Connected questions to games and updated CRUD
+[33m2b8e84f[m Merge pull request #15 from havare0207/person3-game-mechanics
+[33m783358b[m[33m ([m[1;31morigin/person3-game-mechanics[m[33m)[m Update home page with game rules and category image
+[33ma44388d[m Merge pull request #14 from havare0207/feature/frontend-integration
+[33mb9ffbd8[m[33m ([m[1;31morigin/feature/frontend-integration[m[33m)[m Add Games to navigation
+[33mff52a28[m Merge pull request #13 from havare0207/feature/frontend-integration
