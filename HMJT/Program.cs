@@ -24,6 +24,8 @@ builder.Services.AddSingleton<GameStateService>();
 
 var app = builder.Build();
 
+DBInit.Seed(app); // Not under if (!app.Environment.IsDevelopment()) so examiner can see the questions however they launch the application
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

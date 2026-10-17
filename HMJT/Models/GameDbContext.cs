@@ -9,4 +9,5 @@ public class GameDbContext : DbContext
 	}
 	public DbSet<Game> Games { get; set; }
     public DbSet<Question> Questions { get; set; }
+	public DbSet<PresetQuestion> PresetQuestion { get; set; }
 }

@@ -39,6 +39,47 @@ namespace CodePursuit.Migrations
                     b.ToTable("Games");
                 });
 
+            modelBuilder.Entity("HMJT.Models.PresetQuestion", b =>
+                {
+                    b.Property<int>("PresetQuestionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AnswerA")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AnswerB")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AnswerC")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AnswerD")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CorrectAnswer")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Difficulty")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("QuestionText")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("PresetQuestionId");
+
+                    b.ToTable("PresetQuestion");
+                });
+
             modelBuilder.Entity("HMJT.Models.Question", b =>
                 {
                     b.Property<int>("QuestionId")
