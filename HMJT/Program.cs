@@ -1,4 +1,4 @@
-using HMJT.Models;
+using HMJT.DAL;
 using Microsoft.EntityFrameworkCore;
 using HMJT.Services;
 
@@ -18,6 +18,9 @@ builder.Services.AddScoped<GameMechanicsService>();
 builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<GameTurnService>();
 builder.Services.AddScoped<BoardService>();
+
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 
 builder.Services.AddSingleton<GameStateService>();
 

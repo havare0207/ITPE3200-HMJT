@@ -1,0 +1,22 @@
+[
+  {
+    "category": "Java",
+    "questionText": "Which keyword is used to create a class in Java?",
+    "difficulty": "Easy",
+    "answerA": "class",
+    "answerB": "define",
+    "answerC": "struct",
+    "answerD": "new",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "Java",
+    "questionText": "Which data type is used to store true or false values in Java?",
+    "difficulty": "Hard",
+    "answerA": "int",
+    "answerB": "String",
+    "answerC": "boolean",
+    "answerD": "char",
+    "correctAnswer": "C"
+  }
+]

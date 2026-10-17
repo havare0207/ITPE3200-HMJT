@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using HMJT.Models;
 
-namespace HMJT.Models;
+namespace HMJT.DAL;
 
 public class GameDbContext : DbContext
 {

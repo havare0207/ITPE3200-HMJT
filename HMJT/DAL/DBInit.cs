@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-namespace HMJT.Models;
+using HMJT.Models;
+
+namespace HMJT.DAL;
 
 public static class DBInit // Demo 4 - Db Seeding
 {
