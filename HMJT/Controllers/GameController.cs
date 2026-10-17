@@ -1,17 +1,18 @@
 using HMJT.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore;
+using HMJT.DAL;
 
 namespace HMJT.Controllers;
 
 public class GameController : Controller
 {
-    private readonly GameDbContext _gameDbcontext;
+    private readonly IGameRepository _gameRepository;
     private readonly ILogger<GameController> _logger;
 
-    public GameController(GameDbContext gameDbcontext, ILogger<GameController> logger)
+    public GameController(IGameRepository gameRepository, ILogger<GameController> logger)
     {
-        _gameDbcontext = gameDbcontext;
+        _gameRepository = gameRepository;
         _logger = logger;
     }
     
@@ -19,7 +20,7 @@ public class GameController : Controller
     [HttpGet]
     public async Task<IActionResult> Index() 
     {
-        var games = await _gameDbcontext.Games.ToListAsync();
+        var games = await _gameRepository.GetAll();
         return View(games);
     }
 
@@ -27,7 +28,7 @@ public class GameController : Controller
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
-        var game = await _gameDbcontext.Games.FindAsync(id);
+        var game = await _gameRepository.GetGameById(id);
         if (game == null)
         {
             _logger.LogWarning("Game not found with ID: {GameId}", id);           
@@ -41,12 +42,10 @@ public class GameController : Controller
     [HttpGet]
     public async Task<IActionResult> Questions(int id)
     {
-        var game = await _gameDbcontext.Games
-            .Include(g => g.Questions)
-            .FirstOrDefaultAsync(g => g.GameId == id);
-
+        var game = await _gameRepository.GetGameById(id);
         if (game == null)
         {
+            _logger.LogWarning("Game not found with ID: {GameId}", id);
             return NotFound();
         }
 
@@ -70,8 +69,7 @@ public class GameController : Controller
             try
             {
             game.Status = GameStatus.NotStarted;
-            _gameDbcontext.Games.Add(game);
-            await _gameDbcontext.SaveChangesAsync();
+            await _gameRepository.Create(game);
             _logger.LogInformation("Game '{Name}' created.", game.Name);
             return RedirectToAction(nameof(Index));
             
@@ -80,7 +78,6 @@ public class GameController : Controller
             {
                 _logger.LogError(ex, "Error creating game.");
                 ModelState.AddModelError(string.Empty, "An error occurred while creating the game. Please try again.");
-                return View(game);
             }
         }
         return View(game);
@@ -90,9 +87,10 @@ public class GameController : Controller
     [HttpGet]
     public async Task<IActionResult> Update(int id)
     {
-        var game = await _gameDbcontext.Games.FindAsync(id);
+        var game = await _gameRepository.GetGameById(id);
         if (game == null)
         {
+            _logger.LogWarning("Game not found with ID: {GameId}", id);
             return NotFound();
         }
         return View(game);
@@ -107,9 +105,16 @@ public class GameController : Controller
         {
             try
             {
-            _gameDbcontext.Games.Update(game);
-            await _gameDbcontext.SaveChangesAsync();
-            _logger.LogInformation("Game '{Name}' updated.", game.Name);
+                var existingGame = await _gameRepository.GetGameById(game.GameId);
+                if (existingGame == null)
+                {
+                    _logger.LogWarning("Game not found with ID: {GameId}", game.GameId);
+                    return NotFound();
+                }
+                
+            existingGame.Name = game.Name;
+            await _gameRepository.Update(existingGame);
+            _logger.LogInformation("Game '{Name}' updated.", existingGame.Name);
             return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateException ex)
@@ -125,9 +130,10 @@ public class GameController : Controller
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
-        var game = await _gameDbcontext.Games.FindAsync(id);
+        var game = await _gameRepository.GetGameById(id);
         if (game == null)
         {
+            _logger.LogWarning("Game not found with ID: {GameId}", id);
             return NotFound(); 
         }
         return View(game);
@@ -138,14 +144,25 @@ public class GameController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var game = await _gameDbcontext.Games.FindAsync(id);
-        if (game == null)
+        try
         {
-            return NotFound();
+            var deleted = await _gameRepository.Delete(id);
+            if (!deleted)
+            {
+                _logger.LogWarning("Game not found with ID: {GameId}", id);
+                return NotFound();
+            }
+
+            _logger.LogInformation("Game with ID {GameId} deleted.", id);
+            return RedirectToAction(nameof(Index));
         }
-        _gameDbcontext.Games.Remove(game);
-        await _gameDbcontext.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+        catch (DbUpdateException ex)
+        {
+            _logger.LogError(ex, "Error deleting game.");
+            ModelState.AddModelError(string.Empty, "An error occurred while deleting the game. Please try again.");
+            return RedirectToAction(nameof(Delete), new { id });
+        }
+        
     }
 
 }
