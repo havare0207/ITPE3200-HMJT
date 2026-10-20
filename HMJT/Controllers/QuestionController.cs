@@ -2,6 +2,7 @@ using HMJT.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using HMJT.DAL;
 
 namespace HMJT.Controllers;
 
