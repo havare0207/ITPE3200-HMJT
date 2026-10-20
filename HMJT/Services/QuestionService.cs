@@ -1,5 +1,6 @@
 // Gives this service access to the Question and Difficulty models.
 using HMJT.Models;
+using HMJT.DAL;
 
 // Gives this service access to the temporary mock question data.
 using HMJT.MockData;

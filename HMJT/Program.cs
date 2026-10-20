@@ -1,4 +1,4 @@
-using HMJT.Models;
+using HMJT.DAL;
 using Microsoft.EntityFrameworkCore;
 using HMJT.Services;
 
@@ -19,10 +19,15 @@ builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<GameTurnService>();
 builder.Services.AddScoped<BoardService>();
 
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+
 builder.Services.AddSingleton<GameStateService>();
 
 
 var app = builder.Build();
+
+DBInit.Seed(app); // Not under if (!app.Environment.IsDevelopment()) so examiner can see the questions however they launch the application
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

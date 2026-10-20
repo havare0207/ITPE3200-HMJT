@@ -2,6 +2,7 @@ using HMJT.Controllers;
 using HMJT.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using HMJT.DAL;
 
 namespace HMJT.Tests;
 
