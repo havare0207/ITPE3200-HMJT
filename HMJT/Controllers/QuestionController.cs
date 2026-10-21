@@ -2,22 +2,25 @@ using HMJT.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using HMJT.DAL;
 
 namespace HMJT.Controllers;
 
 public class QuestionController : Controller
 {
     // Gives the controller access to the database. 
-    private readonly GameDbContext _gameDbcontext;
+    private readonly IQuestionRepository _questionRepository;
+    private readonly IGameRepository _gameRepository;
 
     // Used to write messages to the log (terminal output).
     private readonly ILogger<QuestionController> _logger;
 
     // Gets the database context and logger from Program.cs.
     // The logger is optional, so existing unit tests that only pass the database still work.
-    public QuestionController(GameDbContext gameDbcontext, ILogger<QuestionController>? logger = null)
+    public QuestionController(IQuestionRepository questionRepository, IGameRepository gameRepository, ILogger<QuestionController>? logger = null)
     {
-        _gameDbcontext = gameDbcontext;
+        _questionRepository = questionRepository;
+        _gameRepository = gameRepository;
         _logger = logger ?? NullLogger<QuestionController>.Instance;
     }
 
@@ -25,10 +28,7 @@ public class QuestionController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var questions = await _gameDbcontext.Questions
-     .Include(q => q.Game)
-     .ToListAsync();
-
+        var questions = await _questionRepository.GetAll();
         return View(questions);
     }
 
@@ -36,7 +36,7 @@ public class QuestionController : Controller
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
-        var question = await _gameDbcontext.Questions.FindAsync(id);
+        var question = await _questionRepository.GetQuestionById(id);
 
         // If the question does not exist, show "Not Found".
         if (question == null)
@@ -52,7 +52,7 @@ public class QuestionController : Controller
     [HttpGet]
     public async Task<IActionResult> Create(int gameId)
     {
-        var game = await _gameDbcontext.Games.FindAsync(gameId);
+        var game = await _gameRepository.GetGameById(gameId);
 
         // If the game does not exist, show "Not Found".
         if (game == null)
@@ -73,7 +73,7 @@ public class QuestionController : Controller
     public async Task<IActionResult> Create(Question question)
     {
         // Find the game that the question belongs to.
-        var game = await _gameDbcontext.Games.FindAsync(question.GameId);
+        var game = await _gameRepository.GetGameById(question.GameId);
 
         // If the game does not exist, return "Not Found".
         if (game == null)
@@ -96,10 +96,8 @@ public class QuestionController : Controller
         }
 
         // Add the question to the database.
-        _gameDbcontext.Questions.Add(question);
+        await _questionRepository.Create(question);
 
-        // Save the changes.
-        await _gameDbcontext.SaveChangesAsync();
 
         _logger.LogInformation(
             "Question {QuestionId} was created for Game {GameId}",
@@ -119,7 +117,7 @@ public class QuestionController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var question = await _gameDbcontext.Questions.FindAsync(id);
+        var question = await _questionRepository.GetQuestionById(id);
 
         // If the question does not exist, show "Not Found".
         if (question == null)
@@ -147,10 +145,8 @@ public class QuestionController : Controller
         }
 
         // Update the question in the database.
-        _gameDbcontext.Questions.Update(question);
+        await _questionRepository.Update(question);
 
-        // Save the changes.
-        await _gameDbcontext.SaveChangesAsync();
 
         _logger.LogInformation(
             "Question {QuestionId} was updated",
@@ -167,7 +163,7 @@ public class QuestionController : Controller
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
-        var question = await _gameDbcontext.Questions.FindAsync(id);
+        var question = await _questionRepository.GetQuestionById(id);
 
         // If the question does not exist, show "Not Found".
         if (question == null)
@@ -185,7 +181,7 @@ public class QuestionController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var question = await _gameDbcontext.Questions.FindAsync(id);
+        var question = await _questionRepository.GetQuestionById(id);
 
         // If the question does not exist, show "Not Found".
         if (question == null)
@@ -201,10 +197,7 @@ public class QuestionController : Controller
         var gameId = question.GameId;
 
         // Remove the question from the database.
-        _gameDbcontext.Questions.Remove(question);
-
-        // Save the changes.
-        await _gameDbcontext.SaveChangesAsync();
+        await _questionRepository.Delete(id);
 
         _logger.LogInformation("Question {QuestionId} was deleted", id);
 

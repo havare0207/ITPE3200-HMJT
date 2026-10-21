@@ -14,4 +14,7 @@ public class PresetQuestion
     public string AnswerC { get; set; } = string.Empty;
     public string AnswerD { get; set; } = string.Empty;
     public AnswerOption CorrectAnswer { get; set; }
+
+    // Setting up a many-to-many relationship with Game
+    public ICollection<Game> Games { get; set; } = new List<Game>();
 }

@@ -9,4 +9,5 @@ public interface IGameRepository
     Task Create(Game game);
     Task Update(Game game);
     Task<bool> Delete(int id);
+    Task SetPresetQuestion(int gameId, IEnumerable<int> presetQuestionIds);
 }

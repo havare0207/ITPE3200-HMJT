@@ -14,4 +14,7 @@ public class Game
 
     // The questions belonging to this game.
     public ICollection<Question> Questions { get; set; } = new List<Question>();
+
+    // Setting up a many-to-many relationship with PresetQuestion
+    public ICollection<PresetQuestion> PresetQuestions { get; set; } = new List<PresetQuestion>();
 }
