@@ -9,7 +9,7 @@ namespace HMJT.Controllers;
 
 // Only authenticated users can access
 // and manage saved custom games.
-[Authorize]
+//[Authorize]
 public class GameController : Controller
 {
     private readonly IGameRepository _gameRepository;
@@ -48,6 +48,7 @@ public class GameController : Controller
     }
 
 
+
     // GET: /Game/Details/5
     // Shows a game only if it belongs
     // to the currently logged-in user.
@@ -61,7 +62,6 @@ public class GameController : Controller
         {
             return Challenge();
         }
-
         var game =
             await _gameRepository
                 .GetByIdForUser(id, userId);
@@ -88,7 +88,7 @@ public class GameController : Controller
         string? userId =
             _userManager.GetUserId(User);
 
-        if (userId == null)
+     if (userId == null)
         {
             return Challenge();
         }

@@ -2323,3 +2323,40 @@ h3 {
 .resource-button-group-wrap .resource-button {
     flex: 1 1 45%;
 }
+
+/* =========================================
+   Question bank search page
+   ========================================= */
+   
+/* Question Bank search panel */
+.question-search {
+    border-radius: 16px;
+    background-color: var(--bs-body-bg);
+}
+
+/* Rounded inputs and dropdowns */
+.question-search .form-control,
+.question-search .form-select,
+.question-search .input-group-text {
+    min-height: 44px;
+}
+
+/* Highlight focused fields */
+.question-search .form-control:focus,
+.question-search .form-select:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.15);
+}
+
+/* Rounded buttons with a subtle hover effect */
+.question-search .btn {
+    border-radius: 8px;
+    transition: transform 0.15s ease;
+}
+
+.question-search .btn:hover {
+    transform: translateY(-1px);
+}
+.welcome-banner {
+    background-color:  #3729d1;
+}
