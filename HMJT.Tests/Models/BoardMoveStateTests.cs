@@ -61,7 +61,7 @@ public class BoardMoveStateTests
         Assert.False(
             moveState.IsWaitingForMove
         );
-    }    
+    }
 
 
 }

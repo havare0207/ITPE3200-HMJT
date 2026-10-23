@@ -161,10 +161,145 @@
 
 
                     <!-- =====================================
+                         Game mode
+                         ===================================== -->
+
+                    <h2>1. Game mode</h2>
+
+                    <div class="row g-3 mb-4">
+
+                        <!-- Standard game mode.
+                             This uses the normal Code Pursuit question set. -->
+                        <div class="col-md-6">
+                            <label class="card h-100 p-3">
+
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="gameMode"
+                                           id="standardGameMode"
+                                           value="@GameMode.Standard"
+                                           checked />
+
+                                    <span class="form-check-label fw-bold">
+                                        Standard Game
+                                    </span>
+                                </div>
+
+                                <span class="text-muted mt-2">
+                                    Play using the standard Code Pursuit
+                                    question set.
+                                </span>
+
+                            </label>
+                        </div>
+
+
+                        <!-- Custom game mode.
+                             A user must be logged in and have at least
+                             one saved custom game before this can be selected. -->
+                        <div class="col-md-6">
+                            <label class="card h-100 p-3">
+
+                                <div class="form-check">
+
+                                    @if (User.Identity?.IsAuthenticated == true &&
+                                         Model.CustomGames.Any())
+                                    {
+                                        <input class="form-check-input"
+                                               type="radio"
+                                               name="gameMode"
+                                               id="customGameMode"
+                                               value="@GameMode.Custom" />
+                                    }
+                                    else
+                                    {
+                                        <input class="form-check-input"
+                                               type="radio"
+                                               id="customGameMode"
+                                               disabled />
+                                    }
+
+                                    <span class="form-check-label fw-bold">
+                                        Custom Game
+                                    </span>
+
+                                </div>
+
+                                @if (User.Identity?.IsAuthenticated != true)
+                                {
+                                    <span class="text-muted mt-2">
+                                        Login or register to use custom games.
+                                    </span>
+                                }
+                                else if (!Model.CustomGames.Any())
+                                {
+                                    <span class="text-muted mt-2">
+                                        Create a custom game under My Games first.
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted mt-2">
+                                        Play using one of your saved custom games.
+                                    </span>
+                                }
+
+                            </label>
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         Custom game selection
+                         ===================================== -->
+
+                    @if (User.Identity?.IsAuthenticated == true &&
+                         Model.CustomGames.Any())
+                    {
+                        <!-- This section is hidden until Custom Game
+                             is selected above. -->
+                        <div id="customGameSelection"
+                             class="mb-4"
+                             style="display: none;">
+
+                            <label for="customGameId"
+                                   class="form-label fw-bold">
+                                Choose Custom Game
+                            </label>
+
+                            <select id="customGameId"
+                                    name="customGameId"
+                                    class="form-select">
+
+                                <option value="">
+                                    Select a custom game...
+                                </option>
+
+                                @foreach (Game game in Model.CustomGames)
+                                {
+                                    <option value="@game.GameId">
+                                        @game.Name
+                                    </option>
+                                }
+
+                            </select>
+
+                            <div class="form-text">
+                                Only custom games belonging to your
+                                logged-in account are shown here.
+                            </div>
+
+                        </div>
+                    }
+
+
+                    <!-- =====================================
                          Player names
                          ===================================== -->
 
-                    <h2>1. Players</h2>
+                    <h2>2. Players</h2>
 
                     <div class="setup-player-grid">
 
@@ -257,7 +392,7 @@
                          ===================================== -->
 
                     <h2 class="setup-difficulty-heading">
-                        2. Question difficulty
+                        3. Question difficulty
                     </h2>
 
                     <div class="difficulty-card-grid">
@@ -1638,3 +1773,70 @@ else
 
     </div>
 }
+
+<!-- =====================================
+     Game mode setup script
+     ===================================== -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // Get the two game-mode radio buttons.
+        const standardGameMode =
+            document.getElementById("standardGameMode");
+
+        const customGameMode =
+            document.getElementById("customGameMode");
+
+        // Get the custom-game dropdown container.
+        // This element only exists when the logged-in
+        // user has at least one saved custom game.
+        const customGameSelection =
+            document.getElementById("customGameSelection");
+
+
+        // Shows the custom-game dropdown only when
+        // Custom Game mode is selected.
+        function updateGameModeDisplay() {
+
+            if (!customGameSelection ||
+                !customGameMode) {
+                return;
+            }
+
+            customGameSelection.style.display =
+                customGameMode.checked
+                    ? "block"
+                    : "none";
+        }
+
+
+        // Update the page whenever Standard Game
+        // is selected.
+        if (standardGameMode) {
+            standardGameMode.addEventListener(
+                "change",
+                updateGameModeDisplay
+            );
+        }
+
+
+        // Update the page whenever Custom Game
+        // is selected. Disabled radio buttons are
+        // ignored for logged-out users or users
+        // without saved custom games.
+        if (customGameMode &&
+            !customGameMode.disabled) {
+            customGameMode.addEventListener(
+                "change",
+                updateGameModeDisplay
+            );
+        }
+
+
+        // Set the correct initial visibility
+        // when the page first loads.
+        updateGameModeDisplay();
+    });
+</script>
+

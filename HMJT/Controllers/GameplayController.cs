@@ -6,6 +6,10 @@ using HMJT.Services;
 
 // Gives this controller access to the game models.
 using HMJT.Models;
+// Gives this controller access to the user management service.
+using Microsoft.AspNetCore.Identity;
+// Gives this controller access to the custom game repository.
+using HMJT.DAL;
 
 // Places GameplayController in the HMJT.Controllers namespace.
 namespace HMJT.Controllers;
@@ -30,6 +34,9 @@ public class GameplayController : Controller
     // Service used for rolling the game dice.
     private readonly DiceService _diceService;
 
+    private readonly IGameRepository _gameRepository;
+    private readonly UserManager<ApplicationUser> _userManager;
+
 
     // Constructor for GameplayController.
     // The required services are provided through dependency injection.
@@ -38,20 +45,26 @@ public class GameplayController : Controller
         GameStateService gameStateService,
         GameMechanicsService gameMechanicsService,
         BoardService boardService,
-        DiceService diceService)
+        DiceService diceService,
+        IGameRepository gameRepository,
+        UserManager<ApplicationUser> userManager
+        )
     {
         _gameTurnService = gameTurnService;
         _gameStateService = gameStateService;
         _gameMechanicsService = gameMechanicsService;
         _boardService = boardService;
         _diceService = diceService;
+        _gameRepository = gameRepository;
+        _userManager = userManager;
     }
+
 
 
     // Displays the main game page.
     // If no game has been started yet,
     // the setup form is shown instead.
-    public IActionResult Play()
+    public async Task<IActionResult> Play()
     {
         // If no game is currently active,
         // return an empty ViewModel to the Play view.
@@ -62,6 +75,22 @@ public class GameplayController : Controller
                 HasActiveGame = false,
                 Message = _gameStateService.Message
             };
+
+            // Custom games are only available
+            // to authenticated users.
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                string? userId =
+                    _userManager.GetUserId(User);
+
+                if (userId != null)
+                {
+                    emptyViewModel.CustomGames =
+                        (await _gameRepository
+                            .GetAllForUser(userId))
+                        .ToList();
+                }
+            }
 
             return View(emptyViewModel);
         }
@@ -223,7 +252,7 @@ public class GameplayController : Controller
             // render player pieces and wedge progress.
             Players =
                 gameState.Players,
-            
+
             // Shows the intermediate starter screen
             // before the board becomes active.
             IsAwaitingStartConfirmation =
@@ -242,14 +271,16 @@ public class GameplayController : Controller
     // Starts a new game using player names
     // and the selected question difficulty.
     [HttpPost]
-    public IActionResult StartGame(
+    public async Task<IActionResult> StartGame(
         string player1,
         string player2,
         string player3,
         string player4,
         string player5,
         string player6,
-        Difficulty difficulty)
+        Difficulty difficulty,
+        GameMode gameMode,
+        int? customGameId)
     {
         // Player 1 must always be entered.
         if (string.IsNullOrWhiteSpace(player1))
@@ -306,6 +337,119 @@ public class GameplayController : Controller
                 "Player 5 must be entered before Player 6.";
 
             return RedirectToAction(nameof(Play));
+        }
+
+        // -------------------------------------------------
+        // GAME MODE
+        // -------------------------------------------------
+
+        // Standard mode uses the normal Code Pursuit
+        // question source.
+        if (gameMode == GameMode.Standard)
+        {
+            _gameStateService.GameMode =
+                GameMode.Standard;
+
+            _gameStateService.CustomGameId =
+                null;
+
+            _gameStateService.CustomQuestions.Clear();
+        }
+
+
+        // Custom mode uses questions belonging
+        // to one of the logged-in user's saved games.
+        else if (gameMode == GameMode.Custom)
+        {
+            // A user must be logged in to
+            // start a custom game.
+            string? userId =
+                _userManager.GetUserId(User);
+
+            if (userId == null)
+            {
+                _gameStateService.Message =
+                    "You must log in to play a custom game.";
+
+                return RedirectToAction(nameof(Play));
+            }
+
+            // A custom game must have been selected.
+            if (customGameId == null)
+            {
+                _gameStateService.Message =
+                    "Please select a custom game.";
+
+                return RedirectToAction(nameof(Play));
+            }
+
+            // Load the game only if it belongs
+            // to the logged-in user.
+            Game? customGame =
+                await _gameRepository
+                    .GetByIdForUser(
+                        customGameId.Value,
+                        userId);
+
+            if (customGame == null)
+            {
+                _gameStateService.Message =
+                    "The selected custom game could not be found.";
+
+                return RedirectToAction(nameof(Play));
+            }
+
+            // Do not allow gameplay when the
+            // custom game contains no questions.
+            if (customGame.Questions == null ||
+                customGame.Questions.Count == 0)
+            {
+                _gameStateService.Message =
+                    $"'{customGame.Name}' does not contain any questions. " +
+                    "Add questions under My Games before starting.";
+
+                return RedirectToAction(nameof(Play));
+            }
+
+            // All six categories must contain at least
+            // one question for a custom game to work.
+            string[] requiredCategories =
+            {
+                "Java",
+                "JavaScript",
+                "HTML/CSS",
+                "Python",
+                "Game History",
+                "C#"
+            };
+
+            List<string> missingCategories =
+                requiredCategories
+                    .Where(category =>
+                        !customGame.Questions.Any(question =>
+                            question.Category == category))
+                    .ToList();
+
+            if (missingCategories.Count > 0)
+            {
+                _gameStateService.Message =
+                    $"'{customGame.Name}' cannot be started because " +
+                    $"the following categories have no questions: " +
+                    $"{string.Join(", ", missingCategories)}.";
+
+                return RedirectToAction(nameof(Play));
+            }
+
+            // Store the selected custom game
+            // and its questions for gameplay.
+            _gameStateService.GameMode =
+                GameMode.Custom;
+
+            _gameStateService.CustomGameId =
+                customGame.GameId;
+
+            _gameStateService.CustomQuestions =
+                customGame.Questions.ToList();
         }
 
         // Create a new game session.

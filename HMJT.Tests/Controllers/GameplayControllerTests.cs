@@ -9,7 +9,7 @@ public class GameplayControllerTests
 {
     // Creates a GameController with the services
     // needed for the controller tests.
-    private static GameplayController  CreateController(
+    private static GameplayController CreateController(
         GameStateService gameStateService)
     {
         var gameMechanicsService =
@@ -33,7 +33,12 @@ public class GameplayControllerTests
             gameStateService,
             gameMechanicsService,
             boardService,
-            diceService
+            diceService,
+
+            // These dependencies are not used by
+            // the existing Standard Game tests.
+            null!,
+            null!
         );
     }
 
@@ -74,7 +79,7 @@ public class GameplayControllerTests
     // Tests that StartGame creates only the players
     // that have names and stores the selected difficulty.
     [Fact]
-    public void StartGame_CreatesPlayersAndStoresDifficulty()
+    public async Task StartGame_CreatesPlayersAndStoresDifficulty()
     {
         // Arrange
         var gameStateService =
@@ -85,14 +90,16 @@ public class GameplayControllerTests
 
         // Act
         IActionResult result =
-            controller.StartGame(
+            await controller.StartGame(
                 "Alice",
                 "Bob",
                 "",
                 "",
                 "",
                 "",
-                Difficulty.Hard
+                Difficulty.Hard,
+                GameMode.Standard,
+                null
             );
 
         // Assert
@@ -440,7 +447,7 @@ public class GameplayControllerTests
     // Tests that the game cannot start if Player 1 is empty
     // while another player name has been entered.
     [Fact]
-    public void StartGame_RejectsGameWhenPlayer1IsMissing()
+    public async Task StartGame_RejectsGameWhenPlayer1IsMissing()
     {
         // Arrange
         var gameStateService =
@@ -451,14 +458,16 @@ public class GameplayControllerTests
 
         // Act
         IActionResult result =
-            controller.StartGame(
+            await controller.StartGame(
                 "",
                 "Bob",
                 "",
                 "",
                 "",
                 "",
-                Difficulty.Easy
+                Difficulty.Easy,
+                GameMode.Standard,
+                null
             );
 
         // Assert
@@ -481,7 +490,7 @@ public class GameplayControllerTests
     // Player 3 cannot be used if Player 2 is empty.
     // There must be at least two players to start a game.
     [Fact]
-    public void StartGame_RejectsSkippedPlayerNumber()
+    public async Task StartGame_RejectsSkippedPlayerNumber()
     {
         // Arrange
         var gameStateService =
@@ -491,14 +500,16 @@ public class GameplayControllerTests
             CreateController(gameStateService);
 
         // Act
-        controller.StartGame(
+        await controller.StartGame(
             "Alice",
             "Bob",
             "",
             "Diana",
             "",
             "",
-            Difficulty.Easy
+            Difficulty.Easy,
+            GameMode.Standard,
+            null
         );
 
         // Assert
@@ -759,7 +770,7 @@ public class GameplayControllerTests
     }
 
     [Fact]
-    public void StartGame_RequiresAtLeastTwoPlayers()
+    public async Task StartGame_RequiresAtLeastTwoPlayers()
     {
         // Arrange
         var gameStateService =
@@ -769,14 +780,16 @@ public class GameplayControllerTests
             CreateController(gameStateService);
 
         // Act
-        controller.StartGame(
+        await controller.StartGame(
             "Alice",
             "",
             "",
             "",
             "",
             "",
-            Difficulty.Easy
+            Difficulty.Easy,
+            GameMode.Standard,
+            null
         );
 
         // Assert
