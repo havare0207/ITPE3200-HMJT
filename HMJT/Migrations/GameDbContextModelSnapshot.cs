@@ -53,6 +53,9 @@ namespace CodePursuit.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("TimesPlayed")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("GameId");
 
                     b.ToTable("Games");

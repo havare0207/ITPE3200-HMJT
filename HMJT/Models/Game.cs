@@ -31,4 +31,6 @@ public class Game
 
     public ICollection<PresetQuestion> PresetQuestions { get; set; } =
         new List<PresetQuestion>();
+
+    public int TimesPlayed { get; set; } = 0;
 }

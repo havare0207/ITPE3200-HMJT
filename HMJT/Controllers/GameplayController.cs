@@ -452,6 +452,10 @@ public class GameplayController : Controller
 
             _gameStateService.CustomQuestions =
                 customGame.Questions.ToList();
+
+            customGame.TimesPlayed++;
+
+            await _gameRepository.Update(customGame);   
         }
 
         // Create a new game session.
