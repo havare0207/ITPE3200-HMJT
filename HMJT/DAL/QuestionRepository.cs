@@ -13,7 +13,7 @@ public class QuestionRepository : IQuestionRepository
 
     public async Task<IEnumerable<Question>> GetAll()
     {
-        return await _db.Questions.ToListAsync();
+        return await _db.Questions.Include(q => q.Game).ToListAsync();
     }
 
     public async Task<Question?> GetQuestionById(int id)

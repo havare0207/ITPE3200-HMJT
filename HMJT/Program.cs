@@ -21,6 +21,8 @@ builder.Services.AddScoped<BoardService>();
 
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IPresetQuestionRepository, PresetQuestionRepository>();
+builder.Services.AddScoped<INotesRepository, NotesRepository>();
 
 builder.Services.AddSingleton<GameStateService>();
 

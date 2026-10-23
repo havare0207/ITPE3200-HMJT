@@ -17,6 +17,21 @@ namespace CodePursuit.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
 
+            modelBuilder.Entity("GamePresetQuestion", b =>
+                {
+                    b.Property<int>("GamesGameId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PresetQuestionsPresetQuestionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("GamesGameId", "PresetQuestionsPresetQuestionId");
+
+                    b.HasIndex("PresetQuestionsPresetQuestionId");
+
+                    b.ToTable("GamePresetQuestions", (string)null);
+                });
+
             modelBuilder.Entity("HMJT.Models.Game", b =>
                 {
                     b.Property<int>("GameId")
@@ -37,6 +52,29 @@ namespace CodePursuit.Migrations
                     b.HasKey("GameId");
 
                     b.ToTable("Games");
+                });
+
+            modelBuilder.Entity("HMJT.Models.Note", b =>
+                {
+                    b.Property<int>("NoteId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("NoteId");
+
+                    b.ToTable("Notes");
                 });
 
             modelBuilder.Entity("HMJT.Models.PresetQuestion", b =>
@@ -130,6 +168,21 @@ namespace CodePursuit.Migrations
                     b.HasIndex("GameId");
 
                     b.ToTable("Questions");
+                });
+
+            modelBuilder.Entity("GamePresetQuestion", b =>
+                {
+                    b.HasOne("HMJT.Models.Game", null)
+                        .WithMany()
+                        .HasForeignKey("GamesGameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HMJT.Models.PresetQuestion", null)
+                        .WithMany()
+                        .HasForeignKey("PresetQuestionsPresetQuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("HMJT.Models.Question", b =>

@@ -18,7 +18,9 @@ public class GameRepository : IGameRepository
 
     public async Task<Game?> GetGameById(int id)
     {
-        return await _db.Games.FindAsync(id);
+        return await _db.Games
+        .Include(g => g.PresetQuestions)
+        .FirstOrDefaultAsync(g => g.GameId == id);
     }
 
     public async Task Create(Game game)
@@ -45,4 +47,19 @@ public class GameRepository : IGameRepository
         await _db.SaveChangesAsync();
         return true;
     }
+
+    public async Task SetPresetQuestion(int gameId, IEnumerable<int> presetQuestionIds)
+{
+    var game = await _db.Games.Include(g => g.PresetQuestions).FirstOrDefaultAsync(g => g.GameId == gameId);
+    if (game == null) return;
+
+    var selected = await _db.PresetQuestion.Where(pq => presetQuestionIds.Contains(pq.PresetQuestionId)).ToListAsync();
+    game.PresetQuestions.Clear();
+    foreach (var pq in selected)
+    {
+        game.PresetQuestions.Add(pq);
+    }
+
+    await _db.SaveChangesAsync();
+}
 }

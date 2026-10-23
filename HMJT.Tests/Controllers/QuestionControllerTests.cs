@@ -46,6 +46,13 @@ public class QuestionControllerTests
         };
     }
 
+    private QuestionController GetController(GameDbContext context)
+    {
+        var questionRepository = new QuestionRepository(context);
+        var gameRepository = new GameRepository(context);
+        return new QuestionController(questionRepository, gameRepository);
+    }
+
     // Tests that Index shows all questions.
     [Fact]
     public async Task Index_ReturnsAllQuestions()
@@ -64,7 +71,7 @@ public class QuestionControllerTests
 
         await context.SaveChangesAsync();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         // Act
         var result = await controller.Index();
@@ -90,7 +97,7 @@ public class QuestionControllerTests
 
         await context.SaveChangesAsync();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         // Act
         var result = await controller.Index();
@@ -118,7 +125,7 @@ public class QuestionControllerTests
 
         await context.SaveChangesAsync();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         // Act
         var result = await controller.Details(1);
@@ -138,7 +145,7 @@ public class QuestionControllerTests
         // Arrange
         using var context = GetDatabaseContext();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         // Act
         var result = await controller.Details(999);
@@ -159,7 +166,7 @@ public class QuestionControllerTests
 
         await context.SaveChangesAsync();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         var question = GetTestQuestion(1, 1);
 
@@ -181,7 +188,7 @@ public class QuestionControllerTests
         // Arrange
         using var context = GetDatabaseContext();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         var question = GetTestQuestion(1, 999);
 
@@ -207,7 +214,7 @@ public class QuestionControllerTests
 
         await context.SaveChangesAsync();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         question.QuestionText = "What is 3 + 3?";
 
@@ -230,7 +237,7 @@ public class QuestionControllerTests
         // Arrange
         using var context = GetDatabaseContext();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         // Act
         var result = await controller.Edit(999);
@@ -254,7 +261,7 @@ public class QuestionControllerTests
 
         await context.SaveChangesAsync();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         // Act
         var result = await controller.Delete(1);
@@ -274,7 +281,7 @@ public class QuestionControllerTests
         // Arrange
         using var context = GetDatabaseContext();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         // Act
         var result = await controller.Delete(999);
@@ -298,7 +305,7 @@ public class QuestionControllerTests
 
         await context.SaveChangesAsync();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         // Act
         var result = await controller.DeleteConfirmed(1);
@@ -317,7 +324,7 @@ public class QuestionControllerTests
         // Arrange
         using var context = GetDatabaseContext();
 
-        var controller = new QuestionController(context);
+        var controller = GetController(context);
 
         // Act
         var result = await controller.DeleteConfirmed(999);
