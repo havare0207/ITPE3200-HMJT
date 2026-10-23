@@ -427,14 +427,16 @@ public class GameplayController : Controller
                 requiredCategories
                     .Where(category =>
                         !customGame.Questions.Any(question =>
-                            question.Category == category))
+                            question.Category == category &&
+                            question.Difficulty == difficulty))
                     .ToList();
 
             if (missingCategories.Count > 0)
             {
                 _gameStateService.Message =
-                    $"'{customGame.Name}' cannot be started because " +
-                    $"the following categories have no questions: " +
+                    $"'{customGame.Name}' cannot be started on " +
+                    $"{difficulty} difficulty because the following " +
+                    $"categories have no questions: " +
                     $"{string.Join(", ", missingCategories)}.";
 
                 return RedirectToAction(nameof(Play));
@@ -873,10 +875,9 @@ public class GameplayController : Controller
             BoardSpaceType.Category)
         {
             _gameStateService.CurrentTurn =
-                _gameTurnService.StartBoardQuestion(
+                CreateQuestionTurn(
                     player,
-                    landedSpace.Category!,
-                    _gameStateService.Difficulty
+                    landedSpace.Category!
                 );
 
             _gameStateService.Message =
@@ -944,10 +945,9 @@ public class GameplayController : Controller
         // Create a normal question using
         // the category selected by the player.
         _gameStateService.CurrentTurn =
-            _gameTurnService.StartBoardQuestion(
+            CreateQuestionTurn(
                 player,
-                category,
-                _gameStateService.Difficulty
+                category
             );
 
         // The center choice has now been completed.
@@ -1017,11 +1017,45 @@ public class GameplayController : Controller
 
         // Use the category selected by the other players
         // to generate the final question.
-        _gameTurnService.SetFinalQuestion(
-            finalTurn,
-            category,
-            _gameStateService.Difficulty
-        );
+        if (_gameStateService.GameMode ==
+            GameMode.Custom)
+        {
+            List<Question> availableQuestions =
+                _gameStateService.CustomQuestions
+                    .Where(question =>
+                        question.Category == category &&
+                        question.Difficulty ==
+                            _gameStateService.Difficulty)
+                    .ToList();
+
+            if (availableQuestions.Count == 0)
+            {
+                _gameStateService.Message =
+                    $"No custom questions are available for " +
+                    $"{category} with difficulty " +
+                    $"{_gameStateService.Difficulty}.";
+
+                return RedirectToAction(nameof(Play));
+            }
+
+            Question selectedQuestion =
+                availableQuestions[
+                    Random.Shared.Next(
+                        availableQuestions.Count
+                    )
+                ];
+
+            finalTurn.Category = category;
+            finalTurn.Question = selectedQuestion;
+        }
+        else
+        {
+            _gameTurnService.SetFinalQuestion(
+                finalTurn,
+                category,
+                _gameStateService.Difficulty
+            );
+        }
 
         _gameStateService.CurrentTurn =
             finalTurn;
@@ -1196,6 +1230,59 @@ public class GameplayController : Controller
                category == "Python" ||
                category == "Game History" ||
                category == "C#";
+    }
+
+    // Creates a normal question turn using the correct
+    // question source for the selected game mode.
+    private GameTurnState CreateQuestionTurn(
+        PlayerGameState player,
+        string category)
+    {
+        // Custom Game uses questions belonging
+        // to the selected custom game.
+        if (_gameStateService.GameMode ==
+            GameMode.Custom)
+        {
+            List<Question> availableQuestions =
+                _gameStateService.CustomQuestions
+                    .Where(question =>
+                        question.Category == category &&
+                        question.Difficulty ==
+                            _gameStateService.Difficulty)
+                    .ToList();
+
+            if (availableQuestions.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    $"No custom questions are available for " +
+                    $"{category} with difficulty " +
+                    $"{_gameStateService.Difficulty}."
+                );
+            }
+
+            Question selectedQuestion =
+                availableQuestions[
+                    Random.Shared.Next(
+                        availableQuestions.Count
+                    )
+                ];
+
+            return new GameTurnState
+            {
+                Player = player,
+                Category = category,
+                Question = selectedQuestion,
+                IsFinalTurn = false
+            };
+        }
+
+        // Standard Game keeps using the existing
+        // normal question service.
+        return _gameTurnService.StartBoardQuestion(
+            player,
+            category,
+            _gameStateService.Difficulty
+        );
     }
 
 
