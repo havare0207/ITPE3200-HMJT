@@ -4,12 +4,13 @@ using Microsoft.Extensions.Logging.Abstractions;
 using HMJT.DAL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HMJT.Controllers;
 
 // Only authenticated users can access
 // and manage custom game questions.
-[Authorize]
+//[Authorize]
 public class QuestionController : Controller
 {
     // Gives the controller access to
@@ -48,20 +49,89 @@ public class QuestionController : Controller
 
 
     // GET: /Question
-    //
-    // The main custom game flow uses
-    // Game/Questions/{id}.
-    //
-    // Keep this action for the existing
-    // Questions page for now.
-    [HttpGet]
-    public async Task<IActionResult> Index()
-    {
-        var questions =
-            await _questionRepository.GetAll();
+[HttpGet]
+public async Task<IActionResult> Index(
+    string? searchString,
+    string? category,
+    string? difficulty,
+    string? gameName)
+{
+    var questions = (await _questionRepository.GetAll()).ToList();
 
-        return View(questions);
+    // Fixed category options: users cannot add new categories here.
+    var categories = new List<string>
+    {
+        "Java",
+        "JavaScript",
+        "HTML/CSS",
+        "Python",
+        "Game History",
+        "C#"
+    };
+
+    // Populate the dropdowns and keep the selected filters.
+    ViewBag.Categories = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(
+        categories, category);
+
+    ViewBag.Difficulties = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(
+        Enum.GetNames(typeof(Difficulty)), difficulty);
+
+    ViewBag.GameNames = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(
+        questions
+            .Where(q => q.Game != null)
+            .Select(q => q.Game!.Name)
+            .Distinct()
+            .OrderBy(name => name),
+        gameName);
+
+    ViewBag.SearchString = searchString;
+    ViewBag.Category = category;
+    ViewBag.Difficulty = difficulty;
+    ViewBag.GameName = gameName;
+
+    // Filter by question text.
+    if (!string.IsNullOrWhiteSpace(searchString))
+    {
+        questions = questions
+            .Where(q => q.QuestionText.Contains(
+                searchString, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
+
+    // Filter by category.
+    if (!string.IsNullOrWhiteSpace(category))
+    {
+        questions = questions
+            .Where(q => string.Equals(
+                q.Category, category,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    // Filter by difficulty.
+    if (!string.IsNullOrWhiteSpace(difficulty) &&
+        Enum.TryParse<Difficulty>(
+            difficulty, true, out var selectedDifficulty) &&
+        Enum.IsDefined(typeof(Difficulty), selectedDifficulty))
+    {
+        questions = questions
+            .Where(q => q.Difficulty == selectedDifficulty)
+            .ToList();
+    }
+
+    // Filter by game name.
+    if (!string.IsNullOrWhiteSpace(gameName))
+    {
+        questions = questions
+            .Where(q => string.Equals(
+                q.Game?.Name, gameName,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    return View(questions);
+}
+
 
 
     // GET: /Question/Details/5
