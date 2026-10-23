@@ -1,6 +1,95 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Privacy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container py-4">
+
+    <h1 class="mb-4">Privacy and Account Security</h1>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h2 class="h4">Account information</h2>
+
+            <p>
+                Code Pursuit uses ASP.NET Core Identity to manage
+                registered users, login sessions and account security.
+            </p>
+
+            <p>
+                When a user registers, their email address is stored
+                so that it can be used to identify their account.
+            </p>
+
+        </div>
+    </div>
+
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h2 class="h4">Password security</h2>
+
+            <p>
+                Passwords are never stored as plain text in the database.
+                Code Pursuit uses ASP.NET Core Identity's password hashing
+                system to securely transform passwords before they are stored.
+            </p>
+
+            <p>
+                The stored value is a salted password hash rather than the
+                original password. This means that the application does not
+                need to know or store the user's original password after
+                registration.
+            </p>
+
+            <p>
+                When a user logs in, the entered password is verified against
+                the stored password hash by ASP.NET Core Identity.
+            </p>
+
+            <p>
+                Additional password requirements are used, including a minimum
+                password length and requirements for uppercase letters,
+                lowercase letters, numbers and special characters.
+            </p>
+
+        </div>
+    </div>
+
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h2 class="h4">Login protection</h2>
+
+            <p>
+                Accounts are temporarily locked after several unsuccessful
+                login attempts. This helps reduce the risk of repeated
+                password guessing attempts.
+            </p>
+
+            <p>
+                Authentication is handled using secure login cookies provided
+                by ASP.NET Core Identity.
+            </p>
+
+        </div>
+    </div>
+
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h2 class="h4">Custom games</h2>
+
+            <p>
+                Saved custom games are associated with the account that
+                created them. A logged-in user can only access and manage
+                custom games belonging to their own account.
+            </p>
+
+        </div>
+    </div>
+
+</div>

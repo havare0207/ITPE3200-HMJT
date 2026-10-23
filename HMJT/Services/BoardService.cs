@@ -315,7 +315,7 @@ public class BoardService
         third.ConnectedSpaceIds.Add(43);
     }
 
-   // Returns all board spaces that can be reached
+    // Returns all board spaces that can be reached
     // by moving exactly the requested number of steps
     // from the player's current board space.
     public List<BoardSpace> GetReachableSpaces(

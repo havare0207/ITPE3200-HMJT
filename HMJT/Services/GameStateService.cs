@@ -19,7 +19,8 @@ public class GameStateService
     public GameTurnState? CurrentTurn { get; set; }
 
     // Stores the difficulty selected when the game starts.
-    public Difficulty Difficulty { get; set; } = Difficulty.Easy;
+    public Difficulty Difficulty { get; set; }
+        = Difficulty.Easy;
 
     // Shows whether a game has been started.
     public bool HasActiveGame =>
@@ -27,18 +28,32 @@ public class GameStateService
 
     // Stores temporary feedback that can be shown
     // to the players on the Play page.
-    public string Message { get; set; } = string.Empty;
-
+    public string Message { get; set; }
+        = string.Empty;
 
     // Stores the current board movement while
     // the active player is choosing a destination.
     public BoardMoveState? CurrentMove { get; set; }
-    
+
     // Shows whether the current player has just moved
     // into the center and must choose a category.
     public bool IsCenterChoicePending { get; set; }
-    
+
     // Shows whether the players are currently
     // on the starter confirmation screen.
     public bool IsAwaitingStartConfirmation { get; set; }
+
+    // Stores whether the current game uses
+    // standard or custom questions.
+    public GameMode GameMode { get; set; }
+        = GameMode.Standard;
+
+    // Stores the selected custom game.
+    // Null when Standard mode is used.
+    public int? CustomGameId { get; set; }
+
+    // Stores the questions belonging to
+    // the selected custom game.
+    public List<Question> CustomQuestions { get; set; }
+        = new List<Question>();
 }

@@ -17,14 +17,17 @@
 
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark shadow-sm mb-4">
+
             <div class="container">
 
                 <!-- Website/game name -->
                 <a class="navbar-brand fw-bold"
-                   asp-area=""
-                   asp-controller="Home"
-                   asp-action="Index">
+                asp-area=""
+                asp-controller="Home"
+                asp-action="Index">
+
                     CodePursuit
+
                 </a>
 
                 <!-- Mobile navigation button -->
@@ -37,67 +40,96 @@
                         aria-label="Toggle navigation">
 
                     <span class="navbar-toggler-icon"></span>
+
                 </button>
 
-                <!-- Navigation links -->
+
+                <!-- Navigation links and authentication controls -->
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
+                    <!-- Main navigation links shown on the left side -->
                     <ul class="navbar-nav flex-grow-1">
 
+                        <!-- Home page -->
                         <li class="nav-item">
                             <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Home"
-                               asp-action="Index">
+                            asp-area=""
+                            asp-controller="Home"
+                            asp-action="Index">
                                 Home
                             </a>
                         </li>
 
+
+                        <!-- Opens the gameplay setup / game board -->
                         <li class="nav-item">
                             <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Gameplay"
+                            asp-area=""
+                            asp-controller="Gameplay"
                             asp-action="Play">
                                 Play
                             </a>
                         </li>
 
+                        
+                        <!-- Opens the question management page, NOT IN USE -->
+                        <!--
                         <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-area=""
-                               asp-controller="Question"
-                               asp-action="Index">
+                            <a class="nav-link"
+                            asp-area=""
+                            asp-controller="Question"
+                            asp-action="Index">
                                 Questions
                             </a>
                         </li>
+                        -->
+
+                        <!-- Opens the user's saved custom games.
+                            Login is required to access this page. -->
                         <li class="nav-item">
-                           <a class="nav-link"
-                             asp-area=""
+                            <a class="nav-link"
+                            asp-area=""
                             asp-controller="Game"
                             asp-action="Index">
                                 My Games
-                             </a>
-                          </li>
+                            </a>
+                        </li>
+                        }
 
+
+                        <!-- Opens the learning resources
+                            for the six game categories -->
                         <li class="nav-item">
                             <a class="nav-link"
+                            asp-area=""
                             asp-controller="Home"
                             asp-action="Categories">
                                 Categories
                             </a>
                         </li>
-                          
+
+
+                        <!-- Opens the privacy page -->
                         <li class="nav-item">
                             <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Home"
-                               asp-action="Privacy">
+                            asp-area=""
+                            asp-controller="Home"
+                            asp-action="Privacy">
                                 Privacy
                             </a>
                         </li>
 
                     </ul>
+
+
+                    <!-- Shows Register and Login when the user is logged out.
+                        Shows the logged-in user and Logout when signed in. -->
+                    <partial name="_LoginPartial" />
+
                 </div>
+
             </div>
+
         </nav>
     </header>
 
