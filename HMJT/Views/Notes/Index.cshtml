@@ -1,0 +1,48 @@
+@model IEnumerable<HMJT.Models.Note>
+
+@{
+    ViewData["Title"] = "My Notes";
+}
+
+<h1>My Notes</h1>
+
+<p>
+    <a asp-controller="Notes"
+       asp-action="Create"
+       class="btn btn-primary">
+        Create New Note
+    </a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Content</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var note in Model)
+        {
+            <tr>
+                <td>@note.Title</td>
+                <td>@note.Content</td>
+                <td>@note.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@note.NoteId">
+                        Edit
+                    </a>
+                    |
+                    <a asp-action="Delete"
+                       asp-route-id="@note.NoteId">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
