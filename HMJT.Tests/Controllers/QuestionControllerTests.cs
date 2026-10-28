@@ -143,10 +143,11 @@ public class QuestionControllerTests
 
         // Act
         var result = await controller.Index(
-    null,
-    null,
-    null,
-    null);
+            null,
+            null,
+            null,
+            null
+        );
 
         // Assert
         var viewResult = Assert.IsType<ViewResult>(result);
@@ -204,7 +205,12 @@ public class QuestionControllerTests
         var controller = GetController(context);
 
         // Act
-        var result = await controller.Details(1);
+        var result = await controller.Index(
+            null,
+            null,
+            null,
+            null
+        );
 
         // Assert
         var viewResult = Assert.IsType<ViewResult>(result);

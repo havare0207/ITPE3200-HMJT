@@ -452,15 +452,36 @@ public class QuestionController : Controller
             return View(vm);
         }
 
-        // Convert the ViewModel into the database model.
-        var question = ToModel(vm);
+        // Update the tracked question instead of
+        // attaching a second instance with the same ID.
+        existingQuestion.QuestionText =
+            question.QuestionText;
 
-        // Keep the original game relationship.
-        // Do not trust a GameId submitted by the browser.
-        question.GameId = existingQuestion.GameId;
+        existingQuestion.Category =
+            question.Category;
 
-        // Update the question in the database.
-        await _questionRepository.Update(question);
+        existingQuestion.Difficulty =
+            question.Difficulty;
+
+        existingQuestion.AnswerA =
+            question.AnswerA;
+
+        existingQuestion.AnswerB =
+            question.AnswerB;
+
+        existingQuestion.AnswerC =
+            question.AnswerC;
+
+        existingQuestion.AnswerD =
+            question.AnswerD;
+
+        existingQuestion.CorrectAnswer =
+            question.CorrectAnswer;
+
+        // Keep the original game relationship automatically,
+        // because existingQuestion already has the correct GameId.
+        await _questionRepository
+            .Update(existingQuestion);
 
         _logger.LogInformation(
             "Question {QuestionId} was updated",
