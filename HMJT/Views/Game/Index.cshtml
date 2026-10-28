@@ -12,7 +12,7 @@
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Status</th>
+                <th>Times Played</th>
                 <th>Created At</th>
                 <th>Actions</th>
             </tr>
@@ -22,12 +22,26 @@
             {
                 <tr>
                     <td>@game.Name</td>
-                    <td>@game.Status</td>
+                    <td>@game.TimesPlayed</td>
                     <td>@game.CreatedAt</td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@game.GameId" class="btn btn-sm btn-info">Details</a>
-                        <a asp-action="Update" asp-route-id="@game.GameId" class="btn btn-sm btn-warning">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@game.GameId" class="btn btn-sm btn-danger">Delete</a>
+                        <a asp-action="Questions" 
+                        asp-route-id="@game.GameId" 
+                        class="btn btn-info"> 
+                        Manage Questions
+                        </a>
+
+                        <a asp-action="Update" 
+                        asp-route-id="@game.GameId" 
+                        class="btn btn-sm btn-warning">
+                        Edit
+                        </a>
+
+                        <a asp-action="Delete" 
+                        asp-route-id="@game.GameId" 
+                        class="btn btn-sm btn-danger">
+                        Delete
+                        </a>
                     </td>
                 </tr>
             }

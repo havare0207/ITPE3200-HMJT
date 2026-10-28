@@ -9,7 +9,7 @@ public class GameplayControllerTests
 {
     // Creates a GameController with the services
     // needed for the controller tests.
-    private static GameplayController  CreateController(
+    private static GameplayController CreateController(
         GameStateService gameStateService)
     {
         var gameMechanicsService =
@@ -33,7 +33,12 @@ public class GameplayControllerTests
             gameStateService,
             gameMechanicsService,
             boardService,
-            diceService
+            diceService,
+
+            // These dependencies are not used by
+            // the existing Standard Game tests.
+            null!,
+            null!
         );
     }
 
@@ -74,7 +79,7 @@ public class GameplayControllerTests
     // Tests that StartGame creates only the players
     // that have names and stores the selected difficulty.
     [Fact]
-    public void StartGame_CreatesPlayersAndStoresDifficulty()
+    public async Task StartGame_CreatesPlayersAndStoresDifficulty()
     {
         // Arrange
         var gameStateService =
@@ -85,14 +90,16 @@ public class GameplayControllerTests
 
         // Act
         IActionResult result =
-            controller.StartGame(
+            await controller.StartGame(
                 "Alice",
                 "Bob",
                 "",
                 "",
                 "",
                 "",
-                Difficulty.Hard
+                Difficulty.Hard,
+                GameMode.Standard,
+                null
             );
 
         // Assert
@@ -440,7 +447,7 @@ public class GameplayControllerTests
     // Tests that the game cannot start if Player 1 is empty
     // while another player name has been entered.
     [Fact]
-    public void StartGame_RejectsGameWhenPlayer1IsMissing()
+    public async Task StartGame_RejectsGameWhenPlayer1IsMissing()
     {
         // Arrange
         var gameStateService =
@@ -451,14 +458,16 @@ public class GameplayControllerTests
 
         // Act
         IActionResult result =
-            controller.StartGame(
+            await controller.StartGame(
                 "",
                 "Bob",
                 "",
                 "",
                 "",
                 "",
-                Difficulty.Easy
+                Difficulty.Easy,
+                GameMode.Standard,
+                null
             );
 
         // Assert
@@ -481,7 +490,7 @@ public class GameplayControllerTests
     // Player 3 cannot be used if Player 2 is empty.
     // There must be at least two players to start a game.
     [Fact]
-    public void StartGame_RejectsSkippedPlayerNumber()
+    public async Task StartGame_RejectsSkippedPlayerNumber()
     {
         // Arrange
         var gameStateService =
@@ -491,14 +500,16 @@ public class GameplayControllerTests
             CreateController(gameStateService);
 
         // Act
-        controller.StartGame(
+        await controller.StartGame(
             "Alice",
             "Bob",
             "",
             "Diana",
             "",
             "",
-            Difficulty.Easy
+            Difficulty.Easy,
+            GameMode.Standard,
+            null
         );
 
         // Assert
@@ -759,7 +770,7 @@ public class GameplayControllerTests
     }
 
     [Fact]
-    public void StartGame_RequiresAtLeastTwoPlayers()
+    public async Task StartGame_RequiresAtLeastTwoPlayers()
     {
         // Arrange
         var gameStateService =
@@ -769,14 +780,16 @@ public class GameplayControllerTests
             CreateController(gameStateService);
 
         // Act
-        controller.StartGame(
+        await controller.StartGame(
             "Alice",
             "",
             "",
             "",
             "",
             "",
-            Difficulty.Easy
+            Difficulty.Easy,
+            GameMode.Standard,
+            null
         );
 
         // Assert
@@ -789,6 +802,244 @@ public class GameplayControllerTests
             gameStateService.Message
         );
     }
+
+    // Tests that starting a Custom Game stores
+    // the selected custom game's questions.
+    [Fact]
+    public void CustomGame_UsesCustomQuestions()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService
+            {
+                GameMode = GameMode.Custom,
+
+                CustomQuestions =
+                [
+                    new Question
+                    {
+                        QuestionId = 999,
+                        QuestionText = "CUSTOM TEST QUESTION",
+                        Category = "Java",
+                        Difficulty = Difficulty.Easy,
+                        AnswerA = "A",
+                        AnswerB = "B",
+                        AnswerC = "C",
+                        AnswerD = "D",
+                        CorrectAnswer = AnswerOption.A
+                    }
+                ]
+            };
+
+        var player =
+            new PlayerGameState
+            {
+                PlayerNumber = 1,
+                PlayerName = "Alice"
+            };
+
+        var controller =
+            CreateController(gameStateService);
+
+        // Act
+        var method =
+            controller.GetType()
+                .GetMethod(
+                    "CreateQuestionTurn",
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance
+                );
+
+        var result =
+            (GameTurnState)method!.Invoke(
+                controller,
+                new object[]
+                {
+                    player,
+                    "Java"
+                }
+            )!;
+
+        // Assert
+        Assert.Equal(
+            "CUSTOM TEST QUESTION",
+            result.Question.QuestionText
+        );
+
+        Assert.Equal(
+            999,
+            result.Question.QuestionId
+        );
+
+        Assert.Equal(
+            "Java",
+            result.Category
+        );
+    }
+
+    // Tests that Custom Game only uses questions
+    // matching the selected difficulty.
+    [Fact]
+    public void CustomGame_UsesSelectedDifficulty()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService
+            {
+                GameMode = GameMode.Custom,
+                Difficulty = Difficulty.Easy,
+
+                CustomQuestions =
+                [
+                    new Question
+                    {
+                        QuestionId = 100,
+                        QuestionText = "Easy custom question",
+                        Category = "Java",
+                        Difficulty = Difficulty.Easy,
+                        AnswerA = "A",
+                        AnswerB = "B",
+                        AnswerC = "C",
+                        AnswerD = "D",
+                        CorrectAnswer = AnswerOption.A
+                    },
+
+                    new Question
+                    {
+                        QuestionId = 200,
+                        QuestionText = "Hard custom question",
+                        Category = "Java",
+                        Difficulty = Difficulty.Hard,
+                        AnswerA = "A",
+                        AnswerB = "B",
+                        AnswerC = "C",
+                        AnswerD = "D",
+                        CorrectAnswer = AnswerOption.A
+                    }
+                ]
+            };
+
+        var player =
+            new PlayerGameState
+            {
+                PlayerNumber = 1,
+                PlayerName = "Alice"
+            };
+
+        var controller =
+            CreateController(gameStateService);
+
+        // Act
+        var method =
+            controller.GetType()
+                .GetMethod(
+                    "CreateQuestionTurn",
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance
+                );
+
+        var result =
+            (GameTurnState)method!.Invoke(
+                controller,
+                new object[]
+                {
+                    player,
+                    "Java"
+                }
+            )!;
+
+        // Assert
+        Assert.Equal(
+            Difficulty.Easy,
+            result.Question.Difficulty
+        );
+
+        Assert.Equal(
+            "Easy custom question",
+            result.Question.QuestionText
+        );
+
+        Assert.NotEqual(
+            "Hard custom question",
+            result.Question.QuestionText
+        );
+    }
+
+    // Tests that Standard Game still uses
+    // the normal question source.
+    [Fact]
+    public void StandardGame_DoesNotUseCustomQuestions()
+    {
+        // Arrange
+        var gameStateService =
+            new GameStateService
+            {
+                GameMode = GameMode.Standard,
+                Difficulty = Difficulty.Easy,
+
+                CustomQuestions =
+                [
+                    new Question
+                    {
+                        QuestionId = 999,
+                        QuestionText = "CUSTOM TEST QUESTION",
+                        Category = "Java",
+                        Difficulty = Difficulty.Easy,
+                        AnswerA = "A",
+                        AnswerB = "B",
+                        AnswerC = "C",
+                        AnswerD = "D",
+                        CorrectAnswer = AnswerOption.A
+                    }
+                ]
+            };
+
+        var player =
+            new PlayerGameState
+            {
+                PlayerNumber = 1,
+                PlayerName = "Alice"
+            };
+
+        var controller =
+            CreateController(gameStateService);
+
+        // Act
+        var method =
+            controller.GetType()
+                .GetMethod(
+                    "CreateQuestionTurn",
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance
+                );
+
+        var result =
+            (GameTurnState)method!.Invoke(
+                controller,
+                new object[]
+                {
+                    player,
+                    "Java"
+                }
+            )!;
+
+        // Assert
+        Assert.NotEqual(
+            "CUSTOM TEST QUESTION",
+            result.Question.QuestionText
+        );
+
+        Assert.Equal(
+            "Java",
+            result.Question.Category
+        );
+
+        Assert.Equal(
+            Difficulty.Easy,
+            result.Question.Difficulty
+        );
+    }
+
 
 }
 

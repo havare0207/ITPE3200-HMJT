@@ -1,5 +1,6 @@
 using HMJT.Models;
 namespace HMJT.DAL;
+
 public interface IQuestionRepository
 {
     Task<IEnumerable<Question>> GetAll();

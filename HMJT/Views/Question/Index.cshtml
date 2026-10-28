@@ -4,70 +4,179 @@
 // Sets the title for the page.
 ViewData["Title"] = "Questions";
 }
+<!-- Display the explore question bank heading and a short,
+     welcoming introduction to help users explore
+     and search questions by keyword, category,
+     difficulty, and game. -->
+<div class="mb-4">
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-<h2 class="mb-0">Questions</h2>
-
-<!-- Link to the page for creating a new question. -->
-
-<p>
-    <a asp-action="Create" class="btn btn-primary">
-        Create New Question
-    </a>
-</p>
+<h2 class="mb-0">Explore Questions</h2>
+<span class="badge bg-primary">Explore</span>
 </div>
-<!-- Displays all questions in a table. -->
+<div class="welcome-banner p-4 p-md-5 mb-4 rounded-3 text-white">
+    <h2>Welcome, Curious Mind! 🧠</h2>
+    <p class="mb-3">
+        Explore questions, discover new topics, and challenge your knowledge.
+    </p>
+    <p class="mb-0">
+       Explore the question collection, discover different
+        topics, and find the perfect question using the
+        search and filters below. Let the quiz adventure begin!
+    </p>
+</div>
+</div>
+
+<!-- Search and filter form -->
+<form asp-controller="Question"
+      asp-action="Index"
+      method="get"
+      class="question-search card border-0 shadow-sm p-3 p-md-4 mb-4">
+
+    <div class="mb-3">
+        <h5 class="fw-bold mb-1">
+            <i class="bi bi-search me-2"></i>Find your next question
+        </h5>
+
+        <p class="text-muted small mb-0">
+            Search by keyword or narrow down the results using the filters.
+        </p>
+    </div>
+
+    <div class="row g-3">
+
+        <!-- Keyword search -->
+        <div class="col-12">
+            <label for="searchString" class="form-label fw-semibold">
+                Search questions
+            </label>
+
+            <div class="input-group">
+                <span class="input-group-text bg-body">
+                    <i class="bi bi-search"></i>
+                </span>
+
+                <input type="text"
+                       id="searchString"
+                       name="searchString"
+                       value="@ViewBag.SearchString"
+                       class="form-control"
+                       placeholder="e.g. What is a closing tag?..." />
+            </div>
+        </div>
+
+        <!-- Category filter -->
+        <div class="col-md-6">
+    <label for="category" class="form-label">Category</label>
+
+    <select id="category"
+            name="category"
+            asp-items="ViewBag.Categories"
+            class="form-select">
+    </select>
+</div>
+
+    
+
+        <!-- Difficulty filter -->
+        <div class="col-md-6">
+    <label for="difficulty" class="form-label">Difficulty</label>
+
+    <select id="difficulty"
+            name="difficulty"
+            asp-items="ViewBag.Difficulties"
+            class="form-select">
+    </select>
+</div>
+
+        <!-- Game name filter -->
+        <div class="col-md-6">
+    <label for="gameName" class="form-label">Game</label>
+
+    <select id="gameName"
+            name="gameName"
+            asp-items="ViewBag.GameNames"
+            class="form-select">
+        <option value="">All games</option>
+    </select>
+</div>
+
+        <!-- Search and clear buttons -->
+        <div class="col-12 d-flex flex-wrap gap-2 mt-4">
+
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-search me-1"></i>
+                Search questions
+            </button>
+
+            <a asp-controller="Question"
+               asp-action="Index"
+               class="btn btn-outline-secondary px-4">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>
+                Clear filters
+            </a>
+
+        </div>
+    </div>
+</form>
+
+<!-- Display the number of matching questions -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Questions</h5>
+
+    <span class="badge bg-secondary">
+        @Model.Count() question(s)
+    </span>
+</div>
+
+<!-- Read-only question results table -->
 <div class="table-responsive">
-<table class="table table-bordered table-striped table-hover align-middle">
-    <thead>
-        <tr>
-            <th>Question</th>
-            <th>Category</th>
-            <th>Difficulty</th>
-            <th>Correct Answer</th>
-            <th>Game Name</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
+    <table class="table table-bordered table-striped table-hover align-middle">
 
+        <thead class="table-light">
+            <tr>
+                <th>Question</th>
+                <th>Category</th>
+                <th>Difficulty</th>
+                <th>Correct Answer</th>
+                <th>Game Name</th>
+            </tr>
+        </thead>
 
-<tbody>
-    <!-- Loops through every question supplied by the controller. -->
-    @foreach (var question in Model)
-    {
-        <tr>
-            <td>@question.QuestionText</td>
-            <td>@question.Category</td>
-            <td>@question.Difficulty</td>
-            <td>@question.CorrectAnswer</td>
-            <td>@question.Game?.Name</td>
+        <tbody>
+            @if (Model.Any())
+            {
+                @foreach (var question in Model)
+                {
+                    <tr>
+                        <td>@question.QuestionText</td>
+                        <td>@question.Category</td>
+                        <td>@question.Difficulty</td>
+                        <td>@question.CorrectAnswer</td>
+                        <td>@question.Game?.Name</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center py-4">
+                        <i class="bi bi-search fs-3 d-block mb-2 text-muted"></i>
 
+                        <strong>No questions found</strong>
 
-            <td>
-                <!-- Opens the details page for this question. -->
-                <a asp-action="Details"
-                   asp-route-id="@question.QuestionId"
-                   class="btn btn-info btn-sm">
-                    Details
-                </a>
+                        <p class="text-muted mb-2">
+                            Try another keyword or change your filters.
+                        </p>
 
-                <!-- Opens the edit page for this question. -->
-                <a asp-action="Edit"
-                   asp-route-id="@question.QuestionId"
-                   class="btn btn-warning btn-sm">
-                    Edit
-                </a>
+                        <a asp-controller="Question"
+                           asp-action="Index"
+                           class="btn btn-outline-primary btn-sm">
+                            Show all questions
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
 
-                <!-- Opens the delete confirmation page for this question. -->
-                <a asp-action="Delete"
-                   asp-route-id="@question.QuestionId"
-                   class="btn btn-danger btn-sm">
-                    Delete
-                </a>
-            </td>
-        </tr>
-    }
-</tbody>
-
-
-</table>
+    </table>
 </div>

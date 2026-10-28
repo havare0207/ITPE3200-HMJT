@@ -4,10 +4,11 @@ namespace HMJT.Tests.Models;
 
 // Tests validation rules for the Question model.
 
-public class QuestionTests{
+public class QuestionTests
+{
 
-// Validates a Question object using its DataAnnotation attributes.
- private static IList<ValidationResult> ValidateModel(Question question)
+    // Validates a Question object using its DataAnnotation attributes.
+    private static IList<ValidationResult> ValidateModel(Question question)
     {
         var validationContext = new ValidationContext(question);
         var validationResults = new List<ValidationResult>();
@@ -61,7 +62,7 @@ public class QuestionTests{
         Assert.Contains(results,
             r => r.ErrorMessage == "Question text is required.");
     }
-        // Category is required.
+    // Category is required.
 
 
     [Fact]
@@ -102,8 +103,8 @@ public class QuestionTests{
         Assert.Contains(results,
             r => r.ErrorMessage == "Answer A is required.");
     }
-    
-    
+
+
     // Question text cannot be longer than 500 characters.
 
     [Fact]
@@ -144,4 +145,4 @@ public class QuestionTests{
         Assert.Contains(results,
             r => r.ErrorMessage == "Answer A cannot exceed 300 characters.");
     }
-} 
+}

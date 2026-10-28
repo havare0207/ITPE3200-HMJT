@@ -1,5 +1,9 @@
+// Gives this file access to the game models.
+using HMJT.Models;
+
 // Places GamePlayViewModel in the HMJT.Models namespace.
 namespace HMJT.Models;
+
 
 // ViewModel used to send game data from GameplayController to Play.cshtml.
 // It combines information from the current player, turn, question,
@@ -63,16 +67,16 @@ public class GamePlayViewModel
     // Indicates whether the game is currently waiting
     // for the player to choose a destination on the board.
     public bool IsWaitingForMove { get; set; }
-    
+
     // Stores all players in the current game.
     // This is used to show player information
     // and later to render player tokens on the board.
     public List<PlayerGameState> Players { get; set; } = new();
-    
+
     // Shows whether the current player has reached the center
     // during a normal turn and may choose the question category.
     public bool NeedsCenterCategory { get; set; }
-    
+
     // Shows whether the game setup is complete
     // but gameplay has not started yet.
     public bool IsAwaitingStartConfirmation { get; set; }
@@ -80,4 +84,19 @@ public class GamePlayViewModel
     // Stores the selected question difficulty
     // so it can be shown on the starter screen.
     public Difficulty SelectedDifficulty { get; set; }
+
+    // Custom games available to the
+    // currently logged-in user.
+    public List<Game> CustomGames { get; set; }
+        = new List<Game>();
+
+    // Selected gameplay mode.
+    public GameMode GameMode { get; set; }
+        = GameMode.Standard;
+
+    // Selected custom game when
+    // Custom mode is used.
+    public int? CustomGameId { get; set; }
+
+
 }
