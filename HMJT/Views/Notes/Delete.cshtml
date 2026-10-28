@@ -1,4 +1,4 @@
-@model HMJT.Models.Note
+@model HMJT.ViewModels.NoteViewModel
 
 @{
     ViewData["Title"] = "Delete Note";
@@ -26,7 +26,13 @@
       asp-route-id="@Model.NoteId"
       method="post">
 
-    <button type="submit" class="btn btn-danger">Delete</button>
+    @Html.AntiForgeryToken()
 
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-danger">
+        Delete
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Cancel
+    </a>
 </form>

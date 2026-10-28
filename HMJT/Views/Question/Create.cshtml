@@ -1,122 +1,115 @@
-@model HMJT.Models.Question
+@model HMJT.ViewModels.QuestionViewModel
 
 @{
     // Sets the title for the page.
     ViewData["Title"] = "Create Question";
 }
+
 <h2>Create New Question</h2>
 
-<!-- Sends the completed form to the Create action in QuestionController. -->
+<!-- Sends the completed form to the Create POST action. -->
 <form asp-action="Create" method="post">
 
-<!-- Stores the GameId so the question belongs to the selected game. -->
-<input type="hidden" asp-for="GameId" value="@ViewBag.Game.GameId" />
+    <!-- Stores the GameId in the ViewModel when the form is submitted. -->
+    <input type="hidden" asp-for="GameId" />
 
-<!-- Displays validation errors that are not connected to one specific field. -->
+    <!-- Displays validation errors not connected to a specific field. -->
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<div class="form-group">
-    <!-- Label is generated from the QuestionText property. -->
-    <label asp-for="QuestionText"></label>
-    <span class="text-danger">*</span>
+    <div class="form-group">
+        <label asp-for="QuestionText"></label>
+        <span class="text-danger">*</span>
+        <input asp-for="QuestionText" class="form-control" />
+        <span asp-validation-for="QuestionText" class="text-danger"></span>
+    </div>
 
-    <!-- Input is connected to the QuestionText property. -->
-    <input asp-for="QuestionText" class="form-control" />
+    <!-- Category options are supplied by QuestionViewModel. -->
+    <div class="form-group mt-3">
+        <label asp-for="Category"></label>
+        <span class="text-danger">*</span>
 
-    <!-- Displays validation errors for QuestionText. -->
-    <span asp-validation-for="QuestionText" class="text-danger"></span>
-</div>
+        <select asp-for="Category"
+                asp-items="Model.Categories"
+                class="form-select">
+            <option value="">-- Select a category --</option>
+        </select>
 
-<!-- Category -->
-<div class="form-group">
-    <label asp-for="Category"></label>
-    <span class="text-danger">*</span>
+        <span asp-validation-for="Category" class="text-danger"></span>
+    </div>
 
-    <!-- Allow the user to select a category, which will later be replaced with a category database entity. -->
-    <select asp-for="Category" class="form-select">
-        <option value="">-- Select a category --</option>
-        <option value="Java">Java</option>
-        <option value="JavaScript">JavaScript</option>
-        <option value="HTML/CSS">HTML/CSS</option>
-        <option value="Python">Python</option>
-        <option value="Game History">Game History</option>
-        <option value="C#">C#</option>
-    </select>
+    <!-- Difficulty options are supplied by the ViewModel. -->
+    <div class="form-group mt-3">
+        <label asp-for="Difficulty"></label>
+        <span class="text-danger">*</span>
 
-    <span asp-validation-for="Category" class="text-danger"></span>
-</div>
+        <select asp-for="Difficulty"
+                asp-items="Model.Difficulties"
+                class="form-select">
+        </select>
 
-<div class="form-group">
-    <label asp-for="Difficulty"></label>
-    <span class="text-danger">*</span>
+        <span asp-validation-for="Difficulty" class="text-danger"></span>
+    </div>
 
-    <!-- Creates a dropdown using the values from the Difficulty enum. -->
-    <select asp-for="Difficulty"
-            asp-items="Html.GetEnumSelectList<HMJT.Models.Difficulty>()"
-            class="form-select">
-    </select>
+    <!-- Answer options. -->
+    <h5 class="mt-4 mb-3">Answer Options</h5>
 
-    <span asp-validation-for="Difficulty" class="text-danger"></span>
-</div>
+    <div class="form-group">
+        <label asp-for="AnswerA"></label>
+        <span class="text-danger">*</span>
+        <input asp-for="AnswerA" class="form-control" />
+        <span asp-validation-for="AnswerA" class="text-danger"></span>
+    </div>
 
-<!-- Answer options -->
-<h5 class="mt-4 mb-3">Answer Options</h5>
+    <div class="form-group mt-3">
+        <label asp-for="AnswerB"></label>
+        <span class="text-danger">*</span>
+        <input asp-for="AnswerB" class="form-control" />
+        <span asp-validation-for="AnswerB" class="text-danger"></span>
+    </div>
 
-<div class="form-group">
-    <label asp-for="AnswerA"></label>
-    <span class="text-danger">*</span>
-    <input asp-for="AnswerA" class="form-control" />
-    <span asp-validation-for="AnswerA" class="text-danger"></span>
-</div>
+    <div class="form-group mt-3">
+        <label asp-for="AnswerC"></label>
+        <span class="text-danger">*</span>
+        <input asp-for="AnswerC" class="form-control" />
+        <span asp-validation-for="AnswerC" class="text-danger"></span>
+    </div>
 
-<div class="form-group">
-    <label asp-for="AnswerB"></label>
-    <span class="text-danger">*</span>
-    <input asp-for="AnswerB" class="form-control" />
-    <span asp-validation-for="AnswerB" class="text-danger"></span>
-</div>
+    <div class="form-group mt-3">
+        <label asp-for="AnswerD"></label>
+        <span class="text-danger">*</span>
+        <input asp-for="AnswerD" class="form-control" />
+        <span asp-validation-for="AnswerD" class="text-danger"></span>
+    </div>
 
-<div class="form-group">
-    <label asp-for="AnswerC"></label>
-    <span class="text-danger">*</span>
-    <input asp-for="AnswerC" class="form-control" />
-    <span asp-validation-for="AnswerC" class="text-danger"></span>
-</div>
+    <!-- Correct answer selection. -->
+    <h5 class="mt-4 mb-3">Correct Answer</h5>
 
-<div class="form-group">
-    <label asp-for="AnswerD"></label>
-    <span class="text-danger">*</span>
-    <input asp-for="AnswerD" class="form-control" />
-    <span asp-validation-for="AnswerD" class="text-danger"></span>
-</div>
+    <div class="form-group">
+        <label asp-for="CorrectAnswer"></label>
+        <span class="text-danger">*</span>
 
-<!-- Correct answer -->
-<h5 class="mt-4 mb-3">Correct Answer</h5>
+        <select asp-for="CorrectAnswer"
+                asp-items="Html.GetEnumSelectList<HMJT.Models.AnswerOption>()"
+                class="form-select">
+        </select>
 
-<div class="form-group">
-    <label asp-for="CorrectAnswer"></label>
-    <span class="text-danger">*</span>
+        <span asp-validation-for="CorrectAnswer" class="text-danger"></span>
+    </div>
 
-    <select asp-for="CorrectAnswer"
-            asp-items="Html.GetEnumSelectList<HMJT.Models.AnswerOption>()"
-            class="form-select">
-    </select>
+    <br />
 
-    <span asp-validation-for="CorrectAnswer" class="text-danger"></span>
-</div>
+    <!-- Submits the form to QuestionController. -->
+    <button type="submit" class="btn btn-primary">Create</button>
 
-<br />
-
-<!-- Submits the form to QuestionController. -->
-<button type="submit" class="btn btn-primary">
-    Create
-</button>
-
-<!-- Returns to the questions for the current game. -->
-<a asp-controller="Game"
-   asp-action="Questions"
-   asp-route-id="@ViewBag.Game.GameId"
-   class="btn btn-secondary">
-    Back to Questions
-</a>
-
+    <!-- Returns to the questions for the selected game. -->
+    <a asp-controller="Game"
+       asp-action="Questions"
+       asp-route-id="@Model.GameId"
+       class="btn btn-secondary">
+        Back to Questions
+    </a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
