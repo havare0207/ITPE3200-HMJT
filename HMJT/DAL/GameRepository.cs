@@ -91,11 +91,12 @@ public class GameRepository : IGameRepository
         if (game == null) return;
 
         var selected = await _db.PresetQuestion.Where(pq => presetQuestionIds.Contains(pq.PresetQuestionId)).ToListAsync();
-    game.PresetQuestions.Clear();
-    foreach (var pq in selected)
+        game.PresetQuestions.Clear();
+        foreach (var pq in selected)
     {
         game.PresetQuestions.Add(pq);
 
-    }    
+    }   
+        await _db.SaveChangesAsync(); 
 }
 }
