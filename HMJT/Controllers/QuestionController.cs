@@ -454,47 +454,30 @@ public class QuestionController : Controller
 
         // Update the tracked question instead of
         // attaching a second instance with the same ID.
-        existingQuestion.QuestionText =
-            question.QuestionText;
 
-        existingQuestion.Category =
-            question.Category;
+        // Update the existing database model using the submitted ViewModel.
+        existingQuestion.QuestionText = vm.QuestionText;
+        existingQuestion.Category = vm.Category;
+        existingQuestion.Difficulty = vm.Difficulty;
+        existingQuestion.AnswerA = vm.AnswerA;
+        existingQuestion.AnswerB = vm.AnswerB;
+        existingQuestion.AnswerC = vm.AnswerC;
+        existingQuestion.AnswerD = vm.AnswerD;
+        existingQuestion.CorrectAnswer = vm.CorrectAnswer;
 
-        existingQuestion.Difficulty =
-            question.Difficulty;
-
-        existingQuestion.AnswerA =
-            question.AnswerA;
-
-        existingQuestion.AnswerB =
-            question.AnswerB;
-
-        existingQuestion.AnswerC =
-            question.AnswerC;
-
-        existingQuestion.AnswerD =
-            question.AnswerD;
-
-        existingQuestion.CorrectAnswer =
-            question.CorrectAnswer;
-
-        // Keep the original game relationship automatically,
-        // because existingQuestion already has the correct GameId.
-        await _questionRepository
-            .Update(existingQuestion);
+        // Keep the original GameId from the database.
+        await _questionRepository.Update(existingQuestion);
 
         _logger.LogInformation(
             "Question {QuestionId} was updated",
-            question.QuestionId);
+            vm.QuestionId);
 
-        // Go back to the questions
-        // belonging to this game.
+        // Return to the questions belonging to this game.
         return RedirectToAction(
             "Questions",
             "Game",
-            new { id = question.GameId });
+            new { id = existingQuestion.GameId });
     }
-
     // GET: /Question/Delete/5
     //
     // Shows the delete confirmation only
