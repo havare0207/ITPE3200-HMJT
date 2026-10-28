@@ -1,8 +1,8 @@
-@model HMJT.Models.Question
+@model HMJT.ViewModels.QuestionViewModel
 
 @{
-// Sets the title for the page.
-ViewData["Title"] = "Delete Question";
+    // Sets the title for the page.
+    ViewData["Title"] = "Delete Question";
 }
 
 <h2>Delete Question</h2>
@@ -13,33 +13,40 @@ ViewData["Title"] = "Delete Question";
 
 <!-- Displays the question information before deletion. -->
 
-<div class="form-group"> <label asp-for="QuestionText"></label> <p class="form-control">@Model.QuestionText</p> </div>
+<div class="form-group">
+    <label asp-for="QuestionText"></label>
+    <p class="form-control">@Model.QuestionText</p>
+</div>
 
-<div class="form-group"> <label asp-for="Category"></label> <p class="form-control">@Model.Category</p> </div>
+<div class="form-group">
+    <label asp-for="Category"></label>
+    <p class="form-control">@Model.Category</p>
+</div>
 
-<div class="form-group"> <label asp-for="Difficulty"></label> <p class="form-control">@Model.Difficulty</p> </div>
+<div class="form-group">
+    <label asp-for="Difficulty"></label>
+    <p class="form-control">@Model.Difficulty</p>
+</div>
 
-<div class="form-group"> <label asp-for="CorrectAnswer"></label> <p class="form-control">@Model.CorrectAnswer</p> </div>
+<div class="form-group">
+    <label asp-for="CorrectAnswer"></label>
+    <p class="form-control">@Model.CorrectAnswer</p>
+</div>
 
 <br />
 
 <!-- Sends the QuestionId to the Delete POST action. -->
-
 <form asp-action="Delete" method="post">
 
-<!-- Hidden field keeps track of which question should be deleted. -->
-<input type="hidden" asp-for="QuestionId" />
-<!-- Keeps the GameId when the form is submitted. -->
-<input type="hidden" asp-for="GameId" />
+    <!-- Keeps the ID of the question being deleted. -->
+    <input type="hidden" asp-for="QuestionId" />
 
-<!-- Confirms deletion. -->
-<button type="submit" class="btn btn-danger">
-    Delete
-</button>
+    <!-- Retains the game context; the controller must verify ownership. -->
+    <input type="hidden" asp-for="GameId" />
 
-<!-- Cancels deletion and returns to the question list. -->
-<a asp-action="Index" class="btn btn-secondary">
-    Cancel
-</a>
+    <!-- Confirms deletion. -->
+    <button type="submit" class="btn btn-danger">Delete</button>
 
+    <!-- Cancels deletion and returns to the question list. -->
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>

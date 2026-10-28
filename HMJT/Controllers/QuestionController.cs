@@ -1,16 +1,19 @@
+
 using HMJT.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging.Abstractions;
 using HMJT.DAL;
+using HMJT.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HMJT.Controllers;
 
 // Only authenticated users can access
 // and manage custom game questions.
-//[Authorize]
+[Authorize]
 public class QuestionController : Controller
 {
     // Gives the controller access to
@@ -29,6 +32,17 @@ public class QuestionController : Controller
     // the application log.
     private readonly ILogger<QuestionController> _logger;
 
+    // Fixed category options: users cannot add
+    // new categories through these question forms.
+    private static readonly List<string> CategoryOptions = new()
+    {
+        "Java",
+        "JavaScript",
+        "HTML/CSS",
+        "Python",
+        "Game History",
+        "C#"
+    };
 
     // Gets the repositories, Identity UserManager
     // and logger through dependency injection.
@@ -47,92 +61,121 @@ public class QuestionController : Controller
             NullLogger<QuestionController>.Instance;
     }
 
-
     // GET: /Question
-[HttpGet]
-public async Task<IActionResult> Index(
-    string? searchString,
-    string? category,
-    string? difficulty,
-    string? gameName)
-{
-    var questions = (await _questionRepository.GetAll()).ToList();
-
-    // Fixed category options: users cannot add new categories here.
-    var categories = new List<string>
+    // Displays questions and their search filters.
+    [HttpGet]
+    public async Task<IActionResult> Index(
+        string? searchString,
+        string? category,
+        string? difficulty,
+        string? gameName)
     {
-        "Java",
-        "JavaScript",
-        "HTML/CSS",
-        "Python",
-        "Game History",
-        "C#"
-    };
+        // Retrieve all questions from the repository.
+        var allQuestions =
+            (await _questionRepository.GetAll()).ToList();
 
-    // Populate the dropdowns and keep the selected filters.
-    ViewBag.Categories = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(
-        categories, category);
-
-    ViewBag.Difficulties = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(
-        Enum.GetNames(typeof(Difficulty)), difficulty);
-
-    ViewBag.GameNames = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(
-        questions
+        // Get the available game names before filtering
+        // so the dropdown retains all available choices.
+        var gameNames = allQuestions
             .Where(q => q.Game != null)
             .Select(q => q.Game!.Name)
             .Distinct()
-            .OrderBy(name => name),
-        gameName);
-
-    ViewBag.SearchString = searchString;
-    ViewBag.Category = category;
-    ViewBag.Difficulty = difficulty;
-    ViewBag.GameName = gameName;
-
-    // Filter by question text.
-    if (!string.IsNullOrWhiteSpace(searchString))
-    {
-        questions = questions
-            .Where(q => q.QuestionText.Contains(
-                searchString, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(name => name)
             .ToList();
+
+        // Start with all questions.
+        var questions = allQuestions;
+
+        // Filter by question text.
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            questions = questions
+                .Where(q => q.QuestionText.Contains(
+                    searchString,
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Filter by category.
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            questions = questions
+                .Where(q => string.Equals(
+                    q.Category,
+                    category,
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Filter by difficulty.
+        if (!string.IsNullOrWhiteSpace(difficulty) &&
+            Enum.TryParse<Difficulty>(
+                difficulty,
+                true,
+                out var selectedDifficulty) &&
+            Enum.IsDefined(typeof(Difficulty), selectedDifficulty))
+        {
+            questions = questions
+                .Where(q => q.Difficulty == selectedDifficulty)
+                .ToList();
+        }
+
+        // Filter by game name.
+        if (!string.IsNullOrWhiteSpace(gameName))
+        {
+            questions = questions
+                .Where(q => string.Equals(
+                    q.Game?.Name,
+                    gameName,
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Create the Index ViewModel.
+        // This passes both the filtered questions
+        // and the filter selections to the frontend.
+        var vm = new QuestionIndexViewModel
+        {
+            Questions = questions
+                .Select(ToViewModel)
+                .ToList(),
+
+            SearchString = searchString,
+            Category = category,
+            Difficulty = difficulty,
+            GameName = gameName,
+
+            Categories = CategoryOptions
+                .Select(c => new SelectListItem
+                {
+                    Text = c,
+                    Value = c,
+                    Selected = c == category
+                })
+                .ToList(),
+
+            Difficulties = Enum.GetNames(typeof(Difficulty))
+                .Select(d => new SelectListItem
+                {
+                    Text = d,
+                    Value = d,
+                    Selected = d == difficulty
+                })
+                .ToList(),
+
+            GameNames = gameNames
+                .Select(g => new SelectListItem
+                {
+                    Text = g,
+                    Value = g,
+                    Selected = g == gameName
+                })
+                .ToList()
+        };
+
+        // Send the ViewModel to Index.cshtml.
+        return View(vm);
     }
-
-    // Filter by category.
-    if (!string.IsNullOrWhiteSpace(category))
-    {
-        questions = questions
-            .Where(q => string.Equals(
-                q.Category, category,
-                StringComparison.OrdinalIgnoreCase))
-            .ToList();
-    }
-
-    // Filter by difficulty.
-    if (!string.IsNullOrWhiteSpace(difficulty) &&
-        Enum.TryParse<Difficulty>(
-            difficulty, true, out var selectedDifficulty) &&
-        Enum.IsDefined(typeof(Difficulty), selectedDifficulty))
-    {
-        questions = questions
-            .Where(q => q.Difficulty == selectedDifficulty)
-            .ToList();
-    }
-
-    // Filter by game name.
-    if (!string.IsNullOrWhiteSpace(gameName))
-    {
-        questions = questions
-            .Where(q => string.Equals(
-                q.Game?.Name, gameName,
-                StringComparison.OrdinalIgnoreCase))
-            .ToList();
-    }
-
-    return View(questions);
-}
-
-
 
     // GET: /Question/Details/5
     //
@@ -141,9 +184,9 @@ public async Task<IActionResult> Index(
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
+        // Retrieve the question from the database.
         var question =
-            await _questionRepository
-                .GetQuestionById(id);
+            await _questionRepository.GetQuestionById(id);
 
         if (question == null)
         {
@@ -154,8 +197,8 @@ public async Task<IActionResult> Index(
             return NotFound();
         }
 
-        string? userId =
-            _userManager.GetUserId(User);
+        // Identify the currently logged-in user.
+        string? userId = _userManager.GetUserId(User);
 
         if (userId == null)
         {
@@ -164,11 +207,9 @@ public async Task<IActionResult> Index(
 
         // Verify that the game containing
         // this question belongs to the user.
-        var game =
-            await _gameRepository
-                .GetByIdForUser(
-                    question.GameId,
-                    userId);
+        var game = await _gameRepository.GetByIdForUser(
+            question.GameId,
+            userId);
 
         if (game == null)
         {
@@ -179,20 +220,22 @@ public async Task<IActionResult> Index(
             return NotFound();
         }
 
-        return View(question);
-    }
+        // Convert the database model into a ViewModel.
+        var vm = ToViewModel(question);
+        vm.GameName = game.Name;
 
+        // Send the ViewModel to Details.cshtml.
+        return View(vm);
+    }
 
     // GET: /Question/Create?gameId=5
     //
     // Shows the form for creating
     // a question for a specific game.
     [HttpGet]
-    public async Task<IActionResult> Create(
-        int gameId)
+    public async Task<IActionResult> Create(int gameId)
     {
-        string? userId =
-            _userManager.GetUserId(User);
+        string? userId = _userManager.GetUserId(User);
 
         if (userId == null)
         {
@@ -201,11 +244,9 @@ public async Task<IActionResult> Index(
 
         // The game must belong to
         // the currently logged-in user.
-        var game =
-            await _gameRepository
-                .GetByIdForUser(
-                    gameId,
-                    userId);
+        var game = await _gameRepository.GetByIdForUser(
+            gameId,
+            userId);
 
         if (game == null)
         {
@@ -216,12 +257,19 @@ public async Task<IActionResult> Index(
             return NotFound();
         }
 
-        // Pass the game to the Create view.
-        ViewBag.Game = game;
+        // Create a ViewModel for the form.
+        var vm = new QuestionViewModel
+        {
+            GameId = gameId,
+            GameName = game.Name
+        };
 
-        return View();
+        // Populate dropdowns for the Create form.
+        PopulateFormOptions(vm);
+
+        // Send the ViewModel to Create.cshtml.
+        return View(vm);
     }
-
 
     // POST: /Question/Create
     //
@@ -229,11 +277,9 @@ public async Task<IActionResult> Index(
     // a user-owned custom game.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(
-        Question question)
+    public async Task<IActionResult> Create(QuestionViewModel vm)
     {
-        string? userId =
-            _userManager.GetUserId(User);
+        string? userId = _userManager.GetUserId(User);
 
         if (userId == null)
         {
@@ -245,39 +291,38 @@ public async Task<IActionResult> Index(
         //
         // Verify that the selected game
         // actually belongs to this user.
-        var game =
-            await _gameRepository
-                .GetByIdForUser(
-                    question.GameId,
-                    userId);
+        var game = await _gameRepository.GetByIdForUser(
+            vm.GameId,
+            userId);
 
         if (game == null)
         {
             _logger.LogWarning(
                 "Game {GameId} was not found or access was denied",
-                question.GameId);
+                vm.GameId);
 
             return NotFound();
         }
 
-        // Check if the question passes
-        // the validation rules.
+        // Check if the ViewModel passes validation.
         if (!ModelState.IsValid)
         {
-            // Pass the game back to the view
-            // so it still knows which game
-            // the question belongs to.
-            ViewBag.Game = game;
+            // Restore display information and dropdowns
+            // before returning the form to the user.
+            vm.GameName = game.Name;
+            PopulateFormOptions(vm);
 
             _logger.LogWarning(
                 "Creating a question failed validation");
 
-            return View(question);
+            return View(vm);
         }
 
+        // Convert the ViewModel into the database model.
+        var question = ToModel(vm);
+
         // Add the question to the database.
-        await _questionRepository
-            .Create(question);
+        await _questionRepository.Create(question);
 
         _logger.LogInformation(
             "Question {QuestionId} was created for Game {GameId}",
@@ -289,24 +334,19 @@ public async Task<IActionResult> Index(
         return RedirectToAction(
             "Questions",
             "Game",
-            new
-            {
-                id = question.GameId
-            });
+            new { id = question.GameId });
     }
-
 
     // GET: /Question/Edit/5
     //
     // Shows the edit form only if
     // the user owns the question's game.
     [HttpGet]
-    public async Task<IActionResult> Edit(
-        int id)
+    public async Task<IActionResult> Edit(int id)
     {
+        // Retrieve the question from the database.
         var question =
-            await _questionRepository
-                .GetQuestionById(id);
+            await _questionRepository.GetQuestionById(id);
 
         if (question == null)
         {
@@ -317,19 +357,17 @@ public async Task<IActionResult> Index(
             return NotFound();
         }
 
-        string? userId =
-            _userManager.GetUserId(User);
+        string? userId = _userManager.GetUserId(User);
 
         if (userId == null)
         {
             return Challenge();
         }
 
-        var game =
-            await _gameRepository
-                .GetByIdForUser(
-                    question.GameId,
-                    userId);
+        // Verify ownership of the associated game.
+        var game = await _gameRepository.GetByIdForUser(
+            question.GameId,
+            userId);
 
         if (game == null)
         {
@@ -340,9 +378,16 @@ public async Task<IActionResult> Index(
             return NotFound();
         }
 
-        return View(question);
-    }
+        // Convert the database model into a ViewModel.
+        var vm = ToViewModel(question);
+        vm.GameName = game.Name;
 
+        // Populate dropdowns for the Edit form.
+        PopulateFormOptions(vm);
+
+        // Send the ViewModel to Edit.cshtml.
+        return View(vm);
+    }
 
     // POST: /Question/Edit
     //
@@ -350,11 +395,9 @@ public async Task<IActionResult> Index(
     // if the user owns its game.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(
-        Question question)
+    public async Task<IActionResult> Edit(QuestionViewModel vm)
     {
-        string? userId =
-            _userManager.GetUserId(User);
+        string? userId = _userManager.GetUserId(User);
 
         if (userId == null)
         {
@@ -365,51 +408,59 @@ public async Task<IActionResult> Index(
         // the database instead of trusting
         // all values sent by the browser.
         var existingQuestion =
-            await _questionRepository
-                .GetQuestionById(
-                    question.QuestionId);
+            await _questionRepository.GetQuestionById(
+                vm.QuestionId);
 
         if (existingQuestion == null)
         {
             _logger.LogWarning(
                 "Question {QuestionId} was not found (Edit)",
-                question.QuestionId);
+                vm.QuestionId);
 
             return NotFound();
         }
 
         // Verify ownership using the GameId
         // stored in the database.
-        var game =
-            await _gameRepository
-                .GetByIdForUser(
-                    existingQuestion.GameId,
-                    userId);
+        var game = await _gameRepository.GetByIdForUser(
+            existingQuestion.GameId,
+            userId);
 
         if (game == null)
         {
             _logger.LogWarning(
                 "Access denied to Question {QuestionId}",
-                question.QuestionId);
+                vm.QuestionId);
 
             return NotFound();
         }
 
+        // Check whether the submitted ViewModel is valid.
         if (!ModelState.IsValid)
         {
+            // Preserve the original game relationship
+            // and restore the dropdown options.
+            vm.GameId = existingQuestion.GameId;
+            vm.GameName = game.Name;
+
+            PopulateFormOptions(vm);
+
             _logger.LogWarning(
                 "Editing question {QuestionId} failed validation",
-                question.QuestionId);
+                vm.QuestionId);
 
-            return View(question);
+            return View(vm);
         }
 
-        // Keep the original game relationship.
-        question.GameId =
-            existingQuestion.GameId;
+        // Convert the ViewModel into the database model.
+        var question = ToModel(vm);
 
-        await _questionRepository
-            .Update(question);
+        // Keep the original game relationship.
+        // Do not trust a GameId submitted by the browser.
+        question.GameId = existingQuestion.GameId;
+
+        // Update the question in the database.
+        await _questionRepository.Update(question);
 
         _logger.LogInformation(
             "Question {QuestionId} was updated",
@@ -420,24 +471,19 @@ public async Task<IActionResult> Index(
         return RedirectToAction(
             "Questions",
             "Game",
-            new
-            {
-                id = question.GameId
-            });
+            new { id = question.GameId });
     }
-
 
     // GET: /Question/Delete/5
     //
     // Shows the delete confirmation only
     // if the user owns the question's game.
     [HttpGet]
-    public async Task<IActionResult> Delete(
-        int id)
+    public async Task<IActionResult> Delete(int id)
     {
+        // Retrieve the question from the database.
         var question =
-            await _questionRepository
-                .GetQuestionById(id);
+            await _questionRepository.GetQuestionById(id);
 
         if (question == null)
         {
@@ -448,19 +494,17 @@ public async Task<IActionResult> Index(
             return NotFound();
         }
 
-        string? userId =
-            _userManager.GetUserId(User);
+        string? userId = _userManager.GetUserId(User);
 
         if (userId == null)
         {
             return Challenge();
         }
 
-        var game =
-            await _gameRepository
-                .GetByIdForUser(
-                    question.GameId,
-                    userId);
+        // Verify ownership of the associated game.
+        var game = await _gameRepository.GetByIdForUser(
+            question.GameId,
+            userId);
 
         if (game == null)
         {
@@ -471,9 +515,13 @@ public async Task<IActionResult> Index(
             return NotFound();
         }
 
-        return View(question);
-    }
+        // Convert the database model into a ViewModel.
+        var vm = ToViewModel(question);
+        vm.GameName = game.Name;
 
+        // Send the ViewModel to Delete.cshtml.
+        return View(vm);
+    }
 
     // POST: /Question/Delete/5
     //
@@ -482,12 +530,11 @@ public async Task<IActionResult> Index(
     [HttpPost]
     [ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(
-        int id)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
+        // Retrieve the question from the database.
         var question =
-            await _questionRepository
-                .GetQuestionById(id);
+            await _questionRepository.GetQuestionById(id);
 
         if (question == null)
         {
@@ -498,8 +545,7 @@ public async Task<IActionResult> Index(
             return NotFound();
         }
 
-        string? userId =
-            _userManager.GetUserId(User);
+        string? userId = _userManager.GetUserId(User);
 
         if (userId == null)
         {
@@ -507,11 +553,9 @@ public async Task<IActionResult> Index(
         }
 
         // Verify ownership before deleting.
-        var game =
-            await _gameRepository
-                .GetByIdForUser(
-                    question.GameId,
-                    userId);
+        var game = await _gameRepository.GetByIdForUser(
+            question.GameId,
+            userId);
 
         if (game == null)
         {
@@ -524,11 +568,10 @@ public async Task<IActionResult> Index(
 
         // Remember the game before
         // deleting the question.
-        int gameId =
-            question.GameId;
+        int gameId = question.GameId;
 
-        await _questionRepository
-            .Delete(id);
+        // Delete the question from the database.
+        await _questionRepository.Delete(id);
 
         _logger.LogInformation(
             "Question {QuestionId} was deleted",
@@ -539,9 +582,74 @@ public async Task<IActionResult> Index(
         return RedirectToAction(
             "Questions",
             "Game",
-            new
+            new { id = gameId });
+    }
+
+    // Converts a database Question model into
+    // a QuestionViewModel for displaying in a view.
+    private static QuestionViewModel ToViewModel(Question question)
+    {
+        return new QuestionViewModel
+        {
+            QuestionId = question.QuestionId,
+            QuestionText = question.QuestionText,
+            Category = question.Category,
+            Difficulty = question.Difficulty,
+            AnswerA = question.AnswerA,
+            AnswerB = question.AnswerB,
+            AnswerC = question.AnswerC,
+            AnswerD = question.AnswerD,
+            CorrectAnswer = question.CorrectAnswer,
+            GameId = question.GameId,
+            GameName = question.Game?.Name
+        };
+    }
+
+    // Converts a QuestionViewModel submitted by the frontend
+    // into a Question model that can be saved to the database.
+    //
+    // The navigation property Game is deliberately not mapped.
+    // The game relationship is checked separately by the controller.
+    private static Question ToModel(QuestionViewModel vm)
+    {
+        return new Question
+        {
+            QuestionId = vm.QuestionId,
+            QuestionText = vm.QuestionText,
+            Category = vm.Category,
+            Difficulty = vm.Difficulty,
+            AnswerA = vm.AnswerA,
+            AnswerB = vm.AnswerB,
+            AnswerC = vm.AnswerC,
+            AnswerD = vm.AnswerD,
+            CorrectAnswer = vm.CorrectAnswer,
+            GameId = vm.GameId
+        };
+    }
+
+    // Populates dropdown options used by the Create and Edit forms.
+    //
+    // This helper must also be called when ModelState is invalid,
+    // because dropdown options are not automatically retained
+    // when a form is returned after validation errors.
+    private static void PopulateFormOptions(QuestionViewModel vm)
+    {
+        vm.Categories = CategoryOptions
+            .Select(category => new SelectListItem
             {
-                id = gameId
-            });
+                Text = category,
+                Value = category,
+                Selected = category == vm.Category
+            })
+            .ToList();
+
+        vm.Difficulties = Enum.GetNames(typeof(Difficulty))
+            .Select(difficulty => new SelectListItem
+            {
+                Text = difficulty,
+                Value = difficulty,
+                Selected = difficulty == vm.Difficulty.ToString()
+            })
+            .ToList();
     }
 }

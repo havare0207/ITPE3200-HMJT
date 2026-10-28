@@ -1,32 +1,31 @@
-@model IEnumerable<HMJT.Models.Question>
+@model HMJT.ViewModels.QuestionIndexViewModel
 
 @{
-// Sets the title for the page.
-ViewData["Title"] = "Questions";
+    // Sets the title for the page.
+    ViewData["Title"] = "Questions";
 }
-<!-- Display the explore question bank heading and a short,
-     welcoming introduction to help users explore
-     and search questions by keyword, category,
-     difficulty, and game. -->
+
+<!-- Welcome heading and introduction. -->
 <div class="mb-4">
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-<h2 class="mb-0">Explore Questions</h2>
-<span class="badge bg-primary">Explore</span>
-</div>
-<div class="welcome-banner p-4 p-md-5 mb-4 rounded-3 text-white">
-    <h2>Welcome, Curious Mind! 🧠</h2>
-    <p class="mb-3">
-        Explore questions, discover new topics, and challenge your knowledge.
-    </p>
-    <p class="mb-0">
-       Explore the question collection, discover different
-        topics, and find the perfect question using the
-        search and filters below. Let the quiz adventure begin!
-    </p>
-</div>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+        <h2 class="mb-0">Explore Questions</h2>
+        <span class="badge bg-primary">Explore</span>
+    </div>
+
+    <div class="welcome-banner p-4 p-md-5 mb-4 rounded-3 text-white">
+        <h2>Welcome, Curious Mind! 🧠</h2>
+        <p class="mb-3">
+            Explore questions, discover new topics, and challenge your knowledge.
+        </p>
+        <p class="mb-0">
+            Explore the question collection, discover different
+            topics, and find the perfect question using the
+            search and filters below. Let the quiz adventure begin!
+        </p>
+    </div>
 </div>
 
-<!-- Search and filter form -->
+<!-- Sends search and filter values to the Index GET action. -->
 <form asp-controller="Question"
       asp-action="Index"
       method="get"
@@ -36,17 +35,15 @@ ViewData["Title"] = "Questions";
         <h5 class="fw-bold mb-1">
             <i class="bi bi-search me-2"></i>Find your next question
         </h5>
-
         <p class="text-muted small mb-0">
             Search by keyword or narrow down the results using the filters.
         </p>
     </div>
 
     <div class="row g-3">
-
-        <!-- Keyword search -->
+        <!-- Keyword search connected to the ViewModel. -->
         <div class="col-12">
-            <label for="searchString" class="form-label fw-semibold">
+            <label asp-for="SearchString" class="form-label fw-semibold">
                 Search questions
             </label>
 
@@ -55,54 +52,41 @@ ViewData["Title"] = "Questions";
                     <i class="bi bi-search"></i>
                 </span>
 
-                <input type="text"
-                       id="searchString"
-                       name="searchString"
-                       value="@ViewBag.SearchString"
+                <input asp-for="SearchString"
                        class="form-control"
                        placeholder="e.g. What is a closing tag?..." />
             </div>
         </div>
 
-        <!-- Category filter -->
+        <!-- Category options come from the ViewModel. -->
         <div class="col-md-6">
-    <label for="category" class="form-label">Category</label>
+            <label asp-for="Category" class="form-label">Category</label>
+            <select asp-for="Category"
+                    asp-items="Model.Categories"
+                    class="form-select">
+            </select>
+        </div>
 
-    <select id="category"
-            name="category"
-            asp-items="ViewBag.Categories"
-            class="form-select">
-    </select>
-</div>
-
-    
-
-        <!-- Difficulty filter -->
+        <!-- Difficulty options come from the ViewModel. -->
         <div class="col-md-6">
-    <label for="difficulty" class="form-label">Difficulty</label>
+            <label asp-for="Difficulty" class="form-label">Difficulty</label>
+            <select asp-for="Difficulty"
+                    asp-items="Model.Difficulties"
+                    class="form-select">
+            </select>
+        </div>
 
-    <select id="difficulty"
-            name="difficulty"
-            asp-items="ViewBag.Difficulties"
-            class="form-select">
-    </select>
-</div>
-
-        <!-- Game name filter -->
+        <!-- Game options come from the ViewModel. -->
         <div class="col-md-6">
-    <label for="gameName" class="form-label">Game</label>
+            <label asp-for="GameName" class="form-label">Game</label>
+            <select asp-for="GameName"
+                    asp-items="Model.GameNames"
+                    class="form-select">
+            </select>
+        </div>
 
-    <select id="gameName"
-            name="gameName"
-            asp-items="ViewBag.GameNames"
-            class="form-select">
-        <option value="">All games</option>
-    </select>
-</div>
-
-        <!-- Search and clear buttons -->
+        <!-- Search and clear buttons. -->
         <div class="col-12 d-flex flex-wrap gap-2 mt-4">
-
             <button type="submit" class="btn btn-primary px-4">
                 <i class="bi bi-search me-1"></i>
                 Search questions
@@ -114,24 +98,21 @@ ViewData["Title"] = "Questions";
                 <i class="bi bi-arrow-counterclockwise me-1"></i>
                 Clear filters
             </a>
-
         </div>
     </div>
 </form>
 
-<!-- Display the number of matching questions -->
+<!-- Displays the number of matching questions. -->
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="mb-0">Questions</h5>
-
     <span class="badge bg-secondary">
-        @Model.Count() question(s)
+        @Model.Questions.Count question(s)
     </span>
 </div>
 
-<!-- Read-only question results table -->
+<!-- Displays questions supplied by the ViewModel. -->
 <div class="table-responsive">
     <table class="table table-bordered table-striped table-hover align-middle">
-
         <thead class="table-light">
             <tr>
                 <th>Question</th>
@@ -143,16 +124,16 @@ ViewData["Title"] = "Questions";
         </thead>
 
         <tbody>
-            @if (Model.Any())
+            @if (Model.Questions.Any())
             {
-                @foreach (var question in Model)
+                @foreach (var question in Model.Questions)
                 {
                     <tr>
                         <td>@question.QuestionText</td>
                         <td>@question.Category</td>
                         <td>@question.Difficulty</td>
                         <td>@question.CorrectAnswer</td>
-                        <td>@question.Game?.Name</td>
+                        <td>@question.GameName</td>
                     </tr>
                 }
             }
@@ -161,13 +142,10 @@ ViewData["Title"] = "Questions";
                 <tr>
                     <td colspan="5" class="text-center py-4">
                         <i class="bi bi-search fs-3 d-block mb-2 text-muted"></i>
-
                         <strong>No questions found</strong>
-
                         <p class="text-muted mb-2">
                             Try another keyword or change your filters.
                         </p>
-
                         <a asp-controller="Question"
                            asp-action="Index"
                            class="btn btn-outline-primary btn-sm">
@@ -177,6 +155,5 @@ ViewData["Title"] = "Questions";
                 </tr>
             }
         </tbody>
-
     </table>
 </div>
