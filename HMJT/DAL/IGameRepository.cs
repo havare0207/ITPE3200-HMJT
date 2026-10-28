@@ -28,4 +28,6 @@ public interface IGameRepository
     Task<bool> Delete(
         int id,
         string userId);
+
+    Task SetPresetQuestion(int gameId, IEnumerable<int> presetQuestionIds);
 }
