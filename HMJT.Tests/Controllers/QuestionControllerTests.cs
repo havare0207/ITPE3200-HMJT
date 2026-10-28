@@ -1,4 +1,3 @@
-
 using System.Security.Claims;
 using HMJT.Controllers;
 using HMJT.DAL;
@@ -192,37 +191,38 @@ public class QuestionControllerTests
         Assert.NotNull(model.GameNames);
     }
 
-    // Tests that Details returns a QuestionViewModel.
-    [Fact]
-    public async Task Details_ReturnsViewModel_WhenQuestionExists()
-    {
-        // Arrange
-        using var context = GetDatabaseContext();
-        context.Games.Add(GetTestGame(1));
-        context.Questions.Add(GetTestQuestion(1, 1));
-        await context.SaveChangesAsync();
+// Tests that Details returns a QuestionViewModel.
+[Fact]
+public async Task Details_ReturnsViewModel_WhenQuestionExists()
+{
+    // Arrange
+    using var context = GetDatabaseContext();
 
-        var controller = GetController(context);
+    context.Games.Add(GetTestGame(1));
+    context.Questions.Add(GetTestQuestion(1, 1));
 
-        // Act
-        var result = await controller.Index(
-            null,
-            null,
-            null,
-            null
-        );
+    await context.SaveChangesAsync();
 
-        // Assert
-        var viewResult = Assert.IsType<ViewResult>(result);
-        var model = Assert.IsType<QuestionViewModel>(
-            viewResult.Model
-        );
+    var controller = GetController(context);
 
-        Assert.Equal(1, model.QuestionId);
-        Assert.Equal(1, model.GameId);
-        Assert.Equal("What is 2 + 2?", model.QuestionText);
-        Assert.Equal("Test Game", model.GameName);
-    }
+    // Act
+    // Call Details for the question with ID 1.
+    var result = await controller.Details(1);
+
+    // Assert
+    var viewResult = Assert.IsType<ViewResult>(result);
+
+    // Details should return a QuestionViewModel.
+    var model = Assert.IsType<QuestionViewModel>(
+        viewResult.Model
+    );
+
+    // Verify that the correct question is displayed.
+    Assert.Equal(1, model.QuestionId);
+    Assert.Equal(1, model.GameId);
+    Assert.Equal("What is 2 + 2?", model.QuestionText);
+    Assert.Equal("Test Game", model.GameName);
+}
 
     // Tests that Details returns NotFound for a missing question.
     [Fact]

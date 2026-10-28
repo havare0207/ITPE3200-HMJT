@@ -1,14 +1,30 @@
-@model HMJT.Models.Game
+@model HMJT.ViewModels.GameViewModel
 
 <h2>Create New Game</h2>
 
 <form asp-action="Create" method="post">
+    <!--  Include an anti-forgery token to protect the POST request. -->
+    @Html.AntiForgeryToken()
+
+    <!-- Display validation errors that are not tied to one field. -->
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     <div class="form-group">
-        <label asp-for="Name"></label><span class="text-danger">*</span>
+        <label asp-for="Name"></label>
+        <span class="text-danger">*</span>
+
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-    
+
     <button type="submit" class="btn btn-primary">Create</button>
-    <a asp-action="Index" class="btn btn-secondary">Back to Games</a>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Back to Games
+    </a>
 </form>
+
+@section Scripts {
+    <!--  Enable client-side validation -->
+    <partial name="_ValidationScriptsPartial" />
+}

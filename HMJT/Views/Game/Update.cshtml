@@ -1,14 +1,33 @@
-@model HMJT.Models.Game
+@model HMJT.ViewModels.GameViewModel
 
 <h2>Edit Game</h2>
 
 <form asp-action="Update" method="post">
+    <!--  Include an anti-forgery token to protect the POST request. -->
+    @Html.AntiForgeryToken()
+
+    <!--  The ID identifies the game to update; the controller still verifies ownership. -->
     <input type="hidden" asp-for="GameId" />
+
+    <!--   Show general validation errors, if any. -->
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     <div class="form-group">
         <label asp-for="Name"></label>
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+
+    <button type="submit" class="btn btn-primary">
+        Save Changes
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Cancel
+    </a>
 </form>
+
+@section Scripts {
+    <!--  Enable client-side validation -->
+    <partial name="_ValidationScriptsPartial" />
+}
