@@ -143,7 +143,12 @@ public class QuestionControllerTests
         var controller = GetController(context);
 
         // Act
-        var result = await controller.Index();
+        var result = await controller.Index(
+            null,
+            null,
+            null,
+            null
+        );
 
         // Assert
         var viewResult =
@@ -176,7 +181,12 @@ public class QuestionControllerTests
         var controller = GetController(context);
 
         // Act
-        var result = await controller.Index();
+        var result = await controller.Index(
+            null,
+            null,
+            null,
+            null
+        );
 
         // Assert
         var viewResult =

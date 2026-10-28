@@ -11,12 +11,532 @@
   },
   {
     "category": "Java",
-    "questionText": "Which data type is used to store true or false values in Java?",
-    "difficulty": "Hard",
-    "answerA": "int",
-    "answerB": "String",
+    "questionText": "Which data type is used to store whole numbers in Java?",
+    "difficulty": "Easy",
+    "answerA": "String",
+    "answerB": "int",
     "answerC": "boolean",
     "answerD": "char",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "Java",
+    "questionText": "Which method is the usual entry point of a Java application?",
+    "difficulty": "Easy",
+    "answerA": "start()",
+    "answerB": "run()",
+    "answerC": "main()",
+    "answerD": "init()",
     "correctAnswer": "C"
+  },
+  {
+    "category": "Java",
+    "questionText": "Which keyword is used to inherit from a class in Java?",
+    "difficulty": "Medium",
+    "answerA": "implements",
+    "answerB": "extends",
+    "answerC": "inherits",
+    "answerD": "super",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "Java",
+    "questionText": "Which collection stores unique elements and does not allow duplicates?",
+    "difficulty": "Medium",
+    "answerA": "List",
+    "answerB": "ArrayList",
+    "answerC": "Set",
+    "answerD": "Queue",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "Java",
+    "questionText": "Which access modifier makes a member accessible only inside its own class?",
+    "difficulty": "Medium",
+    "answerA": "public",
+    "answerB": "protected",
+    "answerC": "private",
+    "answerD": "static",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "Java",
+    "questionText": "Which statement about Java's String class is correct?",
+    "difficulty": "Hard",
+    "answerA": "String objects are immutable",
+    "answerB": "String is a primitive type",
+    "answerC": "String cannot contain Unicode",
+    "answerD": "String objects cannot be compared",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "Java",
+    "questionText": "Which keyword prevents a method from being overridden in a subclass?",
+    "difficulty": "Hard",
+    "answerA": "static",
+    "answerB": "sealed",
+    "answerC": "final",
+    "answerD": "const",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "Java",
+    "questionText": "What is the purpose of the try-with-resources statement in Java?",
+    "difficulty": "Hard",
+    "answerA": "To retry failed code automatically",
+    "answerB": "To close eligible resources automatically",
+    "answerC": "To prevent exceptions from being thrown",
+    "answerD": "To make all variables immutable",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "JavaScript",
+    "questionText": "Which keyword declares a block-scoped variable that can be reassigned in JavaScript?",
+    "difficulty": "Easy",
+    "answerA": "let",
+    "answerB": "class",
+    "answerC": "import",
+    "answerD": "return",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "JavaScript",
+    "questionText": "Which symbols start a single-line comment in JavaScript?",
+    "difficulty": "Easy",
+    "answerA": "//",
+    "answerB": "<!--",
+    "answerC": "#",
+    "answerD": "**",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "JavaScript",
+    "questionText": "Which function writes a message to the browser console?",
+    "difficulty": "Easy",
+    "answerA": "console.log()",
+    "answerB": "print()",
+    "answerC": "write()",
+    "answerD": "echo()",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "JavaScript",
+    "questionText": "Which operator checks both value and type equality in JavaScript?",
+    "difficulty": "Medium",
+    "answerA": "==",
+    "answerB": "=",
+    "answerC": "===",
+    "answerD": "!=",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "JavaScript",
+    "questionText": "Which array method adds an element to the end of an array?",
+    "difficulty": "Medium",
+    "answerA": "push()",
+    "answerB": "pop()",
+    "answerC": "shift()",
+    "answerD": "slice()",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "JavaScript",
+    "questionText": "What does JSON.parse() do?",
+    "difficulty": "Medium",
+    "answerA": "Converts a JavaScript object to JSON text",
+    "answerB": "Converts JSON text to a JavaScript value",
+    "answerC": "Deletes invalid JSON",
+    "answerD": "Formats JavaScript source code",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "JavaScript",
+    "questionText": "What is a closure in JavaScript?",
+    "difficulty": "Hard",
+    "answerA": "A function bundled with access to its lexical scope",
+    "answerB": "A method that closes the browser window",
+    "answerC": "A special kind of array",
+    "answerD": "A syntax error caused by a missing brace",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "JavaScript",
+    "questionText": "Which statement about const in JavaScript is correct?",
+    "difficulty": "Hard",
+    "answerA": "A const variable can always be reassigned",
+    "answerB": "A const object cannot have its properties changed",
+    "answerC": "A const binding cannot be reassigned",
+    "answerD": "const is function-scoped instead of block-scoped",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "JavaScript",
+    "questionText": "What does the async keyword make a JavaScript function return?",
+    "difficulty": "Hard",
+    "answerA": "A Promise",
+    "answerB": "A string",
+    "answerC": "A generator",
+    "answerD": "A callback",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "HTML/CSS",
+    "questionText": "Which HTML element represents the largest heading by default?",
+    "difficulty": "Easy",
+    "answerA": "<h1>",
+    "answerB": "<head>",
+    "answerC": "<p>",
+    "answerD": "<title>",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "HTML/CSS",
+    "questionText": "Which CSS property changes the text color of an element?",
+    "difficulty": "Easy",
+    "answerA": "font-style",
+    "answerB": "color",
+    "answerC": "background",
+    "answerD": "text-size",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "HTML/CSS",
+    "questionText": "Which HTML element is used to create a hyperlink?",
+    "difficulty": "Easy",
+    "answerA": "<a>",
+    "answerB": "<link>",
+    "answerC": "<href>",
+    "answerD": "<url>",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "HTML/CSS",
+    "questionText": "Which CSS selector targets an element with id=\"menu\"?",
+    "difficulty": "Medium",
+    "answerA": ".menu",
+    "answerB": "#menu",
+    "answerC": "menu#",
+    "answerD": "*menu",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "HTML/CSS",
+    "questionText": "Which CSS property controls the space inside an element's border?",
+    "difficulty": "Medium",
+    "answerA": "margin",
+    "answerB": "padding",
+    "answerC": "gap",
+    "answerD": "outline",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "HTML/CSS",
+    "questionText": "Which HTML attribute provides alternative text for an image?",
+    "difficulty": "Medium",
+    "answerA": "title",
+    "answerB": "src",
+    "answerC": "alt",
+    "answerD": "description",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "HTML/CSS",
+    "questionText": "In the CSS box model, which area is directly outside the border?",
+    "difficulty": "Hard",
+    "answerA": "Padding",
+    "answerB": "Content",
+    "answerC": "Margin",
+    "answerD": "Outline content",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "HTML/CSS",
+    "questionText": "Which CSS declaration makes a flex container arrange items vertically?",
+    "difficulty": "Hard",
+    "answerA": "display: block;",
+    "answerB": "flex-direction: column;",
+    "answerC": "align-items: vertical;",
+    "answerD": "grid-auto-flow: row;",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "HTML/CSS",
+    "questionText": "Which HTML element is intended for the main navigation links of a page?",
+    "difficulty": "Hard",
+    "answerA": "<section>",
+    "answerB": "<aside>",
+    "answerC": "<nav>",
+    "answerD": "<main>",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "Python",
+    "questionText": "Which keyword is used to define a function in Python?",
+    "difficulty": "Easy",
+    "answerA": "func",
+    "answerB": "function",
+    "answerC": "def",
+    "answerD": "method",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "Python",
+    "questionText": "Which function displays text in the console in Python?",
+    "difficulty": "Easy",
+    "answerA": "echo()",
+    "answerB": "print()",
+    "answerC": "write()",
+    "answerD": "display()",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "Python",
+    "questionText": "Which symbol starts a single-line comment in Python?",
+    "difficulty": "Easy",
+    "answerA": "//",
+    "answerB": "#",
+    "answerC": "<!--",
+    "answerD": "--",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "Python",
+    "questionText": "Which built-in collection stores unique unordered elements?",
+    "difficulty": "Medium",
+    "answerA": "list",
+    "answerB": "tuple",
+    "answerC": "set",
+    "answerD": "dict",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "Python",
+    "questionText": "Which keyword is used to handle an exception after a try block?",
+    "difficulty": "Medium",
+    "answerA": "catch",
+    "answerB": "except",
+    "answerC": "error",
+    "answerD": "handle",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "Python",
+    "questionText": "What does len([10, 20, 30]) return?",
+    "difficulty": "Medium",
+    "answerA": "2",
+    "answerB": "3",
+    "answerC": "30",
+    "answerD": "60",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "Python",
+    "questionText": "What does a Python list comprehension create?",
+    "difficulty": "Hard",
+    "answerA": "A new list from an iterable expression",
+    "answerB": "A compiled binary file",
+    "answerC": "A new class automatically",
+    "answerD": "A database table",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "Python",
+    "questionText": "Which statement about Python tuples is correct?",
+    "difficulty": "Hard",
+    "answerA": "They are mutable",
+    "answerB": "They are always empty",
+    "answerC": "They are immutable",
+    "answerD": "They can only contain strings",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "Python",
+    "questionText": "What is the purpose of the yield keyword in Python?",
+    "difficulty": "Hard",
+    "answerA": "It immediately terminates the program",
+    "answerB": "It produces a value from a generator and pauses its state",
+    "answerC": "It imports another module",
+    "answerD": "It converts a function into a class",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "Game History",
+    "questionText": "Which company created the original PlayStation console?",
+    "difficulty": "Easy",
+    "answerA": "Nintendo",
+    "answerB": "Sega",
+    "answerC": "Sony",
+    "answerD": "Atari",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "Game History",
+    "questionText": "Which arcade game features a yellow character eating pellets in a maze?",
+    "difficulty": "Easy",
+    "answerA": "Pac-Man",
+    "answerB": "Pong",
+    "answerC": "Asteroids",
+    "answerD": "Space Invaders",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "Game History",
+    "questionText": "Which company is best known for creating the Mario series?",
+    "difficulty": "Easy",
+    "answerA": "Valve",
+    "answerB": "Nintendo",
+    "answerC": "Sony",
+    "answerD": "Microsoft",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "Game History",
+    "questionText": "In which decade was the original Nintendo Entertainment System released?",
+    "difficulty": "Medium",
+    "answerA": "1970s",
+    "answerB": "1980s",
+    "answerC": "1990s",
+    "answerD": "2000s",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "Game History",
+    "questionText": "Which game is widely credited with popularizing the first-person shooter genre in the early 1990s?",
+    "difficulty": "Medium",
+    "answerA": "Doom",
+    "answerB": "Tetris",
+    "answerC": "SimCity",
+    "answerD": "Myst",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "Game History",
+    "questionText": "Which company released the Dreamcast console?",
+    "difficulty": "Medium",
+    "answerA": "Sega",
+    "answerB": "Sony",
+    "answerC": "Atari",
+    "answerD": "Nintendo",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "Game History",
+    "questionText": "Which 1972 arcade game from Atari helped popularize commercial video games?",
+    "difficulty": "Hard",
+    "answerA": "Pong",
+    "answerB": "Donkey Kong",
+    "answerC": "Galaga",
+    "answerD": "Frogger",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "Game History",
+    "questionText": "Which console introduced Microsoft's Xbox brand in 2001?",
+    "difficulty": "Hard",
+    "answerA": "Xbox 360",
+    "answerB": "Original Xbox",
+    "answerC": "Xbox One",
+    "answerD": "Xbox Series X",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "Game History",
+    "questionText": "Which 1984 game by Alexey Pajitnov became one of the most famous puzzle games ever made?",
+    "difficulty": "Hard",
+    "answerA": "Lemmings",
+    "answerB": "Tetris",
+    "answerC": "Q*bert",
+    "answerD": "Columns",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "C#",
+    "questionText": "Which keyword is used to declare a class in C#?",
+    "difficulty": "Easy",
+    "answerA": "class",
+    "answerB": "new",
+    "answerC": "struct",
+    "answerD": "object",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "C#",
+    "questionText": "Which C# type is commonly used to store whole numbers?",
+    "difficulty": "Easy",
+    "answerA": "string",
+    "answerB": "bool",
+    "answerC": "int",
+    "answerD": "double",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "C#",
+    "questionText": "Which method is the usual entry point of a C# console application?",
+    "difficulty": "Easy",
+    "answerA": "Main",
+    "answerB": "Start",
+    "answerC": "Run",
+    "answerD": "Init",
+    "correctAnswer": "A"
+  },
+  {
+    "category": "C#",
+    "questionText": "Which keyword is used when a class inherits from an interface member implementation requirement?",
+    "difficulty": "Medium",
+    "answerA": "implements",
+    "answerB": "extends",
+    "answerC": ":",
+    "answerD": "inherits",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "C#",
+    "questionText": "Which generic collection stores key-value pairs in C#?",
+    "difficulty": "Medium",
+    "answerA": "List<T>",
+    "answerB": "Dictionary<TKey, TValue>",
+    "answerC": "Queue<T>",
+    "answerD": "HashSet<T>",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "C#",
+    "questionText": "Which access modifier restricts a member to the containing type?",
+    "difficulty": "Medium",
+    "answerA": "public",
+    "answerB": "internal",
+    "answerC": "private",
+    "answerD": "protected",
+    "correctAnswer": "C"
+  },
+  {
+    "category": "C#",
+    "questionText": "Which statement about async methods in C# is correct?",
+    "difficulty": "Hard",
+    "answerA": "They must always return void",
+    "answerB": "They can use await to asynchronously wait for operations",
+    "answerC": "They cannot throw exceptions",
+    "answerD": "They always run on a new thread",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "C#",
+    "questionText": "What is the purpose of the using statement with an IDisposable object in C#?",
+    "difficulty": "Hard",
+    "answerA": "To import a namespace only",
+    "answerB": "To ensure the object is disposed when the scope ends",
+    "answerC": "To make the object static",
+    "answerD": "To prevent garbage collection",
+    "correctAnswer": "B"
+  },
+  {
+    "category": "C#",
+    "questionText": "Which C# feature allows a class to provide multiple methods with the same name but different parameter lists?",
+    "difficulty": "Hard",
+    "answerA": "Method overloading",
+    "answerB": "Method overriding",
+    "answerC": "Boxing",
+    "answerD": "Reflection",
+    "correctAnswer": "A"
   }
 ]
