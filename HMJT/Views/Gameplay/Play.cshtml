@@ -115,6 +115,42 @@
 
 @{
     ViewData["Title"] = "Play";
+
+    // Find the current player so the final-retry rule can
+    // be used when deciding which popup should be shown.
+    PlayerGameState? currentPlayerState =
+        Model.Players.FirstOrDefault(
+            player => player.PlayerNumber == Model.PlayerNumber
+        );
+
+    // Show the winner popup when the game has ended.
+    bool showWinnerPopup =
+        Model.HasActiveGame &&
+        Model.IsGameOver &&
+        !string.IsNullOrWhiteSpace(Model.WinnerName);
+
+    // Show the final-answer retry rule after a wrong
+    // final answer. The GameplayController already sets
+    // this message and the player's retry state.
+    bool showWrongFinalAnswerPopup =
+        Model.HasActiveGame &&
+        !Model.IsGameOver &&
+        !string.IsNullOrWhiteSpace(Model.Message) &&
+        Model.Message.StartsWith(
+            "Wrong final answer",
+            StringComparison.OrdinalIgnoreCase
+        );
+
+    // Show the final-rule reminder when the current player
+    // has all six wedges and is ready to roll toward center.
+    // Do not show it while the special retry rule is active.
+    bool showFinalRulePopup =
+        Model.HasActiveGame &&
+        !Model.IsGameOver &&
+        Model.CanRollDice &&
+        Model.MissingWedges.Count == 0 &&
+        currentPlayerState?.MustLeaveCenterBeforeFinalRetry != true &&
+        !showWrongFinalAnswerPopup;
 }
 
 <!-- Show the setup form if no game is currently active. -->
@@ -1750,7 +1786,7 @@ else
 
                             <div class="player-token-text">
                                 <p class="player-token-name">
-                                    P@player.PlayerNumber · @player.PlayerName
+                                    P@(player.PlayerNumber). (@player.PlayerName)
                                 </p>
 
                                 <p class="player-token-space">
@@ -1771,6 +1807,156 @@ else
 
         </aside>
 
+    </div>
+}
+
+<!-- =====================================
+     End-game and final-rule popups
+     ===================================== -->
+
+@if (showWinnerPopup)
+{
+    <!-- Winner popup. The game cannot continue after a winner exists. -->
+    <div class="modal fade"
+         id="winnerModal"
+         tabindex="-1"
+         aria-labelledby="winnerModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="winnerModalLabel">
+                        Winner!
+                    </h5>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-0">
+                        <strong>@Model.WinnerName</strong> won the game!
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <form asp-controller="Gameplay"
+                          asp-action="ResetGame"
+                          method="post">
+
+                        <button type="submit"
+                                class="btn btn-primary">
+                            Reset Game
+                        </button>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+@if (showFinalRulePopup)
+{
+    <!-- Reminder shown when the current player has all six wedges. -->
+    <div class="modal fade"
+         id="finalRuleModal"
+         tabindex="-1"
+         aria-labelledby="finalRuleModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="finalRuleModalLabel">
+                        Final Question Unlocked
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        <strong>@Model.PlayerName</strong> has collected all six wedges.
+                    </p>
+
+                    <p class="mb-0">
+                        Reach the center of the board to attempt the final question.
+                        The other players will choose the category.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-primary"
+                            data-bs-dismiss="modal">
+                        Continue
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+@if (showWrongFinalAnswerPopup)
+{
+    <!-- Explains the retry rule after an incorrect final answer. -->
+    <div class="modal fade"
+         id="wrongFinalAnswerModal"
+         tabindex="-1"
+         aria-labelledby="wrongFinalAnswerModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="wrongFinalAnswerModalLabel">
+                        Wrong Final Answer
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        The final answer was incorrect.
+                    </p>
+
+                    <p>
+                        You must leave the center and return before attempting
+                        another final question.
+                    </p>
+
+                    <p class="mb-0">
+                        If you roll a 6 while still in the center, you may choose
+                        the center again immediately instead.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-primary"
+                            data-bs-dismiss="modal">
+                        Continue
+                    </button>
+                </div>
+
+            </div>
+        </div>
     </div>
 }
 
@@ -1837,6 +2023,82 @@ else
         // Set the correct initial visibility
         // when the page first loads.
         updateGameModeDisplay();
+    });
+</script>
+
+<!-- =====================================
+     Popup display script
+     ===================================== -->
+
+<script>
+    window.addEventListener("load", function () {
+
+        // Clear one-time final-rule reminders after a game
+        // has been reset and the setup page is shown again.
+        @if (!Model.HasActiveGame)
+        {
+            <text>
+            Object.keys(sessionStorage)
+                .filter(key =>
+                    key.startsWith("codepursuit-final-rule-"))
+                .forEach(key =>
+                    sessionStorage.removeItem(key));
+            </text>
+        }
+
+        // Winner popup. This cannot be dismissed without
+        // resetting the game.
+        const winnerModalElement =
+            document.getElementById("winnerModal");
+
+        if (winnerModalElement) {
+            const winnerModal =
+                new bootstrap.Modal(
+                    winnerModalElement,
+                    {
+                        backdrop: "static",
+                        keyboard: false
+                    }
+                );
+
+            winnerModal.show();
+            return;
+        }
+
+        // Wrong-final-answer popup. This explains both
+        // ways the player can become eligible to retry.
+        const wrongFinalAnswerModalElement =
+            document.getElementById("wrongFinalAnswerModal");
+
+        if (wrongFinalAnswerModalElement) {
+            const wrongFinalAnswerModal =
+                new bootstrap.Modal(
+                    wrongFinalAnswerModalElement
+                );
+
+            wrongFinalAnswerModal.show();
+            return;
+        }
+
+        // Show the six-wedge reminder only once for each
+        // player during the current game.
+        const finalRuleModalElement =
+            document.getElementById("finalRuleModal");
+
+        if (finalRuleModalElement) {
+            const storageKey =
+                "codepursuit-final-rule-@Model.PlayerNumber";
+
+            if (sessionStorage.getItem(storageKey) !== "shown") {
+                const finalRuleModal =
+                    new bootstrap.Modal(
+                        finalRuleModalElement
+                    );
+
+                finalRuleModal.show();
+                sessionStorage.setItem(storageKey, "shown");
+            }
+        }
     });
 </script>
 

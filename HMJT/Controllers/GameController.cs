@@ -9,7 +9,7 @@ namespace HMJT.Controllers;
 
 // Only authenticated users can access
 // and manage saved custom games.
-//[Authorize]
+[Authorize]
 public class GameController : Controller
 {
     private readonly IGameRepository _gameRepository;

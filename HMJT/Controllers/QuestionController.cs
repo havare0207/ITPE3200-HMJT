@@ -10,7 +10,7 @@ namespace HMJT.Controllers;
 
 // Only authenticated users can access
 // and manage custom game questions.
-//[Authorize]
+[Authorize]
 public class QuestionController : Controller
 {
     // Gives the controller access to
@@ -404,12 +404,36 @@ public async Task<IActionResult> Index(
             return View(question);
         }
 
-        // Keep the original game relationship.
-        question.GameId =
-            existingQuestion.GameId;
+        // Update the tracked question instead of
+        // attaching a second instance with the same ID.
+        existingQuestion.QuestionText =
+            question.QuestionText;
 
+        existingQuestion.Category =
+            question.Category;
+
+        existingQuestion.Difficulty =
+            question.Difficulty;
+
+        existingQuestion.AnswerA =
+            question.AnswerA;
+
+        existingQuestion.AnswerB =
+            question.AnswerB;
+
+        existingQuestion.AnswerC =
+            question.AnswerC;
+
+        existingQuestion.AnswerD =
+            question.AnswerD;
+
+        existingQuestion.CorrectAnswer =
+            question.CorrectAnswer;
+
+        // Keep the original game relationship automatically,
+        // because existingQuestion already has the correct GameId.
         await _questionRepository
-            .Update(question);
+            .Update(existingQuestion);
 
         _logger.LogInformation(
             "Question {QuestionId} was updated",
