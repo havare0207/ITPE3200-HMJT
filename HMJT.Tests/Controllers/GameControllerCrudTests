@@ -1,0 +1,176 @@
+using HMJT.Controllers;
+using HMJT.DAL;
+using HMJT.Models;
+using HMJT.ViewModels;
+using NSubstitute;
+using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+
+namespace HMJT.Tests.Controllers;
+
+public class GameControllerCrudTests
+{
+    private const string Alice = "user-alice";
+ 
+    private static GameController CreateController(IGameRepository repository)
+    {
+        var store = Substitute.For<IUserStore<ApplicationUser>>();
+        var userManager = Substitute.For<UserManager<ApplicationUser>>(
+            store, null, null, null, null, null, null, null, null);
+        userManager.GetUserId(Arg.Any<ClaimsPrincipal>()).Returns(Alice);
+ 
+        var controller = new GameController(
+            repository,
+            userManager,
+            Substitute.For<ILogger<GameController>>());
+ 
+        var httpContext = new DefaultHttpContext();
+        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
+        controller.TempData = new TempDataDictionary(
+            httpContext, Substitute.For<ITempDataProvider>());
+ 
+        return controller;
+    }
+ 
+    // Create
+ 
+    [Fact]
+    public async Task Create_WhenModelIsValid_SavesGameWithOwnerFromIdentityAndRedirects()
+    {
+        // Arrange
+        var repo = Substitute.For<IGameRepository>();
+        var controller = CreateController(repo);
+ 
+        // Act
+        var result = await controller.Create(new GameViewModel { Name = "New game" });
+ 
+        // Assert
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(nameof(GameController.Index), redirect.ActionName);
+        await repo.Received(1).Create(Arg.Is<Game>(g =>
+            g.Name == "New game" && g.OwnerUserId == Alice));
+    }
+ 
+    [Fact]
+    public async Task Create_WhenDatabaseFails_ReturnsViewWithModelError()
+    {
+        // Arrange
+        var repo = Substitute.For<IGameRepository>();
+        repo.Create(Arg.Any<Game>()).ThrowsAsync(new DbUpdateException("fail"));
+        var controller = CreateController(repo);
+ 
+        // Act
+        var result = await controller.Create(new GameViewModel { Name = "Failing game" });
+ 
+        // Assert
+        Assert.IsType<ViewResult>(result);
+        Assert.False(controller.ModelState.IsValid);
+    }
+ 
+    // Read
+ 
+    [Fact]
+    public async Task Details_WhenGameIsOwned_ReturnsViewWithGameViewModel()
+    {
+        // Arrange
+        var repo = Substitute.For<IGameRepository>();
+        repo.GetByIdForUser(1, Alice).Returns(
+            new Game { GameId = 1, Name = "My game", OwnerUserId = Alice });
+        var controller = CreateController(repo);
+ 
+        // Act
+        var result = await controller.Details(1);
+ 
+        // Assert
+        var viewResult = Assert.IsType<ViewResult>(result);
+        var vm = Assert.IsAssignableFrom<GameViewModel>(viewResult.Model);
+        Assert.Equal("My game", vm.Name);
+    }
+ 
+    [Fact]
+    public async Task Details_WhenGameIsNotOwnedByUser_ReturnsNotFound()
+    {
+        // Arrange
+        var repo = Substitute.For<IGameRepository>();
+        repo.GetByIdForUser(1, Alice).Returns((Game?)null);
+        var controller = CreateController(repo);
+ 
+        // Act
+        var result = await controller.Details(1);
+ 
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
+    }
+ 
+    // Update
+ 
+    [Fact]
+    public async Task Update_WhenModelIsValid_ChangesNameSavesAndRedirects()
+    {
+        // Arrange
+        var existing = new Game { GameId = 1, Name = "Old name", OwnerUserId = Alice };
+        var repo = Substitute.For<IGameRepository>();
+        repo.GetByIdForUser(1, Alice).Returns(existing);
+        var controller = CreateController(repo);
+ 
+        // Act
+        var result = await controller.Update(
+            new GameViewModel { GameId = 1, Name = "New name" });
+ 
+        // Assert
+        Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("New name", existing.Name);
+        await repo.Received(1).Update(existing);
+    }
+ 
+    [Fact]
+    public async Task Update_WhenGameIsNotOwnedByUser_ReturnsNotFoundAndDoesNotSave()
+    {
+        // Arrange
+        var repo = Substitute.For<IGameRepository>();
+        repo.GetByIdForUser(1, Alice).Returns((Game?)null);
+        var controller = CreateController(repo);
+ 
+        // Act
+        var result = await controller.Update(
+            new GameViewModel { GameId = 1, Name = "Hacked" });
+ 
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
+        await repo.DidNotReceive().Update(Arg.Any<Game>());
+    }
+ 
+    // Delete
+ 
+    [Fact]
+    public async Task DeleteConfirmed_WhenGameIsOwned_DeletesAndRedirectsToIndex()
+    {
+        // Arrange
+        var repo = Substitute.For<IGameRepository>();
+        repo.Delete(1, Alice).Returns(true);
+        var controller = CreateController(repo);
+ 
+        // Act
+        var result = await controller.DeleteConfirmed(1);
+ 
+        // Assert
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(nameof(GameController.Index), redirect.ActionName);
+    }
+ 
+    [Fact]
+    public async Task DeleteConfirmed_WhenGameIsNotOwned_ReturnsNotFound()
+    {
+        // Arrange: If user isn't owner, returns false
+        var repo = Substitute.For<IGameRepository>();
+        repo.Delete(1, Alice).Returns(false);
+        var controller = CreateController(repo);
+ 
+        // Act
+        var result = await controller.DeleteConfirmed(1);
+ 
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
+    }
+}
