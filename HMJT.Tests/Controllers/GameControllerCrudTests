@@ -36,7 +36,7 @@ public class GameControllerCrudTests
     // Create
  
     [Fact]
-    public async Task Create_WhenModelIsValid_SavesGameWithOwnerFromIdentityAndRedirects()
+    public async Task Create_WhenModelIsValid_SavesGameWithOwnerFromIdentityAndRedirects() // Positive test
     {
         // Arrange
         var repo = Substitute.For<IGameRepository>();
@@ -53,7 +53,7 @@ public class GameControllerCrudTests
     }
  
     [Fact]
-    public async Task Create_WhenDatabaseFails_ReturnsViewWithModelError()
+    public async Task Create_WhenDatabaseFails_ReturnsViewWithModelError() // Negative test
     {
         // Arrange
         var repo = Substitute.For<IGameRepository>();
@@ -71,7 +71,7 @@ public class GameControllerCrudTests
     // Read
  
     [Fact]
-    public async Task Details_WhenGameIsOwned_ReturnsViewWithGameViewModel()
+    public async Task Details_WhenGameIsOwned_ReturnsViewWithGameViewModel() // Positive test
     {
         // Arrange
         var repo = Substitute.For<IGameRepository>();
@@ -89,7 +89,7 @@ public class GameControllerCrudTests
     }
  
     [Fact]
-    public async Task Details_WhenGameIsNotOwnedByUser_ReturnsNotFound()
+    public async Task Details_WhenGameIsNotOwnedByUser_ReturnsNotFound() // Negative test
     {
         // Arrange
         var repo = Substitute.For<IGameRepository>();
@@ -106,7 +106,7 @@ public class GameControllerCrudTests
     // Update
  
     [Fact]
-    public async Task Update_WhenModelIsValid_ChangesNameSavesAndRedirects()
+    public async Task Update_WhenModelIsValid_ChangesNameSavesAndRedirects() // Positive test
     {
         // Arrange
         var existing = new Game { GameId = 1, Name = "Old name", OwnerUserId = Alice };
@@ -125,7 +125,7 @@ public class GameControllerCrudTests
     }
  
     [Fact]
-    public async Task Update_WhenGameIsNotOwnedByUser_ReturnsNotFoundAndDoesNotSave()
+    public async Task Update_WhenGameIsNotOwnedByUser_ReturnsNotFoundAndDoesNotSave() // Negative test
     {
         // Arrange
         var repo = Substitute.For<IGameRepository>();
@@ -144,7 +144,7 @@ public class GameControllerCrudTests
     // Delete
  
     [Fact]
-    public async Task DeleteConfirmed_WhenGameIsOwned_DeletesAndRedirectsToIndex()
+    public async Task DeleteConfirmed_WhenGameIsOwned_DeletesAndRedirectsToIndex() // Positive test
     {
         // Arrange
         var repo = Substitute.For<IGameRepository>();
@@ -160,7 +160,7 @@ public class GameControllerCrudTests
     }
  
     [Fact]
-    public async Task DeleteConfirmed_WhenGameIsNotOwned_ReturnsNotFound()
+    public async Task DeleteConfirmed_WhenGameIsNotOwned_ReturnsNotFound() // Negative test
     {
         // Arrange: If user isn't owner, returns false
         var repo = Substitute.For<IGameRepository>();
