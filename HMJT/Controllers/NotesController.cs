@@ -1,156 +1,219 @@
-using System.Linq;
-using System;
-using System.Threading.Tasks;
 using HMJT.DAL;
 using HMJT.Models;
 using HMJT.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HMJT.Controllers;
 
+// Only authenticated users can view and manage notes.
 [Authorize]
 public class NotesController : Controller
 {
-    // Repository used to retrieve and save notes.
+    // Gives the controller access to notes stored in the database.
     private readonly INotesRepository _notesRepository;
 
-    // Inject the repository through dependency injection.
-    public NotesController(INotesRepository notesRepository)
+    // Used to write messages to the application log.
+    private readonly ILogger<NotesController> _logger;
+
+    // Gets the repository and logger through dependency injection.
+    public NotesController(
+        INotesRepository notesRepository,
+        ILogger<NotesController>? logger = null)
     {
         _notesRepository = notesRepository;
+        _logger = logger ?? NullLogger<NotesController>.Instance;
     }
 
-    // READ - Display all notes.
-    [HttpGet]
+    // READ - Display all notes, newest first
     public async Task<IActionResult> Index()
     {
-        var notes = await _notesRepository.GetAll();
-
-        // Convert database models into ViewModels.
-        var vm = new NoteIndexViewModel
+        try
         {
-            Notes = notes.Select(ToViewModel).ToList()
-        };
+            var notes = await _notesRepository.GetAll();
 
-        return View(vm);
+            var viewModel = new NoteIndexViewModel
+            {
+                Notes = notes
+                    .OrderByDescending(n => n.CreatedAt)
+                    .Select(ToViewModel)
+                    .ToList()
+            };
+
+            return View(viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not load notes");
+            TempData["ErrorMessage"] = "Could not load your notes. Please try again.";
+            return View(new NoteIndexViewModel { Notes = new List<NoteViewModel>() });
+        }
     }
 
-    // CREATE - Display the form.
+    // CREATE - Display the create form
     [HttpGet]
     public IActionResult Create()
     {
         return View(new NoteViewModel());
     }
 
-    // CREATE - Save a new note.
+    // CREATE - Save a new note
+    // Bind only accepts Title and Content, so the browser cannot
+    // set NoteId or CreatedAt (over-posting protection).
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(NoteViewModel vm)
+    public async Task<IActionResult> Create([Bind("Title,Content")] NoteViewModel viewModel)
     {
         if (!ModelState.IsValid)
         {
-            return View(vm);
+            _logger.LogWarning("Creating a note failed validation");
+            return View(viewModel);
         }
 
-        // Map the ViewModel to the database model.
         var note = new Note
         {
-            Title = vm.Title,
-            Content = vm.Content,
+            Title = viewModel.Title,
+            Content = viewModel.Content,
             CreatedAt = DateTime.UtcNow
         };
 
-        await _notesRepository.Create(note);
-
-        return RedirectToAction(nameof(Index));
+        try
+        {
+            await _notesRepository.Create(note);
+            _logger.LogInformation("Note {NoteId} was created", note.NoteId);
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not create note");
+            ModelState.AddModelError(string.Empty,
+                "Could not save the note. Please try again.");
+            return View(viewModel);
+        }
     }
 
-    // UPDATE - Display the edit form.
+    // UPDATE - Display the edit form
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var note = await _notesRepository.GetNoteById(id);
-
-        if (note == null)
+        try
         {
-            return NotFound();
+            var note = await _notesRepository.GetNoteById(id);
+
+            if (note == null)
+            {
+                _logger.LogWarning("Note {NoteId} was not found (Edit)", id);
+                return NotFound();
+            }
+
+            return View(ToViewModel(note));
         }
-
-        // Convert the database model into a ViewModel.
-        var vm = ToViewModel(note);
-
-        return View(vm);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not load note {NoteId} for editing", id);
+            TempData["ErrorMessage"] = "Could not load the note. Please try again.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
-    // UPDATE - Save changes.
+    // UPDATE - Save changes
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, NoteViewModel vm)
+    public async Task<IActionResult> Edit(int id, NoteViewModel viewModel)
     {
-        // Ensure the route ID matches the submitted note ID.
-        if (id != vm.NoteId)
+        if (id != viewModel.NoteId)
         {
+            _logger.LogWarning(
+                "Edit id {Id} does not match note id {NoteId}", id, viewModel.NoteId);
             return BadRequest();
         }
 
         if (!ModelState.IsValid)
         {
-            return View(vm);
+            _logger.LogWarning("Editing note {NoteId} failed validation", id);
+            return View(viewModel);
         }
 
-        var existingNote = await _notesRepository.GetNoteById(id);
-
-        if (existingNote == null)
+        try
         {
-            return NotFound();
+            var existingNote = await _notesRepository.GetNoteById(id);
+
+            if (existingNote == null)
+            {
+                _logger.LogWarning("Note {NoteId} was not found (Edit)", id);
+                return NotFound();
+            }
+
+            // Only Title and Content are changed. CreatedAt is kept.
+            existingNote.Title = viewModel.Title;
+            existingNote.Content = viewModel.Content;
+
+            await _notesRepository.Update(existingNote);
+            _logger.LogInformation("Note {NoteId} was updated", id);
+
+            return RedirectToAction(nameof(Index));
         }
-
-        // Update only editable fields.
-        existingNote.Title = vm.Title;
-        existingNote.Content = vm.Content;
-
-        // Preserve NoteId and the original CreatedAt value.
-        await _notesRepository.Update(existingNote);
-
-        return RedirectToAction(nameof(Index));
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not update note {NoteId}", id);
+            ModelState.AddModelError(string.Empty,
+                "Could not save the changes. Please try again.");
+            return View(viewModel);
+        }
     }
 
-    // DELETE - Display the confirmation page.
+    // DELETE - Display delete confirmation
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
-        var note = await _notesRepository.GetNoteById(id);
-
-        if (note == null)
+        try
         {
-            return NotFound();
+            var note = await _notesRepository.GetNoteById(id);
+
+            if (note == null)
+            {
+                _logger.LogWarning("Note {NoteId} was not found (Delete)", id);
+                return NotFound();
+            }
+
+            return View(ToViewModel(note));
         }
-
-        var vm = ToViewModel(note);
-
-        return View(vm);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not load note {NoteId} for deletion", id);
+            TempData["ErrorMessage"] = "Could not load the note. Please try again.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
-    // DELETE - Confirm deletion.
-    [HttpPost]
-    [ActionName("Delete")]
+    // DELETE - Confirm deletion
+    [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
+    public async Task<IActionResult> DeleteConfirmed(int noteId)
     {
-        var note = await _notesRepository.GetNoteById(id);
-
-        if (note == null)
+        try
         {
-            return NotFound();
+            var deleted = await _notesRepository.Delete(noteId);
+
+            if (!deleted)
+            {
+                _logger.LogWarning("Note {NoteId} was not found (DeleteConfirmed)", noteId);
+                return NotFound();
+            }
+
+            _logger.LogInformation("Note {NoteId} was deleted", noteId);
+            return RedirectToAction(nameof(Index));
         }
-
-        await _notesRepository.Delete(id);
-
-        return RedirectToAction(nameof(Index));
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not delete note {NoteId}", noteId);
+            TempData["ErrorMessage"] = "Could not delete the note. Please try again.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
-    // Convert a database Note into a NoteViewModel.
+    // Converts a Note entity to a NoteViewModel for the views.
     private static NoteViewModel ToViewModel(Note note)
     {
         return new NoteViewModel

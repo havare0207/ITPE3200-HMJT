@@ -1,44 +1,55 @@
 @model HMJT.ViewModels.NoteIndexViewModel
 
 @{
-    ViewData["Title"] = "My Notes";
+    ViewData["Title"] = "Notes";
 }
 
-<h1>My Notes</h1>
+<h2>Notes</h2>
 
-<p>
-    <a asp-controller="Notes"
-       asp-action="Create"
-       class="btn btn-primary">
-        Create New Note
-    </a>
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<p class="text-muted">
+    Use notes to keep track of programming concepts, tricky questions and
+    things you want to revise after a game. Click <strong>Create New Note</strong>
+    to write a note, <strong>Edit</strong> to change it, or <strong>Delete</strong>
+    to remove it.
 </p>
 
-<table class="table">
+<a asp-action="Create" class="btn btn-primary mb-3">Create New Note</a>
+
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Title</th>
             <th>Content</th>
-            <th>Created</th>
+            <th>Created At</th>
             <th>Actions</th>
         </tr>
     </thead>
-
     <tbody>
         @foreach (var note in Model.Notes)
         {
             <tr>
                 <td>@note.Title</td>
-                <td>@note.Content</td>
-                <td>@note.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td>
+                    @(note.Content.Length > 60
+                        ? note.Content.Substring(0, 60) + "..."
+                        : note.Content)
+                </td>
+                <td>@note.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
                 <td>
                     <a asp-action="Edit"
-                       asp-route-id="@note.NoteId">
+                       asp-route-id="@note.NoteId"
+                       class="btn btn-sm btn-warning">
                         Edit
                     </a>
-                    |
+
                     <a asp-action="Delete"
-                       asp-route-id="@note.NoteId">
+                       asp-route-id="@note.NoteId"
+                       class="btn btn-sm btn-danger">
                         Delete
                     </a>
                 </td>
@@ -46,3 +57,8 @@
         }
     </tbody>
 </table>
+
+@if (!Model.Notes.Any())
+{
+    <p class="text-muted">You have no notes yet. Create your first one!</p>
+}
