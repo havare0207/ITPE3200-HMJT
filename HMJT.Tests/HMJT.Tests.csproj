@@ -55,6 +55,7 @@ means that the project uses the standard .NET SDK.
       commands such as "dotnet test".
     -->
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="NSubstitute" Version="6.2.0" />
     <!--
       The xUnit testing framework.
       This provides features such as [Fact] and Assert.
