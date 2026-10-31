@@ -395,7 +395,10 @@ This prevents gameplay from reaching a category where no custom question is avai
 
 The project includes question-related pages for browsing and managing question data.
 
-**Explore Questions** is used to view available question information in the application.
+**Explore Questions** 
+The Explore Questions page allows users to browse and explore questions created for their custom games. Users must first create custom games and add questions to them before those questions become available on the Explore Questions page.
+
+The page provides multi-parameter search and content filtering, allowing users to find specific questions based on keywords, category, difficulty level, and game name. This makes it easier to navigate, manage, and discover questions across their custom games.
 
 Question-management functionality is also used when working with user-created custom games.
 
