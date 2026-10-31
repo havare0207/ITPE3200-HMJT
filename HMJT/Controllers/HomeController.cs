@@ -28,10 +28,18 @@ public class HomeController : Controller
     [Route("Home/Status")]
     public IActionResult Status(int code)
     {
+        var statusFeature =
+            HttpContext.Features
+                .Get<IStatusCodeReExecuteFeature>();
+
+        string path =
+            statusFeature?.OriginalPath ??
+            HttpContext.Request.Path;
+
         _logger.LogWarning(
             "Status code {StatusCode} returned for {Path}",
             code,
-            HttpContext.Request.Path);
+            path);
 
         Response.StatusCode = code;
         ViewData["Code"] = code;
