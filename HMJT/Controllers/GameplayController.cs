@@ -1,3 +1,6 @@
+// Gives this controller access to a logger that does nothing when none is provided (used in tests).
+using Microsoft.Extensions.Logging.Abstractions;
+
 // Gives this controller access to ASP.NET Core MVC.
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,9 +38,10 @@ public class GameplayController : Controller
     private readonly DiceService _diceService;
 
     private readonly IGameRepository _gameRepository;
-    private readonly UserManager<ApplicationUser> _userManager;
+     private readonly UserManager<ApplicationUser> _userManager;
 
-
+  // Used to write messages to the application log.
+    private readonly ILogger<GameplayController> _logger;
     // Constructor for GameplayController.
     // The required services are provided through dependency injection.
     public GameplayController(
@@ -47,7 +51,8 @@ public class GameplayController : Controller
         BoardService boardService,
         DiceService diceService,
         IGameRepository gameRepository,
-        UserManager<ApplicationUser> userManager
+        UserManager<ApplicationUser> userManager,
+        ILogger<GameplayController>? logger = null
         )
     {
         _gameTurnService = gameTurnService;
@@ -57,6 +62,7 @@ public class GameplayController : Controller
         _diceService = diceService;
         _gameRepository = gameRepository;
         _userManager = userManager;
+        _logger = logger ?? NullLogger<GameplayController>.Instance;
     }
 
 
@@ -268,7 +274,7 @@ public class GameplayController : Controller
     }
 
 
-    // Starts a new game using player names
+        // Starts a new game using player names
     // and the selected question difficulty.
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -290,6 +296,8 @@ public class GameplayController : Controller
             _gameStateService.Message =
                 "Player 1 must be entered.";
 
+            _logger.LogWarning("Start game rejected: player 1 was empty");
+
             return RedirectToAction(nameof(Play));
         }
 
@@ -299,6 +307,8 @@ public class GameplayController : Controller
         {
             _gameStateService.Message =
                 "At least two players are required.";
+
+            _logger.LogWarning("Start game rejected: fewer than two players");
 
             return RedirectToAction(nameof(Play));
         }
@@ -311,6 +321,8 @@ public class GameplayController : Controller
             _gameStateService.Message =
                 "Player 2 must be entered before Player 3.";
 
+            _logger.LogWarning("Start game rejected: player 2 was empty but player 3 was entered");
+
             return RedirectToAction(nameof(Play));
         }
 
@@ -319,6 +331,8 @@ public class GameplayController : Controller
         {
             _gameStateService.Message =
                 "Player 3 must be entered before Player 4.";
+
+            _logger.LogWarning("Start game rejected: player 3 was empty but player 4 was entered");
 
             return RedirectToAction(nameof(Play));
         }
@@ -329,6 +343,8 @@ public class GameplayController : Controller
             _gameStateService.Message =
                 "Player 4 must be entered before Player 5.";
 
+            _logger.LogWarning("Start game rejected: player 4 was empty but player 5 was entered");
+
             return RedirectToAction(nameof(Play));
         }
 
@@ -337,6 +353,8 @@ public class GameplayController : Controller
         {
             _gameStateService.Message =
                 "Player 5 must be entered before Player 6.";
+
+            _logger.LogWarning("Start game rejected: player 5 was empty but player 6 was entered");
 
             return RedirectToAction(nameof(Play));
         }
@@ -373,6 +391,8 @@ public class GameplayController : Controller
                 _gameStateService.Message =
                     "You must log in to play a custom game.";
 
+                _logger.LogWarning("Start custom game rejected: user was not logged in");
+
                 return RedirectToAction(nameof(Play));
             }
 
@@ -381,6 +401,8 @@ public class GameplayController : Controller
             {
                 _gameStateService.Message =
                     "Please select a custom game.";
+
+                _logger.LogWarning("Start custom game rejected: no game was selected");
 
                 return RedirectToAction(nameof(Play));
             }
@@ -398,6 +420,10 @@ public class GameplayController : Controller
                 _gameStateService.Message =
                     "The selected custom game could not be found.";
 
+                _logger.LogWarning(
+                    "Start custom game rejected: game {GameId} was not found for the user",
+                    customGameId.Value);
+
                 return RedirectToAction(nameof(Play));
             }
 
@@ -409,6 +435,10 @@ public class GameplayController : Controller
                 _gameStateService.Message =
                     $"'{customGame.Name}' does not contain any questions. " +
                     "Add questions under My Games before starting.";
+
+                _logger.LogWarning(
+                    "Start custom game rejected: game {GameId} has no questions",
+                    customGame.GameId);
 
                 return RedirectToAction(nameof(Play));
             }
@@ -441,6 +471,11 @@ public class GameplayController : Controller
                     $"categories have no questions: " +
                     $"{string.Join(", ", missingCategories)}.";
 
+                _logger.LogWarning(
+                    "Start custom game rejected: game {GameId} is missing categories on {Difficulty}",
+                    customGame.GameId,
+                    difficulty);
+
                 return RedirectToAction(nameof(Play));
             }
 
@@ -457,7 +492,7 @@ public class GameplayController : Controller
 
             customGame.TimesPlayed++;
 
-            await _gameRepository.Update(customGame);   
+            await _gameRepository.Update(customGame);
         }
 
         // Create a new game session.
@@ -566,9 +601,14 @@ public class GameplayController : Controller
         _gameStateService.Message =
             string.Empty;
 
+        _logger.LogInformation(
+            "Game started with {PlayerCount} players on {Difficulty} difficulty in {GameMode} mode",
+            gameState.Players.Count,
+            difficulty,
+            gameMode);
+
         return RedirectToAction(nameof(Play));
     }
-
     // Confirms the randomly selected starting player
     // and continues from the starter screen
     // to the actual game board.
@@ -669,7 +709,12 @@ public class GameplayController : Controller
 
         // Roll the dice.
         int diceRoll =
-            _diceService.RollDice();
+            _diceService.RollDice(); 
+
+        _logger.LogInformation(
+         "Player {PlayerName} rolled {DiceRoll}",
+         player.PlayerName,
+         diceRoll); 
 
         // Calculate legal destinations.
         List<BoardSpace> legalDestinations =
@@ -761,6 +806,10 @@ public class GameplayController : Controller
         {
             _gameStateService.Message =
                 "That space is not a legal destination.";
+
+           _logger.LogWarning(
+               "Illegal move to space {BoardSpaceId} was rejected",
+              boardSpaceId);
 
             return RedirectToAction(nameof(Play));
         }
@@ -1100,6 +1149,8 @@ public class GameplayController : Controller
         if (!_gameStateService.HasActiveGame ||
             _gameStateService.CurrentTurn == null)
         {
+            _logger.LogWarning("Answer rejected: no active game or question");
+
             return RedirectToAction(nameof(Play));
         }
 
@@ -1192,6 +1243,12 @@ public class GameplayController : Controller
         // any previous center-choice state.
         _gameStateService.IsCenterChoicePending =
             false;
+        
+        _logger.LogInformation(
+            "Answer submitted by {PlayerName}: {Message}",
+            turnState.Player.PlayerName,
+            _gameStateService.Message);
+
 
         return RedirectToAction(nameof(Play));
     }
@@ -1236,6 +1293,8 @@ public class GameplayController : Controller
         // Return to Play.
         // Because no active game exists,
         // the setup screen will be displayed.
+        _logger.LogInformation("Game was reset and returned to the setup screen"); 
+
         return RedirectToAction(nameof(Play));
     }
 
@@ -1273,7 +1332,12 @@ public class GameplayController : Controller
                     .ToList();
 
             if (availableQuestions.Count == 0)
-            {
+            {   
+                _logger.LogError(
+                "No custom questions available for {Category} on {Difficulty}",
+                category,
+               _gameStateService.Difficulty);
+
                 throw new InvalidOperationException(
                     $"No custom questions are available for " +
                     $"{category} with difficulty " +
