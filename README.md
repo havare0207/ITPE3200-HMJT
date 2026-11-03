@@ -16,9 +16,9 @@ Main features include:
 - Wedge collection and final-question gameplay
 - Preset questions stored in JSON
 - User registration, login and logout
-- User-owned custom games
-- Question management for custom games
-- Explore Questions functionality
+- User-owned custom games with CRUD functionality
+- Question management for custom games with CRUD functionality
+- Explore Questions with multi-parameter search and content filtering
 - Personal Notes with CRUD functionality
 - Category learning resources
 - SQLite databases with Entity Framework Core
