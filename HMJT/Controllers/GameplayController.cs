@@ -271,6 +271,8 @@ public class GameplayController : Controller
     // Starts a new game using player names
     // and the selected question difficulty.
     [HttpPost]
+    [ValidateAntiForgeryToken]
+
     public async Task<IActionResult> StartGame(
         string player1,
         string player2,
@@ -571,6 +573,7 @@ public class GameplayController : Controller
     // and continues from the starter screen
     // to the actual game board.
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult ConfirmStartGame()
     {
         // A prepared game must exist.
@@ -599,6 +602,8 @@ public class GameplayController : Controller
     // Cancels the prepared game and returns
     // to the player and difficulty setup screen.
     [HttpPost]
+    [ValidateAntiForgeryToken]
+
     public IActionResult ChangeSetup()
     {
         // Remove the prepared game session.
@@ -632,6 +637,8 @@ public class GameplayController : Controller
     // Rolls the dice and calculates every legal
     // destination for the current player.
     [HttpPost]
+    [ValidateAntiForgeryToken]
+
     public IActionResult RollDice()
     {
         // A game must currently be active.
@@ -730,6 +737,8 @@ public class GameplayController : Controller
     // Moves the current player to one of the legal
     // board destinations created by the dice roll.
     [HttpPost]
+    [ValidateAntiForgeryToken]
+
     public IActionResult Move(int boardSpaceId)
     {
         // A game must be active and the player
@@ -906,6 +915,8 @@ public class GameplayController : Controller
     // Starts a normal question after the current player
     // reaches the center and chooses a category.
     [HttpPost]
+    [ValidateAntiForgeryToken]
+
     public IActionResult SelectCenterCategory(
         string category)
     {
@@ -968,6 +979,8 @@ public class GameplayController : Controller
     // Starts the final question using the category
     // selected by the other players.
     [HttpPost]
+    [ValidateAntiForgeryToken]
+
     public IActionResult SelectFinalCategory(
         string category)
     {
@@ -1078,6 +1091,8 @@ public class GameplayController : Controller
     // Processes the answer selected
     // for the current question.
     [HttpPost]
+    [ValidateAntiForgeryToken]
+
     public IActionResult SubmitAnswer(
         AnswerOption selectedAnswer)
     {
@@ -1185,6 +1200,8 @@ public class GameplayController : Controller
     // Resets the current game
     // and returns to the setup screen.
     [HttpPost]
+    [ValidateAntiForgeryToken]
+
     public IActionResult ResetGame()
     {
         // Remove the active game session.

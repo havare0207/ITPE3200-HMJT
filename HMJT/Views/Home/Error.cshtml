@@ -1,0 +1,32 @@
+@model HMJT.Models.ErrorViewModel
+
+@{
+    ViewData["Title"] = "Something went wrong";
+}
+
+<div class="card p-4 p-md-5 text-center">
+
+    <h1 class="display-4">
+        Something went wrong
+    </h1>
+
+    <h2 class="h4 mb-3">
+        The request could not be completed
+    </h2>
+
+    <p>
+        An unexpected error occurred.
+        Please try again later.
+    </p>
+
+    <div class="d-flex justify-content-center gap-2">
+
+        <a class="btn btn-primary"
+           asp-controller="Home"
+           asp-action="Index">
+            Back to home
+        </a>
+
+    </div>
+
+</div>
