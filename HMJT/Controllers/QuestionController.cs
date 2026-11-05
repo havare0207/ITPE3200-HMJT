@@ -162,15 +162,23 @@ public class QuestionController : Controller
                 })
                 .ToList(),
 
-            GameNames = gameNames
-                .Select(g => new SelectListItem
-                {
-                    Text = g,
-                    Value = g,
-                    Selected = g == gameName
-                })
-                .ToList()
-        };
+            GameNames = new List<SelectListItem>
+{
+    new SelectListItem
+    {
+        Text = "All Games",
+        Value = "",
+        Selected = string.IsNullOrEmpty(gameName)
+    }
+}
+.Concat(gameNames.Select(g => new SelectListItem
+{
+    Text = g,
+    Value = g,
+    Selected = g == gameName
+}))
+.ToList()
+};
 
         // Send the ViewModel to Index.cshtml.
         return View(vm);
