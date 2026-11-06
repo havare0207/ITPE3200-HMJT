@@ -2360,3 +2360,440 @@ h3 {
 .welcome-banner {
     background-color:  #3729d1;
 }
+
+/* =========================================
+   Accessibility and universal design
+   ========================================= */
+
+/*
+   Keep the base text at 16px on all screen sizes.
+   This improves readability on smaller screens and still allows
+   users to zoom or change their browser text settings.
+*/
+html {
+    font-size: 16px;
+}
+
+/*
+   Use a dark, high-contrast muted text color.
+
+   Bootstrap's default muted text and several custom gray text
+   colors can become difficult to read on very light backgrounds.
+*/
+.text-muted,
+.form-text,
+.board-key-item,
+.player-token-space,
+.setup-intro,
+.difficulty-description,
+.setup-info-card > p,
+.setup-info-stat span,
+.starter-description,
+.home-hero-text,
+.home-hero-stats span,
+.home-section-heading > p:last-child,
+.home-category-card p,
+.home-rule-card p,
+.categories-heading > p:last-child,
+.resource-card p,
+.categories-section-heading > p:last-child,
+.timeline-content p {
+    color: #334155 !important;
+}
+
+
+/* =========================================
+   Skip link
+   ========================================= */
+
+/*
+   Hidden during normal navigation, but becomes visible when a
+   keyboard user presses Tab at the beginning of the page.
+*/
+.skip-link {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 9999;
+
+    padding: 12px 18px;
+
+    border: 3px solid #ffffff;
+    border-radius: 8px;
+
+    background: #111827;
+    color: #ffffff;
+
+    font-weight: 800;
+    text-decoration: none;
+
+    transform: translateY(-160%);
+    transition: transform 0.15s ease;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+    color: #ffffff;
+    transform: translateY(0);
+}
+
+
+/* =========================================
+   Keyboard focus
+   ========================================= */
+
+/*
+   Give all common interactive elements a strong focus indicator.
+
+   The dark outline and white outer ring remain visible against
+   both light and dark backgrounds.
+*/
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid #111827;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 2px #ffffff;
+}
+
+/*
+   The navigation has a dark background, so a white focus outline
+   is clearer around navigation links and buttons.
+*/
+.navbar a:focus-visible,
+.navbar button:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 2px #111827;
+}
+
+/*
+   Make the custom difficulty-card selection visibly focusable
+   even though the actual radio input is visually hidden.
+*/
+.difficulty-card:has(input:focus-visible) {
+    outline: 3px solid #111827;
+    outline-offset: 4px;
+}
+
+
+/* =========================================
+   High-contrast primary actions
+   ========================================= */
+
+/*
+   Darker blue backgrounds preserve the visual identity while
+   giving white text substantially stronger contrast.
+*/
+.btn-primary,
+.setup-start-button,
+.starter-start-button,
+.home-primary-button {
+    background-color: #1e40af;
+    border-color: #1e40af;
+    color: #ffffff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.setup-start-button:hover,
+.setup-start-button:focus,
+.starter-start-button:hover,
+.starter-start-button:focus,
+.home-primary-button:hover,
+.home-primary-button:focus {
+    background-color: #172554;
+    border-color: #172554;
+    color: #ffffff;
+}
+
+
+/* =========================================
+   High-contrast blue text
+   ========================================= */
+
+/*
+   These elements previously used a bright blue that did not reach
+   AAA contrast on white or pale backgrounds.
+*/
+.setup-eyebrow,
+.home-eyebrow,
+.categories-eyebrow,
+.setup-info-stat strong,
+.starter-eyebrow,
+.home-rule-number {
+    color: #1e40af;
+}
+
+.starter-player-chip-selected {
+    color: #1e40af;
+    border-color: #1e40af;
+}
+
+
+/* =========================================
+   Board category labels
+   ========================================= */
+
+/*
+   The six board colors are intentionally preserved as the game's
+   category identity colors.
+
+   A solid dark label background ensures every category name has
+   strong text contrast regardless of the color behind it.
+*/
+.board-category-label {
+    padding: 5px 8px;
+
+    border: 2px solid #ffffff;
+    border-radius: 7px;
+
+    background: #111827;
+    color: #ffffff;
+
+    text-shadow: none;
+}
+
+
+/* =========================================
+   Category resource colors
+   ========================================= */
+
+/*
+   Resource-card labels and primary resource buttons use darker
+   variants of each category color.
+
+   The decorative board/category colors can remain bright, while
+   text and button backgrounds need stronger contrast.
+*/
+.resource-java {
+    --resource-color: #174a8b;
+}
+
+.resource-javascript {
+    --resource-color: #0f5f3a;
+}
+
+.resource-html {
+    --resource-color: #8a3f00;
+}
+
+.resource-python {
+    --resource-color: #6b5600;
+}
+
+.resource-history {
+    --resource-color: #8f1745;
+}
+
+.resource-csharp {
+    --resource-color: #5a2789;
+}
+
+/*
+   Ensure white text remains readable on every primary resource button.
+*/
+.resource-button {
+    color: #ffffff;
+}
+
+.resource-button:hover,
+.resource-button:focus {
+    color: #ffffff;
+}
+
+/*
+   Secondary resource buttons keep their light background but use
+   dark navy text for strong contrast.
+*/
+.resource-button-secondary,
+.resource-button-secondary:hover,
+.resource-button-secondary:focus {
+    color: #172554;
+}
+
+
+/* =========================================
+   Game history timeline
+   ========================================= */
+
+/*
+   Keep the bright pink timeline itself as a decorative accent,
+   but use a darker pink for text.
+*/
+.timeline-year {
+    color: #8f1745;
+}
+
+
+/* =========================================
+   Dark information banners
+   ========================================= */
+
+/*
+   Use solid white for paragraph text on dark gradient banners.
+   This avoids reduced contrast caused by partially transparent white.
+*/
+.home-play-banner p,
+.w3schools-resource-card p {
+    color: #ffffff;
+}
+
+/*
+   The lighter blue eyebrow text already contrasts strongly with
+   the dark banner backgrounds, so it can remain a secondary accent.
+*/
+.home-eyebrow-light,
+.w3schools-resource-card .categories-eyebrow {
+    color: #bfdbfe;
+}
+
+
+/* =========================================
+   Form controls and validation
+   ========================================= */
+
+/*
+   Use a strong dark border when a form field receives keyboard
+   or pointer focus. This supplements, rather than replaces,
+   the global focus outline.
+*/
+.form-control:focus,
+.form-select:focus,
+.question-search .form-control:focus,
+.question-search .form-select:focus,
+.setup-player-field .form-control:focus {
+    border-color: #1e40af;
+    box-shadow: 0 0 0 0.2rem rgba(30, 64, 175, 0.22);
+}
+
+/*
+   Validation text should remain visually distinct and readable.
+*/
+.text-danger,
+.field-validation-error,
+.validation-summary-errors {
+    color: #991b1b !important;
+}
+
+
+/* =========================================
+   Current player and selected states
+   ========================================= */
+
+/*
+   Selection is indicated by both background and a strong border,
+   rather than relying on color alone.
+*/
+.player-token-item.current-player-token {
+    border: 3px solid #1e40af;
+    background: #eef2ff;
+}
+
+.starter-player-chip-selected {
+    border-width: 2px;
+    font-weight: 800;
+}
+
+
+/* =========================================
+   Interactive target sizing
+   ========================================= */
+
+/*
+   Give normal application buttons and custom action links a
+   comfortable minimum height. Board spaces are intentionally
+   excluded because their size is part of the board geometry.
+*/
+.btn:not(.btn-sm),
+.setup-start-button,
+.starter-start-button,
+.home-primary-button,
+.home-secondary-button,
+.home-banner-button,
+.resource-button,
+.w3schools-button {
+    min-height: 44px;
+}
+
+
+/* =========================================
+   Reduced motion
+   ========================================= */
+
+/*
+   Respect the user's operating-system preference for reduced motion.
+   Functionality remains unchanged; decorative movement and animated
+   transitions are effectively removed.
+*/
+@media (prefers-reduced-motion: reduce) {
+
+    html {
+        scroll-behavior: auto !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+    }
+
+    .btn:hover,
+    .navbar .nav-link:hover,
+    .difficulty-card:hover,
+    .home-primary-button:hover,
+    .home-secondary-button:hover,
+    .home-banner-button:hover,
+    .home-category-card:hover,
+    .resource-button:hover,
+    .question-search .btn:hover {
+        transform: none;
+    }
+}
+
+
+/* =========================================
+   Windows / operating-system high contrast
+   ========================================= */
+
+/*
+   Allow forced-color modes to use the operating system's own colors
+   while keeping interactive focus and borders visible.
+*/
+@media (forced-colors: active) {
+
+    .skip-link,
+    .board-category-label,
+    .board-space,
+    .resource-button,
+    .home-primary-button,
+    .home-secondary-button,
+    .home-banner-button,
+    .setup-start-button,
+    .starter-start-button {
+        forced-color-adjust: auto;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    [tabindex]:focus-visible {
+        outline: 3px solid Highlight;
+        box-shadow: none;
+    }
+
+    .player-token-item.current-player-token,
+    .starter-player-chip-selected,
+    .difficulty-card:has(input:checked) {
+        border: 3px solid Highlight;
+    }
+}
+

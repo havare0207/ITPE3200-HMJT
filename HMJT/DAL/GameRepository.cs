@@ -85,7 +85,7 @@ public class GameRepository : IGameRepository
         return true;
     }
 
-        public async Task SetPresetQuestion(int gameId, IEnumerable<int> presetQuestionIds)
+    public async Task SetPresetQuestion(int gameId, IEnumerable<int> presetQuestionIds)
     {
         var game = await _db.Games.Include(g => g.PresetQuestions).FirstOrDefaultAsync(g => g.GameId == gameId);
         if (game == null) return;
@@ -93,10 +93,10 @@ public class GameRepository : IGameRepository
         var selected = await _db.PresetQuestion.Where(pq => presetQuestionIds.Contains(pq.PresetQuestionId)).ToListAsync();
         game.PresetQuestions.Clear();
         foreach (var pq in selected)
-    {
-        game.PresetQuestions.Add(pq);
+        {
+            game.PresetQuestions.Add(pq);
 
-    }   
-        await _db.SaveChangesAsync(); 
-}
+        }
+        await _db.SaveChangesAsync();
+    }
 }

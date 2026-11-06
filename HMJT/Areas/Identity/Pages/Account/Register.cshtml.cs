@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
 
 using HMJT.Models;
 
@@ -11,13 +10,18 @@ namespace HMJT.Areas.Identity.Pages.Account;
 
 public class RegisterModel : PageModel
 {
+    // ASP.NET Core Identity service used to create
+    // and manage ApplicationUser accounts.
     private readonly UserManager<ApplicationUser>
         _userManager;
 
+    // Identity service used to sign in the user
+    // after successful registration.
     private readonly SignInManager<ApplicationUser>
         _signInManager;
 
 
+    // Identity services are provided through dependency injection.
     public RegisterModel(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager)
@@ -27,22 +31,31 @@ public class RegisterModel : PageModel
     }
 
 
+    // Binds registration form fields to this model
+    // when the form is submitted.
     [BindProperty]
     public InputModel Input { get; set; } =
         new();
 
 
+    // Stores the destination the user should return to
+    // after successful registration.
     public string? ReturnUrl { get; set; }
 
 
+    // Contains all values entered into the registration form.
     public class InputModel
     {
+        // Email is required and must use a valid email format.
         [Required]
         [EmailAddress]
         public string Email { get; set; } =
             string.Empty;
 
 
+        // Password must satisfy this model's length requirement.
+        // Additional ASP.NET Core Identity password requirements
+        // may also be configured elsewhere in the application.
         [Required]
         [StringLength(
             100,
@@ -54,6 +67,8 @@ public class RegisterModel : PageModel
             string.Empty;
 
 
+        // Confirmation is compared with the Password property
+        // before account creation can continue.
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
         [Compare(
@@ -65,6 +80,7 @@ public class RegisterModel : PageModel
     }
 
 
+    // Runs when the registration page is opened.
     public void OnGet(
         string? returnUrl = null)
     {
@@ -72,17 +88,25 @@ public class RegisterModel : PageModel
     }
 
 
+    // Runs when the registration form is submitted.
     public async Task<IActionResult> OnPostAsync(
         string? returnUrl = null)
     {
+        // Return to the home page when no other
+        // destination has been supplied.
         returnUrl ??=
             Url.Content("~/");
 
+
+        // Stop account creation when validation fails.
         if (!ModelState.IsValid)
         {
             return Page();
         }
 
+
+        // Creates a new application user using the submitted email
+        // as both the username and email address.
         var user =
             new ApplicationUser
             {
@@ -90,6 +114,9 @@ public class RegisterModel : PageModel
                 Email = Input.Email
             };
 
+
+        // ASP.NET Core Identity creates the account and securely
+        // handles password hashing and storage.
         IdentityResult result =
             await _userManager
                 .CreateAsync(
@@ -97,6 +124,9 @@ public class RegisterModel : PageModel
                     Input.Password
                 );
 
+
+        // Sign the new user in immediately after
+        // successful account creation.
         if (result.Succeeded)
         {
             await _signInManager
@@ -110,6 +140,9 @@ public class RegisterModel : PageModel
             );
         }
 
+
+        // Add Identity errors to ModelState so they
+        // can be displayed by the validation summary.
         foreach (IdentityError error
                  in result.Errors)
         {

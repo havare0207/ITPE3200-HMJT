@@ -38,9 +38,9 @@ public class GameplayController : Controller
     private readonly DiceService _diceService;
 
     private readonly IGameRepository _gameRepository;
-     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-  // Used to write messages to the application log.
+    // Used to write messages to the application log.
     private readonly ILogger<GameplayController> _logger;
     // Constructor for GameplayController.
     // The required services are provided through dependency injection.
@@ -274,7 +274,7 @@ public class GameplayController : Controller
     }
 
 
-        // Starts a new game using player names
+    // Starts a new game using player names
     // and the selected question difficulty.
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -709,12 +709,12 @@ public class GameplayController : Controller
 
         // Roll the dice.
         int diceRoll =
-            _diceService.RollDice(); 
+            _diceService.RollDice();
 
         _logger.LogInformation(
          "Player {PlayerName} rolled {DiceRoll}",
          player.PlayerName,
-         diceRoll); 
+         diceRoll);
 
         // Calculate legal destinations.
         List<BoardSpace> legalDestinations =
@@ -807,9 +807,9 @@ public class GameplayController : Controller
             _gameStateService.Message =
                 "That space is not a legal destination.";
 
-           _logger.LogWarning(
-               "Illegal move to space {BoardSpaceId} was rejected",
-              boardSpaceId);
+            _logger.LogWarning(
+                "Illegal move to space {BoardSpaceId} was rejected",
+               boardSpaceId);
 
             return RedirectToAction(nameof(Play));
         }
@@ -1243,7 +1243,7 @@ public class GameplayController : Controller
         // any previous center-choice state.
         _gameStateService.IsCenterChoicePending =
             false;
-        
+
         _logger.LogInformation(
             "Answer submitted by {PlayerName}: {Message}",
             turnState.Player.PlayerName,
@@ -1293,7 +1293,7 @@ public class GameplayController : Controller
         // Return to Play.
         // Because no active game exists,
         // the setup screen will be displayed.
-        _logger.LogInformation("Game was reset and returned to the setup screen"); 
+        _logger.LogInformation("Game was reset and returned to the setup screen");
 
         return RedirectToAction(nameof(Play));
     }
@@ -1332,7 +1332,7 @@ public class GameplayController : Controller
                     .ToList();
 
             if (availableQuestions.Count == 0)
-            {   
+            {
                 _logger.LogError(
                 "No custom questions available for {Category} on {Difficulty}",
                 category,

@@ -1,4 +1,5 @@
 ﻿@{
+    // Sets the browser/page title.
     ViewData["Title"] = "Home";
 }
 
@@ -6,15 +7,20 @@
      Home hero
      ===================================== -->
 
-<section class="home-hero">
+<section class="home-hero"
+         aria-labelledby="home-main-heading">
 
     <div class="home-hero-content">
 
+        <!-- Small introductory label.
+             This is ordinary text rather than a heading because
+             it does not represent a new document section. -->
         <p class="home-eyebrow">
             CODING • TRIVIA • STRATEGY
         </p>
 
-        <h1>
+        <!-- Main heading for the page. -->
+        <h1 id="home-main-heading">
             Learn. Compete.
             <span>Conquer the Code.</span>
         </h1>
@@ -25,26 +31,32 @@
             questions and collect all six category wedges.
         </p>
 
+        <!-- Primary navigation actions for the home page. -->
         <div class="home-hero-actions">
 
             <a asp-controller="Gameplay"
                asp-action="Play"
                class="home-primary-button">
-
                 Start a Game
-
             </a>
 
-            <a href="#how-to-play"
+            <!-- Links directly to the How to Play heading below. -->
+            <a href="#how-to-play-heading"
                class="home-secondary-button">
-
                 How to Play
-
             </a>
 
         </div>
 
-        <div class="home-hero-stats">
+
+        <!--
+            Quick game statistics.
+
+            The information is provided as text instead of being
+            represented only through graphics or colors.
+        -->
+        <div class="home-hero-stats"
+             aria-label="Game overview">
 
             <div>
                 <strong>2–6</strong>
@@ -66,14 +78,23 @@
     </div>
 
 
-    <!-- Category artwork already stored
-         in wwwroot/images/home. -->
+    <!-- =====================================
+         Category artwork
+         ===================================== -->
+
     <div class="home-hero-visual">
 
         <div class="home-category-image-card">
 
+            <!--
+                This image contains useful category information,
+                so it receives descriptive alternative text.
+
+                A screen-reader user therefore receives the same
+                basic information represented visually in the image.
+            -->
             <img src="~/images/home/categories.png"
-                 alt="The six Code Pursuit programming categories"
+                 alt="Illustration showing the six Code Pursuit categories: Java, JavaScript, HTML and CSS, Python, Game History and C sharp."
                  class="home-category-image" />
 
         </div>
@@ -87,7 +108,8 @@
      Category overview
      ===================================== -->
 
-<section class="home-section">
+<section class="home-section"
+         aria-labelledby="category-overview-heading">
 
     <div class="home-section-heading">
 
@@ -95,7 +117,7 @@
             SIX CATEGORIES
         </p>
 
-        <h2>
+        <h2 id="category-overview-heading">
             Collect every wedge
         </h2>
 
@@ -109,9 +131,11 @@
 
     <div class="home-category-grid">
 
+        <!-- Java category. -->
         <article class="home-category-card category-java">
 
-            <div class="home-category-symbol">
+            <div class="home-category-symbol"
+                 aria-hidden="true">
                 ☕
             </div>
 
@@ -124,9 +148,11 @@
         </article>
 
 
+        <!-- JavaScript category. -->
         <article class="home-category-card category-javascript">
 
-            <div class="home-category-symbol">
+            <div class="home-category-symbol"
+                 aria-hidden="true">
                 ⚡
             </div>
 
@@ -139,9 +165,11 @@
         </article>
 
 
+        <!-- HTML/CSS category. -->
         <article class="home-category-card category-html">
 
-            <div class="home-category-symbol">
+            <div class="home-category-symbol"
+                 aria-hidden="true">
                 🌐
             </div>
 
@@ -154,9 +182,11 @@
         </article>
 
 
+        <!-- Python category. -->
         <article class="home-category-card category-python">
 
-            <div class="home-category-symbol">
+            <div class="home-category-symbol"
+                 aria-hidden="true">
                 🐍
             </div>
 
@@ -169,9 +199,11 @@
         </article>
 
 
+        <!-- Game History category. -->
         <article class="home-category-card category-history">
 
-            <div class="home-category-symbol">
+            <div class="home-category-symbol"
+                 aria-hidden="true">
                 🎮
             </div>
 
@@ -184,9 +216,11 @@
         </article>
 
 
+        <!-- C# category. -->
         <article class="home-category-card category-csharp">
 
-            <div class="home-category-symbol">
+            <div class="home-category-symbol"
+                 aria-hidden="true">
                 #️⃣
             </div>
 
@@ -208,7 +242,8 @@
      ===================================== -->
 
 <section id="how-to-play"
-         class="home-section home-rules-section">
+         class="home-section home-rules-section"
+         aria-labelledby="how-to-play-heading">
 
     <div class="home-section-heading">
 
@@ -216,92 +251,131 @@
             HOW TO PLAY
         </p>
 
-        <h2>
+        <!--
+            tabindex="-1" allows this heading to receive focus
+            when users navigate directly to it from the link above.
+        -->
+        <h2 id="how-to-play-heading"
+            tabindex="-1">
             Simple rules. Six wedges. One winner.
         </h2>
+
+        <p>
+            Code Pursuit is played in six main steps.
+            Read the steps below in order to learn how to play.
+        </p>
 
     </div>
 
 
-    <div class="home-rule-grid">
+    <!--
+        The rules form an ordered list.
 
-        <!-- Step 1 -->
-        <article class="home-rule-card">
+        This lets screen readers announce that the user has entered
+        a list containing six steps and makes the rule sequence
+        easier to understand without relying on the visual numbers.
+    -->
+    <ol class="home-rule-grid list-unstyled">
 
-            <span class="home-rule-number">
+        <!-- Step 1. -->
+        <li class="home-rule-card">
+
+            <span class="home-rule-number"
+                  aria-hidden="true">
                 1
             </span>
 
-            <h3>Set up the game</h3>
+            <h3>
+                <span class="visually-hidden">Step 1: </span>
+                Set up the game
+            </h3>
 
             <p>
                 Enter names for 2–6 local players and choose
                 Easy, Medium or Hard question difficulty.
             </p>
 
-        </article>
+        </li>
 
 
-        <!-- Step 2 -->
-        <article class="home-rule-card">
+        <!-- Step 2. -->
+        <li class="home-rule-card">
 
-            <span class="home-rule-number">
+            <span class="home-rule-number"
+                  aria-hidden="true">
                 2
             </span>
 
-            <h3>Choose who starts</h3>
+            <h3>
+                <span class="visually-hidden">Step 2: </span>
+                Choose who starts
+            </h3>
 
             <p>
                 Code Pursuit randomly selects the first player.
                 Players then take turns in order.
             </p>
 
-        </article>
+        </li>
 
 
-        <!-- Step 3 -->
-        <article class="home-rule-card">
+        <!-- Step 3. -->
+        <li class="home-rule-card">
 
-            <span class="home-rule-number">
+            <span class="home-rule-number"
+                  aria-hidden="true">
                 3
             </span>
 
-            <h3>Roll and move</h3>
+            <h3>
+                <span class="visually-hidden">Step 3: </span>
+                Roll and move
+            </h3>
 
             <p>
                 Roll the die and move the exact number of spaces.
                 A six lets you choose any available destination.
             </p>
 
-        </article>
+        </li>
 
 
-        <!-- Step 4 -->
-        <article class="home-rule-card">
+        <!-- Step 4. -->
+        <li class="home-rule-card">
 
-            <span class="home-rule-number">
+            <span class="home-rule-number"
+                  aria-hidden="true">
                 4
             </span>
 
-            <h3>Answer a question</h3>
+            <h3>
+                <span class="visually-hidden">Step 4: </span>
+                Answer a question
+            </h3>
 
             <p>
                 The colored field you land on determines the
-                question category. Answer correctly to collect
-                its wedge if you do not already own it.
+                question category. The category is also identified
+                by text on the game board.
+                Answer correctly to collect its wedge if you do
+                not already own it.
             </p>
 
-        </article>
+        </li>
 
 
-        <!-- Step 5 -->
-        <article class="home-rule-card">
+        <!-- Step 5. -->
+        <li class="home-rule-card">
 
-            <span class="home-rule-number">
+            <span class="home-rule-number"
+                  aria-hidden="true">
                 5
             </span>
 
-            <h3>Use special spaces</h3>
+            <h3>
+                <span class="visually-hidden">Step 5: </span>
+                Use special spaces
+            </h3>
 
             <p>
                 Landing on Roll Again gives you another roll.
@@ -309,17 +383,21 @@
                 you choose your question category.
             </p>
 
-        </article>
+        </li>
 
 
-        <!-- Step 6 -->
-        <article class="home-rule-card">
+        <!-- Step 6. -->
+        <li class="home-rule-card">
 
-            <span class="home-rule-number">
+            <span class="home-rule-number"
+                  aria-hidden="true">
                 6
             </span>
 
-            <h3>Win the game</h3>
+            <h3>
+                <span class="visually-hidden">Step 6: </span>
+                Win the game
+            </h3>
 
             <p>
                 Collect all six wedges and return to the center.
@@ -327,9 +405,9 @@
                 Answer correctly to win Code Pursuit.
             </p>
 
-        </article>
+        </li>
 
-    </div>
+    </ol>
 
 </section>
 
@@ -338,7 +416,8 @@
      Final call to action
      ===================================== -->
 
-<section class="home-play-banner">
+<section class="home-play-banner"
+         aria-labelledby="home-play-heading">
 
     <div>
 
@@ -346,7 +425,7 @@
             READY TO PLAY?
         </p>
 
-        <h2>
+        <h2 id="home-play-heading">
             Begin your Code Pursuit
         </h2>
 
@@ -361,9 +440,7 @@
     <a asp-controller="Gameplay"
        asp-action="Play"
        class="home-banner-button">
-
         Start Game
-
     </a>
 
 </section>

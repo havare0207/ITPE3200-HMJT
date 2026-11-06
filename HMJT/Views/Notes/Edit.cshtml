@@ -1,58 +1,106 @@
 @model HMJT.ViewModels.NoteViewModel
 
 @{
+    // Sets the browser/page title.
     ViewData["Title"] = "Edit Note";
 }
 
+<!-- Main page heading. -->
 <h1>Edit Note</h1>
 
 <hr />
 
 <div class="row">
     <div class="col-md-6">
+
+        <!-- Sends the updated note to the Edit POST action. -->
         <form asp-controller="Notes"
               asp-action="Edit"
               asp-route-id="@Model.NoteId"
               method="post">
 
+            <!-- Protects the POST request against cross-site request forgery. -->
             @Html.AntiForgeryToken()
 
-            <input type="hidden" asp-for="NoteId" />
+            <!-- Keeps the NoteId when the form is submitted. -->
+            <input type="hidden"
+                   asp-for="NoteId" />
 
+            <!-- Displays general validation errors.
+                 role="alert" and aria-live make new errors easier
+                 for assistive technologies to announce. -->
             <div asp-validation-summary="ModelOnly"
-                 class="text-danger"></div>
+                 class="text-danger"
+                 role="alert"
+                 aria-live="polite">
+            </div>
+
+
+            <!-- =====================================
+                 Note title
+                 ===================================== -->
 
             <div class="form-group mb-3">
-                <label asp-for="Title" class="form-label"></label>
 
-                <input asp-for="Title" class="form-control" />
+                <label asp-for="Title"
+                       class="form-label">
+                </label>
+
+                <!-- Displays the existing note title for editing. -->
+                <input asp-for="Title"
+                       class="form-control" />
 
                 <span asp-validation-for="Title"
-                      class="text-danger"></span>
+                      class="text-danger">
+                </span>
+
             </div>
+
+
+            <!-- =====================================
+                 Note content
+                 ===================================== -->
 
             <div class="form-group mb-3">
-                <label asp-for="Content" class="form-label"></label>
 
+                <label asp-for="Content"
+                       class="form-label">
+                </label>
+
+                <!-- Displays the existing note content for editing. -->
                 <textarea asp-for="Content"
                           class="form-control"
-                          rows="6"></textarea>
+                          rows="6">
+                </textarea>
 
                 <span asp-validation-for="Content"
-                      class="text-danger"></span>
+                      class="text-danger">
+                </span>
+
             </div>
 
-            <button type="submit" class="btn btn-primary">
+
+            <!-- Saves the edited note. -->
+            <button type="submit"
+                    class="btn btn-primary">
                 Save Changes
             </button>
 
-            <a asp-action="Index" class="btn btn-secondary">
+            <!-- Returns to the note list without saving changes. -->
+            <a asp-action="Index"
+               class="btn btn-secondary">
                 Cancel
             </a>
+
         </form>
+
     </div>
 </div>
 
+
 @section Scripts {
+
+    <!-- Enables ASP.NET Core client-side validation. -->
     <partial name="_ValidationScriptsPartial" />
+
 }

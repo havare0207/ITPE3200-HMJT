@@ -1,15 +1,29 @@
 @model HMJT.Models.ErrorViewModel
 
 @{
+    // Sets the browser/page title.
     ViewData["Title"] = "Something went wrong";
 }
 
-<div class="card p-4 p-md-5 text-center">
+<!--
+    Generic application error page.
 
-    <h1 class="display-4">
+    The page intentionally avoids displaying technical information
+    such as stack traces, database errors, file paths or source-code
+    details to the user.
+-->
+<section class="card p-4 p-md-5 text-center"
+         aria-labelledby="error-page-heading"
+         role="alert"
+         aria-live="assertive">
+
+    <!-- Main page heading. -->
+    <h1 id="error-page-heading"
+        class="display-4">
         Something went wrong
     </h1>
 
+    <!-- Secondary explanation of the error. -->
     <h2 class="h4 mb-3">
         The request could not be completed
     </h2>
@@ -19,6 +33,7 @@
         Please try again later.
     </p>
 
+    <!-- Gives the user a clear way back into the application. -->
     <div class="d-flex justify-content-center gap-2">
 
         <a class="btn btn-primary"
@@ -29,4 +44,4 @@
 
     </div>
 
-</div>
+</section>

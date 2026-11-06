@@ -179,7 +179,7 @@ public class QuestionControllerTests
     null,
     null,
     null);
-        
+
 
         // Assert
         var model = Assert.IsType<QuestionIndexViewModel>(
@@ -191,38 +191,38 @@ public class QuestionControllerTests
         Assert.NotNull(model.GameNames);
     }
 
-// Tests that Details returns a QuestionViewModel.
-[Fact]
-public async Task Details_ReturnsViewModel_WhenQuestionExists()
-{
-    // Arrange
-    using var context = GetDatabaseContext();
+    // Tests that Details returns a QuestionViewModel.
+    [Fact]
+    public async Task Details_ReturnsViewModel_WhenQuestionExists()
+    {
+        // Arrange
+        using var context = GetDatabaseContext();
 
-    context.Games.Add(GetTestGame(1));
-    context.Questions.Add(GetTestQuestion(1, 1));
+        context.Games.Add(GetTestGame(1));
+        context.Questions.Add(GetTestQuestion(1, 1));
 
-    await context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-    var controller = GetController(context);
+        var controller = GetController(context);
 
-    // Act
-    // Call Details for the question with ID 1.
-    var result = await controller.Details(1);
+        // Act
+        // Call Details for the question with ID 1.
+        var result = await controller.Details(1);
 
-    // Assert
-    var viewResult = Assert.IsType<ViewResult>(result);
+        // Assert
+        var viewResult = Assert.IsType<ViewResult>(result);
 
-    // Details should return a QuestionViewModel.
-    var model = Assert.IsType<QuestionViewModel>(
-        viewResult.Model
-    );
+        // Details should return a QuestionViewModel.
+        var model = Assert.IsType<QuestionViewModel>(
+            viewResult.Model
+        );
 
-    // Verify that the correct question is displayed.
-    Assert.Equal(1, model.QuestionId);
-    Assert.Equal(1, model.GameId);
-    Assert.Equal("What is 2 + 2?", model.QuestionText);
-    Assert.Equal("Test Game", model.GameName);
-}
+        // Verify that the correct question is displayed.
+        Assert.Equal(1, model.QuestionId);
+        Assert.Equal(1, model.GameId);
+        Assert.Equal("What is 2 + 2?", model.QuestionText);
+        Assert.Equal("Test Game", model.GameName);
+    }
 
     // Tests that Details returns NotFound for a missing question.
     [Fact]
