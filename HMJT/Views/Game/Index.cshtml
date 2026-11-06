@@ -120,11 +120,9 @@
                                 <time> gives the date additional semantic meaning
                                 while preserving the visible date/time format.
                             -->
-                            <td>
+                           <td>
                                 <time datetime="@game.CreatedAt.ToString("O")">
-                                    @game.CreatedAt
-                                        .ToLocalTime()
-                                        .ToString("dd.MM.yyyy HH:mm:ss")
+                                    @(game.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss"))
                                 </time>
                             </td>
 
