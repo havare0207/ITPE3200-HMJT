@@ -1,140 +1,259 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+<!--
+    The application interface is written in English,
+    so the document language is set to "en".
+    This helps screen readers use the correct pronunciation rules.
+-->
+<html lang="en">
+
+<head>
+
+    <!-- Defines UTF-8 character encoding for the page. -->
+    <meta charset="utf-8" />
+
+    <!-- Makes the application responsive on phones and tablets. -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <!-- Displays the current page title followed by the application name. -->
     <title>@ViewData["Title"] - CodePursuit</title>
 
+    <!-- Import map generated/used by ASP.NET Core if required. -->
     <script type="importmap"></script>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/CodePursuit.styles.css" asp-append-version="true" />
+    <!-- Bootstrap styling. -->
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Main application stylesheet.
+         asp-append-version adds a cache-busting version value. -->
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <!-- Styles generated from scoped CSS files in the project. -->
+    <link rel="stylesheet"
+          href="~/CodePursuit.styles.css"
+          asp-append-version="true" />
+
 </head>
+
 
 <body>
 
+    <!--
+        Accessibility skip link.
+
+        Keyboard and screen-reader users can use this link to bypass
+        the navigation and move directly to the main page content.
+
+        The visual appearance will be defined later in site.css.
+    -->
+    <a href="#main-content"
+       class="skip-link">
+        Skip to main content
+    </a>
+
+
+    <!-- =====================================
+         Header and primary navigation
+         ===================================== -->
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-dark shadow-sm mb-4">
+
+        <!-- Main application navigation. -->
+        <nav class="navbar navbar-expand-sm navbar-dark shadow-sm mb-4"
+             aria-label="Primary navigation">
 
             <div class="container">
 
-                <!-- Website/game name -->
+
+                <!-- =====================================
+                     Website / game name
+                     ===================================== -->
+
+                <!-- Returns to the home page. -->
                 <a class="navbar-brand fw-bold"
-                asp-area=""
-                asp-controller="Home"
-                asp-action="Index">
+                   asp-area=""
+                   asp-controller="Home"
+                   asp-action="Index">
 
                     CodePursuit
 
                 </a>
 
-                <!-- Mobile navigation button -->
+
+                <!-- =====================================
+                     Mobile navigation button
+                     ===================================== -->
+
+                <!--
+                    Bootstrap navigation toggle used on smaller screens.
+
+                    aria-controls references the collapsible navigation
+                    container below.
+
+                    aria-expanded is automatically updated by Bootstrap.
+                -->
                 <button class="navbar-toggler"
                         type="button"
                         data-bs-toggle="collapse"
-                        data-bs-target=".navbar-collapse"
+                        data-bs-target="#navbarSupportedContent"
                         aria-controls="navbarSupportedContent"
                         aria-expanded="false"
                         aria-label="Toggle navigation">
 
-                    <span class="navbar-toggler-icon"></span>
+                    <!-- Decorative Bootstrap navigation icon. -->
+                    <span class="navbar-toggler-icon"
+                          aria-hidden="true">
+                    </span>
 
                 </button>
 
 
-                <!-- Navigation links and authentication controls -->
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <!-- =====================================
+                     Navigation links
+                     ===================================== -->
 
-                    <!-- Main navigation links shown on the left side -->
+                <!--
+                    Contains the primary navigation links on the left
+                    and authentication controls on the right.
+                -->
+                <div id="navbarSupportedContent"
+                     class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
+
+                    <!-- =====================================
+                         Main navigation
+                         ===================================== -->
+
                     <ul class="navbar-nav flex-grow-1">
 
-                        <!-- Home page -->
+
+                        <!-- Home page. -->
                         <li class="nav-item">
+
                             <a class="nav-link"
-                            asp-area=""
-                            asp-controller="Home"
-                            asp-action="Index">
+                               asp-area=""
+                               asp-controller="Home"
+                               asp-action="Index">
+
                                 Home
+
                             </a>
+
                         </li>
 
 
-                        <!-- Opens the gameplay setup / game board -->
+                        <!-- Opens the gameplay setup or active game board. -->
                         <li class="nav-item">
+
                             <a class="nav-link"
-                            asp-area=""
-                            asp-controller="Gameplay"
-                            asp-action="Play">
+                               asp-area=""
+                               asp-controller="Gameplay"
+                               asp-action="Play">
+
                                 Play
+
                             </a>
+
                         </li>
 
-                        
-                        <!-- Opens the question management page-->
-                        
+
+                        <!-- Opens the searchable question overview. -->
                         <li class="nav-item">
+
                             <a class="nav-link"
-                            asp-area=""
-                            asp-controller="Question"
-                            asp-action="Index">
+                               asp-area=""
+                               asp-controller="Question"
+                               asp-action="Index">
+
                                 Explore Questions
-                            </a>
-                        </li>
-                    
 
-                        <!-- Opens the user's saved custom games.
-                            Login is required to access this page. -->
+                            </a>
+
+                        </li>
+
+
+                        <!--
+                            Opens the user's saved custom games.
+                            Authentication is required by the controller.
+                        -->
                         <li class="nav-item">
+
                             <a class="nav-link"
-                            asp-area=""
-                            asp-controller="Game"
-                            asp-action="Index">
+                               asp-area=""
+                               asp-controller="Game"
+                               asp-action="Index">
+
                                 My Games
+
                             </a>
+
                         </li>
-                           
-                         <!-- Opens the notes page where the user can view, create,
-                         edit and delete notes. Login is required to access this page. -->
+
+
+                        <!--
+                            Opens the user's personal notes.
+                            Authentication is required by the controller.
+                        -->
                         <li class="nav-item">
-                            <a class="nav-link" 
-                            asp-area="" 
-                            asp-controller="Notes" 
-                            asp-action="Index">
+
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Notes"
+                               asp-action="Index">
+
                                 Notes
-                            </a>
-                         </li>
-                        
 
-
-                        <!-- Opens the learning resources
-                            for the six game categories -->
-                        <li class="nav-item">
-                            <a class="nav-link"
-                            asp-area=""
-                            asp-controller="Home"
-                            asp-action="Categories">
-                                Categories
                             </a>
+
                         </li>
 
 
-                        <!-- Opens the privacy page -->
+                        <!-- Opens learning resources for the six categories. -->
                         <li class="nav-item">
+
                             <a class="nav-link"
-                            asp-area=""
-                            asp-controller="Home"
-                            asp-action="Privacy">
-                                Privacy
+                               asp-area=""
+                               asp-controller="Home"
+                               asp-action="Categories">
+
+                                Categories
+
                             </a>
+
+                        </li>
+
+
+                        <!-- Opens privacy and account-security information. -->
+                        <li class="nav-item">
+
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Home"
+                               asp-action="Privacy">
+
+                                Privacy
+
+                            </a>
+
                         </li>
 
                     </ul>
 
 
-                    <!-- Shows Register and Login when the user is logged out.
-                        Shows the logged-in user and Logout when signed in. -->
+                    <!-- =====================================
+                         Authentication navigation
+                         ===================================== -->
+
+                    <!--
+                        Shows Register/Login for anonymous users.
+
+                        Shows the signed-in account and Logout
+                        when authentication is active.
+                    -->
                     <partial name="_LoginPartial" />
 
                 </div>
@@ -142,32 +261,78 @@
             </div>
 
         </nav>
+
     </header>
 
-    <!-- Page content -->
+
+    <!-- =====================================
+         Main page content
+         ===================================== -->
+
     <div class="container">
-        <main role="main" class="pb-3">
+
+        <!--
+            id="main-content" is the destination of the skip link.
+
+            tabindex="-1" allows the element to receive programmatic
+            focus when navigating directly to it without adding it
+            to the normal Tab order.
+        -->
+        <main id="main-content"
+              class="pb-3"
+              tabindex="-1">
+
             @RenderBody()
+
         </main>
+
     </div>
 
-    <!-- Footer -->
+
+    <!-- =====================================
+         Footer
+         ===================================== -->
+
     <footer class="border-top footer text-muted">
+
         <div class="container">
-            &copy; 2026 - CodePursuit -
+
+            <span>
+                &copy; 2026 - CodePursuit -
+            </span>
+
+            <!-- Link to privacy and account-security information. -->
             <a asp-area=""
                asp-controller="Home"
                asp-action="Privacy">
+
                 Privacy
+
             </a>
+
         </div>
+
     </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
 
+    <!-- =====================================
+         JavaScript
+         ===================================== -->
+
+    <!-- jQuery library used by existing client-side functionality. -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <!-- Bootstrap JavaScript, including navigation collapse and modals. -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Application JavaScript. -->
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
+    <!-- Allows individual pages to add their own script section. -->
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>
+
 </html>

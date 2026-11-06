@@ -1,115 +1,297 @@
 @model HMJT.ViewModels.QuestionViewModel
 
 @{
-    // Sets the title for the page.
+    // Sets the browser/page title.
     ViewData["Title"] = "Create Question";
 }
 
-<h2>Create New Question</h2>
+<!-- Main page heading. -->
+<h1>Create New Question</h1>
 
-<!-- Sends the completed form to the Create POST action. -->
-<form asp-action="Create" method="post">
+<!-- Explains the required-field marker for all users.
+     The asterisk itself is hidden from screen readers because
+     the meaning is provided as text. -->
+<p class="text-muted">
+    Fields marked with
+    <span class="text-danger" aria-hidden="true">*</span>
+    <span class="visually-hidden">an asterisk</span>
+    are required.
+</p>
 
-    <!-- Stores the GameId in the ViewModel when the form is submitted. -->
-    <input type="hidden" asp-for="GameId" />
+<!-- Sends the completed question to the Create POST action. -->
+<form asp-action="Create"
+      method="post">
 
-    <!-- Displays validation errors not connected to a specific field. -->
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <!-- Protects the POST request against cross-site request forgery. -->
+    @Html.AntiForgeryToken()
 
-    <div class="form-group">
-        <label asp-for="QuestionText"></label>
-        <span class="text-danger">*</span>
-        <input asp-for="QuestionText" class="form-control" />
-        <span asp-validation-for="QuestionText" class="text-danger"></span>
+    <!-- Stores the GameId so the new question is connected
+         to the correct custom game. -->
+    <input type="hidden"
+           asp-for="GameId" />
+
+    <!-- Displays validation errors that are not connected
+         to one specific form field.
+         role="alert" helps assistive technologies announce errors. -->
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger"
+         role="alert"
+         aria-live="polite">
     </div>
 
-    <!-- Category options are supplied by QuestionViewModel. -->
-    <div class="form-group mt-3">
-        <label asp-for="Category"></label>
-        <span class="text-danger">*</span>
 
+    <!-- =====================================
+         Question text
+         ===================================== -->
+
+    <div class="form-group">
+
+        <!-- asp-for connects the label to the generated input ID. -->
+        <label asp-for="QuestionText"
+               class="form-label">
+        </label>
+
+        <!-- Visible required-field marker. -->
+        <span class="text-danger"
+              aria-hidden="true">*</span>
+        <span class="visually-hidden">required</span>
+
+        <!-- Text field containing the question itself. -->
+        <input asp-for="QuestionText"
+               class="form-control"
+               aria-required="true" />
+
+        <!-- Displays validation errors for the question text. -->
+        <span asp-validation-for="QuestionText"
+              class="text-danger">
+        </span>
+
+    </div>
+
+
+    <!-- =====================================
+         Category
+         ===================================== -->
+
+    <div class="form-group mt-3">
+
+        <label asp-for="Category"
+               class="form-label">
+        </label>
+
+        <span class="text-danger"
+              aria-hidden="true">*</span>
+        <span class="visually-hidden">required</span>
+
+        <!-- Category options are supplied by QuestionViewModel. -->
         <select asp-for="Category"
                 asp-items="Model.Categories"
-                class="form-select">
-            <option value="">-- Select a category --</option>
+                class="form-select"
+                aria-required="true">
+
+            <option value="">
+                -- Select a category --
+            </option>
+
         </select>
 
-        <span asp-validation-for="Category" class="text-danger"></span>
+        <span asp-validation-for="Category"
+              class="text-danger">
+        </span>
+
     </div>
 
-    <!-- Difficulty options are supplied by the ViewModel. -->
-    <div class="form-group mt-3">
-        <label asp-for="Difficulty"></label>
-        <span class="text-danger">*</span>
 
+    <!-- =====================================
+         Difficulty
+         ===================================== -->
+
+    <div class="form-group mt-3">
+
+        <label asp-for="Difficulty"
+               class="form-label">
+        </label>
+
+        <span class="text-danger"
+              aria-hidden="true">*</span>
+        <span class="visually-hidden">required</span>
+
+        <!-- Difficulty options are supplied by the ViewModel. -->
         <select asp-for="Difficulty"
                 asp-items="Model.Difficulties"
-                class="form-select">
+                class="form-select"
+                aria-required="true">
         </select>
 
-        <span asp-validation-for="Difficulty" class="text-danger"></span>
+        <span asp-validation-for="Difficulty"
+              class="text-danger">
+        </span>
+
     </div>
 
-    <!-- Answer options. -->
-    <h5 class="mt-4 mb-3">Answer Options</h5>
 
-    <div class="form-group">
-        <label asp-for="AnswerA"></label>
-        <span class="text-danger">*</span>
-        <input asp-for="AnswerA" class="form-control" />
-        <span asp-validation-for="AnswerA" class="text-danger"></span>
-    </div>
+    <!-- =====================================
+         Answer options
+         ===================================== -->
 
-    <div class="form-group mt-3">
-        <label asp-for="AnswerB"></label>
-        <span class="text-danger">*</span>
-        <input asp-for="AnswerB" class="form-control" />
-        <span asp-validation-for="AnswerB" class="text-danger"></span>
-    </div>
+    <!--
+        The four answers form one logical group, so a fieldset and legend
+        provide clearer structure for users of assistive technologies.
+    -->
+    <fieldset class="mt-4">
 
-    <div class="form-group mt-3">
-        <label asp-for="AnswerC"></label>
-        <span class="text-danger">*</span>
-        <input asp-for="AnswerC" class="form-control" />
-        <span asp-validation-for="AnswerC" class="text-danger"></span>
-    </div>
+        <legend class="h5 mb-3">
+            Answer Options
+        </legend>
 
-    <div class="form-group mt-3">
-        <label asp-for="AnswerD"></label>
-        <span class="text-danger">*</span>
-        <input asp-for="AnswerD" class="form-control" />
-        <span asp-validation-for="AnswerD" class="text-danger"></span>
-    </div>
 
-    <!-- Correct answer selection. -->
-    <h5 class="mt-4 mb-3">Correct Answer</h5>
+        <!-- Answer A. -->
+        <div class="form-group">
 
-    <div class="form-group">
-        <label asp-for="CorrectAnswer"></label>
-        <span class="text-danger">*</span>
+            <label asp-for="AnswerA"
+                   class="form-label">
+            </label>
 
+            <span class="text-danger"
+                  aria-hidden="true">*</span>
+            <span class="visually-hidden">required</span>
+
+            <input asp-for="AnswerA"
+                   class="form-control"
+                   aria-required="true" />
+
+            <span asp-validation-for="AnswerA"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- Answer B. -->
+        <div class="form-group mt-3">
+
+            <label asp-for="AnswerB"
+                   class="form-label">
+            </label>
+
+            <span class="text-danger"
+                  aria-hidden="true">*</span>
+            <span class="visually-hidden">required</span>
+
+            <input asp-for="AnswerB"
+                   class="form-control"
+                   aria-required="true" />
+
+            <span asp-validation-for="AnswerB"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- Answer C. -->
+        <div class="form-group mt-3">
+
+            <label asp-for="AnswerC"
+                   class="form-label">
+            </label>
+
+            <span class="text-danger"
+                  aria-hidden="true">*</span>
+            <span class="visually-hidden">required</span>
+
+            <input asp-for="AnswerC"
+                   class="form-control"
+                   aria-required="true" />
+
+            <span asp-validation-for="AnswerC"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- Answer D. -->
+        <div class="form-group mt-3">
+
+            <label asp-for="AnswerD"
+                   class="form-label">
+            </label>
+
+            <span class="text-danger"
+                  aria-hidden="true">*</span>
+            <span class="visually-hidden">required</span>
+
+            <input asp-for="AnswerD"
+                   class="form-control"
+                   aria-required="true" />
+
+            <span asp-validation-for="AnswerD"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+    </fieldset>
+
+
+    <!-- =====================================
+         Correct answer
+         ===================================== -->
+
+    <div class="form-group mt-4">
+
+        <label asp-for="CorrectAnswer"
+               class="form-label fw-semibold">
+            Correct Answer
+        </label>
+
+        <span class="text-danger"
+              aria-hidden="true">*</span>
+        <span class="visually-hidden">required</span>
+
+        <!-- Creates a dropdown containing the AnswerOption enum values. -->
         <select asp-for="CorrectAnswer"
                 asp-items="Html.GetEnumSelectList<HMJT.Models.AnswerOption>()"
-                class="form-select">
+                class="form-select"
+                aria-required="true">
         </select>
 
-        <span asp-validation-for="CorrectAnswer" class="text-danger"></span>
+        <span asp-validation-for="CorrectAnswer"
+              class="text-danger">
+        </span>
+
     </div>
 
-    <br />
 
-    <!-- Submits the form to QuestionController. -->
-    <button type="submit" class="btn btn-primary">Create</button>
+    <!-- =====================================
+         Form actions
+         ===================================== -->
 
-    <!-- Returns to the questions for the selected game. -->
-    <a asp-controller="Game"
-       asp-action="Questions"
-       asp-route-id="@Model.GameId"
-       class="btn btn-secondary">
-        Back to Questions
-    </a>
+    <div class="mt-4">
+
+        <!-- Creates the question. -->
+        <button type="submit"
+                class="btn btn-primary">
+            Create
+        </button>
+
+        <!-- Returns to the questions belonging to this game. -->
+        <a asp-controller="Game"
+           asp-action="Questions"
+           asp-route-id="@Model.GameId"
+           class="btn btn-secondary">
+            Back to Questions
+        </a>
+
+    </div>
+
 </form>
 
+
 @section Scripts {
+
+    <!-- Enables ASP.NET Core client-side validation. -->
     <partial name="_ValidationScriptsPartial" />
+
 }

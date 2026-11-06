@@ -178,7 +178,7 @@ public class QuestionController : Controller
     Selected = g == gameName
 }))
 .ToList()
-};
+        };
 
         // Send the ViewModel to Index.cshtml.
         return View(vm);

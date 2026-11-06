@@ -1,25 +1,60 @@
-
-
 @model HMJT.ViewModels.NoteIndexViewModel
 
 @{
-    // Sets the title for the page.
+    // Sets the browser/page title.
     ViewData["Title"] = "Notes";
 }
 
-<!-- Welcome heading and introduction. -->
+<!-- =====================================
+     Page heading and introduction
+     ===================================== -->
+
 <div class="mb-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-        <h2 class="mb-0">Notes</h2>
-        <span class="badge bg-primary">Notes</span>
+
+    <div class="d-flex flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-2
+                mb-3">
+
+        <!-- Main heading for the page. -->
+        <h1 class="mb-0">
+            Notes
+        </h1>
+
+        <!-- Visual page label.
+             The main h1 already identifies the page,
+             so this badge does not need extra screen-reader meaning. -->
+        <span class="badge bg-primary"
+              aria-hidden="true">
+            Notes
+        </span>
+
     </div>
 
-    <div class="welcome-banner p-4 p-md-5 mb-4 rounded-3 text-white">
-        <h2>Welcome to Your Notes! 📝</h2>
+
+    <!-- Welcome information. -->
+    <section class="welcome-banner
+                    p-4
+                    p-md-5
+                    mb-4
+                    rounded-3
+                    text-white"
+             aria-labelledby="notes-welcome-heading">
+
+        <h2 id="notes-welcome-heading">
+            Welcome to Your Notes!
+
+            <!-- Decorative emoji. -->
+            <span aria-hidden="true">📝</span>
+        </h2>
+
         <p class="mb-3">
             Keep track of programming concepts, tricky questions and things
             you want to revise after a game.
         </p>
+
         <p class="mb-0">
             Create notes, organize your thoughts, and review important
             concepts whenever you need.
@@ -28,110 +63,278 @@
             <strong>Delete</strong> to remove it.
             Happy studying!
         </p>
-    </div>
+
+    </section>
+
 </div>
 
-<!-- Displays error messages if something goes wrong. -->
+
+<!-- =====================================
+     Error message
+     ===================================== -->
+
+<!--
+    Displays an error if an operation failed.
+    role="alert" ensures important errors are announced
+    by assistive technologies.
+-->
 @if (TempData["ErrorMessage"] != null)
 {
-    <div class="alert alert-danger">
+    <div class="alert alert-danger"
+         role="alert"
+         aria-live="assertive">
+
         @TempData["ErrorMessage"]
+
     </div>
 }
 
-<!-- Create note section. -->
-<div class="card border-0 shadow-sm p-3 p-md-4 mb-4">
+
+<!-- =====================================
+     Create note section
+     ===================================== -->
+
+<section class="card border-0 shadow-sm p-3 p-md-4 mb-4"
+         aria-labelledby="organize-notes-heading">
+
     <div class="mb-3">
-        <h5 class="fw-bold mb-1">
-            <i class="bi bi-journal-text me-2"></i>
+
+        <h2 id="organize-notes-heading"
+            class="h5 fw-bold mb-1">
+
+            <!-- Decorative Bootstrap icon. -->
+            <i class="bi bi-journal-text me-2"
+               aria-hidden="true">
+            </i>
+
             Organize your notes
-        </h5>
+
+        </h2>
+
         <p class="text-muted small mb-0">
             Save important concepts, write down what you have learned,
             and keep everything in one place.
         </p>
+
     </div>
+
 
     <div class="d-flex flex-wrap gap-2">
-        <a asp-action="Create" class="btn btn-primary px-4">
-            <i class="bi bi-plus-circle me-1"></i>
+
+        <!-- Opens the Create Note page. -->
+        <a asp-action="Create"
+           class="btn btn-primary px-4">
+
+            <i class="bi bi-plus-circle me-1"
+               aria-hidden="true">
+            </i>
+
             Create New Note
+
         </a>
+
     </div>
-</div>
 
-<!-- Displays the number of notes. -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0">Your Notes</h5>
-    <span class="badge bg-secondary">
-        @Model.Notes.Count() note(s)
-    </span>
-</div>
+</section>
 
-<!-- Displays notes supplied by the ViewModel. -->
-<div class="table-responsive">
-    <table class="table table-bordered table-striped table-hover align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>Title</th>
-                <th>Content</th>
-                <th>Created At</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
 
-        <tbody>
-            @if (Model.Notes.Any())
-            {
-                @foreach (var note in Model.Notes)
+<!-- =====================================
+     Notes overview and table
+     ===================================== -->
+
+<section aria-labelledby="your-notes-heading">
+
+    <div class="d-flex
+                justify-content-between
+                align-items-center
+                mb-3">
+
+        <h2 id="your-notes-heading"
+            class="h5 mb-0">
+            Your Notes
+        </h2>
+
+        <!-- Displays the total number of saved notes. -->
+        <span class="badge bg-secondary"
+              aria-label="@Model.Notes.Count() notes saved">
+
+            @Model.Notes.Count() note(s)
+
+        </span>
+
+    </div>
+
+
+    <!-- Makes the table horizontally scrollable on smaller screens. -->
+    <div class="table-responsive">
+
+        <table class="table
+                      table-bordered
+                      table-striped
+                      table-hover
+                      align-middle">
+
+            <!-- Hidden caption gives screen-reader users
+                 a description of the table. -->
+            <caption class="visually-hidden">
+                Notes saved by the current user,
+                including content preview, creation date and available actions
+            </caption>
+
+            <thead class="table-light">
+
+                <tr>
+                    <!-- scope="col" associates each table heading
+                         with the cells in its column. -->
+                    <th scope="col">Title</th>
+                    <th scope="col">Content</th>
+                    <th scope="col">Created At</th>
+                    <th scope="col">Actions</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                @if (Model.Notes.Any())
                 {
-                    <tr>
-                        <td>@note.Title</td>
-                        <td>
-                            @(note.Content.Length > 60
-                                ? note.Content.Substring(0, 60) + "..."
-                                : note.Content)
-                        </td>
-                        <td>
-                            @note.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
-                        </td>
-                        <td>
-                            <div class="d-flex flex-wrap gap-2">
-                                <a asp-action="Edit"
-                                   asp-route-id="@note.NoteId"
-                                   class="btn btn-sm btn-warning">
-                                    <i class="bi bi-pencil me-1"></i>
-                                    Edit
-                                </a>
+                    <!-- Display every saved note. -->
+                    @foreach (var note in Model.Notes)
+                    {
+                        <tr>
 
-                                <a asp-action="Delete"
-                                   asp-route-id="@note.NoteId"
-                                   class="btn btn-sm btn-danger">
-                                    <i class="bi bi-trash me-1"></i>
-                                    Delete
-                                </a>
-                            </div>
+                            <!--
+                                The title is the row heading.
+
+                                This makes it easier for screen readers to
+                                identify which note the remaining cells and
+                                action links belong to.
+                            -->
+                            <th scope="row">
+                                @note.Title
+                            </th>
+
+                            <!-- Show a shortened preview when the note
+                                 is longer than 60 characters. -->
+                            <td>
+                                @(note.Content.Length > 60
+                                    ? note.Content.Substring(0, 60) + "..."
+                                    : note.Content)
+                            </td>
+
+                            <!--
+                                Display creation date using local time.
+                                The time element gives the value semantic meaning.
+                            -->
+                            <td>
+                                <time datetime="@note.CreatedAt.ToString("O")">
+                                    @(note.CreatedAt
+                                        .ToLocalTime()
+                                        .ToString("dd.MM.yyyy HH:mm:ss"))
+                                </time>
+                            </td>
+
+
+                            <!-- =====================================
+                                 Note actions
+                                 ===================================== -->
+
+                            <td>
+
+                                <!--
+                                    Groups the actions belonging to this note.
+                                    The note title gives screen-reader users
+                                    additional context.
+                                -->
+                                <div class="d-flex flex-wrap gap-2"
+                                     role="group"
+                                     aria-label="Actions for note: @note.Title">
+
+                                    <!-- Opens the edit page for this note. -->
+                                    <a asp-action="Edit"
+                                       asp-route-id="@note.NoteId"
+                                       class="btn btn-sm btn-warning"
+                                       aria-label="Edit note: @note.Title">
+
+                                        <i class="bi bi-pencil me-1"
+                                           aria-hidden="true">
+                                        </i>
+
+                                        Edit
+
+                                    </a>
+
+
+                                    <!-- Opens the delete confirmation page. -->
+                                    <a asp-action="Delete"
+                                       asp-route-id="@note.NoteId"
+                                       class="btn btn-sm btn-danger"
+                                       aria-label="Delete note: @note.Title">
+
+                                        <i class="bi bi-trash me-1"
+                                           aria-hidden="true">
+                                        </i>
+
+                                        Delete
+
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <!-- =====================================
+                         Empty state
+                         ===================================== -->
+
+                    <tr>
+
+                        <td colspan="4"
+                            class="text-center py-4">
+
+                            <!-- Decorative icon. -->
+                            <i class="bi
+                                      bi-journal-text
+                                      fs-3
+                                      d-block
+                                      mb-2
+                                      text-muted"
+                               aria-hidden="true">
+                            </i>
+
+                            <strong>
+                                No notes yet
+                            </strong>
+
+                            <p class="text-muted mb-2">
+                                Start writing your first note to keep track
+                                of what you have learned.
+                            </p>
+
+                            <!-- Gives users an immediate next action
+                                 instead of leaving the table empty. -->
+                            <a asp-action="Create"
+                               class="btn btn-outline-primary btn-sm">
+
+                                Create your first note
+
+                            </a>
+
                         </td>
+
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="4" class="text-center py-4">
-                        <i class="bi bi-journal-text fs-3 d-block mb-2 text-muted"></i>
-                        <strong>No notes yet</strong>
-                        <p class="text-muted mb-2">
-                            Start writing your first note to keep track
-                            of what you have learned.
-                        </p>
-                        <a asp-action="Create"
-                           class="btn btn-outline-primary btn-sm">
-                            Create your first note
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>

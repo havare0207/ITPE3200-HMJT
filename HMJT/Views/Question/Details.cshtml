@@ -1,67 +1,133 @@
 @model HMJT.ViewModels.QuestionViewModel
 
 @{
-    // Sets the title for the page.
+    // Sets the browser/page title.
     ViewData["Title"] = "Question Details";
 }
 
-<h2>Question Details</h2>
+<!-- Main page heading. -->
+<h1>Question Details</h1>
 
-<!-- Displays the question information supplied by QuestionViewModel. -->
+<!-- =====================================
+     Question information
+     ===================================== -->
 
-<div class="form-group">
-    <label asp-for="QuestionText"></label>
-    <p class="form-control">@Model.QuestionText</p>
+<!--
+    A description list represents the read-only question data.
+    Each <dt> describes the corresponding <dd> value.
+-->
+<dl class="row">
+
+    <!-- Question text. -->
+    <dt class="col-sm-3">
+        Question
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.QuestionText
+    </dd>
+
+
+    <!-- Category. -->
+    <dt class="col-sm-3">
+        Category
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Category
+    </dd>
+
+
+    <!-- Difficulty. -->
+    <dt class="col-sm-3">
+        Difficulty
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Difficulty
+    </dd>
+
+
+    <!-- Answer A. -->
+    <dt class="col-sm-3">
+        Answer A
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.AnswerA
+    </dd>
+
+
+    <!-- Answer B. -->
+    <dt class="col-sm-3">
+        Answer B
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.AnswerB
+    </dd>
+
+
+    <!-- Answer C. -->
+    <dt class="col-sm-3">
+        Answer C
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.AnswerC
+    </dd>
+
+
+    <!-- Answer D. -->
+    <dt class="col-sm-3">
+        Answer D
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.AnswerD
+    </dd>
+
+
+    <!-- Correct answer. -->
+    <dt class="col-sm-3">
+        Correct Answer
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.CorrectAnswer
+    </dd>
+
+
+    <!-- Game that owns this question. -->
+    <dt class="col-sm-3">
+        Game
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.GameName
+    </dd>
+
+</dl>
+
+
+<!-- =====================================
+     Page actions
+     ===================================== -->
+
+<div class="d-flex flex-wrap gap-2">
+
+    <!-- Opens the Edit page for this question. -->
+    <a asp-action="Edit"
+       asp-route-id="@Model.QuestionId"
+       class="btn btn-warning"
+       aria-label="Edit question: @Model.QuestionText">
+        Edit
+    </a>
+
+    <!-- Returns to the main question list. -->
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back to Questions
+    </a>
+
 </div>
-
-<div class="form-group">
-    <label asp-for="Category"></label>
-    <p class="form-control">@Model.Category</p>
-</div>
-
-<div class="form-group">
-    <label asp-for="Difficulty"></label>
-    <p class="form-control">@Model.Difficulty</p>
-</div>
-
-<div class="form-group">
-    <label asp-for="AnswerA"></label>
-    <p class="form-control">@Model.AnswerA</p>
-</div>
-
-<div class="form-group">
-    <label asp-for="AnswerB"></label>
-    <p class="form-control">@Model.AnswerB</p>
-</div>
-
-<div class="form-group">
-    <label asp-for="AnswerC"></label>
-    <p class="form-control">@Model.AnswerC</p>
-</div>
-
-<div class="form-group">
-    <label asp-for="AnswerD"></label>
-    <p class="form-control">@Model.AnswerD</p>
-</div>
-
-<div class="form-group">
-    <label asp-for="CorrectAnswer"></label>
-    <p class="form-control">@Model.CorrectAnswer</p>
-</div>
-
-<div class="form-group">
-    <label>Game</label>
-    <p class="form-control">@Model.GameName</p>
-</div>
-
-<br />
-
-<!-- Opens the Edit page for this question. -->
-<a asp-action="Edit"
-   asp-route-id="@Model.QuestionId"
-   class="btn btn-warning">
-    Edit
-</a>
-
-<!-- Returns to the list of questions. -->
-<a asp-action="Index" class="btn btn-secondary">Back to Questions</a>

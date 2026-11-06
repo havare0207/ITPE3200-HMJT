@@ -2,24 +2,49 @@
 @model HMJT.Areas.Identity.Pages.Account.RegisterModel
 
 @{
+    // Sets the browser/page title.
     ViewData["Title"] = "Register";
 }
 
+<!-- Main page heading. -->
 <h1>@ViewData["Title"]</h1>
 
 <div class="row">
+
     <div class="col-md-6">
 
+        <!-- Sends registration information to the Register POST handler.
+             returnUrl is preserved so the user can return to the
+             intended page after registration. -->
         <form asp-route-returnUrl="@Model.ReturnUrl"
               method="post">
 
-            <h2>Create a new account.</h2>
+            <h2 class="h4">
+                Create a new account
+            </h2>
 
             <hr />
 
+
+            <!--
+                Displays model-level registration errors.
+
+                This can include Identity errors or validation problems
+                that do not belong to one particular field.
+
+                role="alert" helps assistive technologies announce
+                important errors when they appear.
+            -->
             <div asp-validation-summary="ModelOnly"
-                 class="text-danger">
+                 class="text-danger"
+                 role="alert"
+                 aria-live="polite">
             </div>
+
+
+            <!-- =====================================
+                 Email
+                 ===================================== -->
 
             <div class="form-floating mb-3">
 
@@ -33,14 +58,23 @@
                     Email
                 </label>
 
+                <!-- Displays validation errors for the email field. -->
                 <span asp-validation-for="Input.Email"
                       class="text-danger">
                 </span>
 
             </div>
 
+
+            <!-- =====================================
+                 Password
+                 ===================================== -->
+
             <div class="form-floating mb-3">
 
+                <!-- autocomplete="new-password" allows browsers
+                     and password managers to recognise that the
+                     user is creating a new password. -->
                 <input asp-for="Input.Password"
                        class="form-control"
                        autocomplete="new-password"
@@ -51,11 +85,17 @@
                     Password
                 </label>
 
+                <!-- Displays password validation errors. -->
                 <span asp-validation-for="Input.Password"
                       class="text-danger">
                 </span>
 
             </div>
+
+
+            <!-- =====================================
+                 Password confirmation
+                 ===================================== -->
 
             <div class="form-floating mb-3">
 
@@ -69,11 +109,18 @@
                     Confirm Password
                 </label>
 
+                <!-- Displays an error if the confirmation
+                     does not match the selected password. -->
                 <span asp-validation-for="Input.ConfirmPassword"
                       class="text-danger">
                 </span>
 
             </div>
+
+
+            <!-- =====================================
+                 Registration action
+                 ===================================== -->
 
             <button type="submit"
                     class="w-100 btn btn-lg btn-primary">
@@ -85,8 +132,13 @@
         </form>
 
     </div>
+
 </div>
 
+
 @section Scripts {
+
+    <!-- Enables ASP.NET Core client-side validation. -->
     <partial name="_ValidationScriptsPartial" />
+
 }

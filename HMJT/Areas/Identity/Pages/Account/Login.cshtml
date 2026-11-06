@@ -2,61 +2,108 @@
 @model HMJT.Areas.Identity.Pages.Account.LoginModel
 
 @{
+    // Sets the browser/page title.
     ViewData["Title"] = "Log in";
 }
 
+<!-- Main page heading. -->
 <h1>@ViewData["Title"]</h1>
 
 <div class="row">
+
     <div class="col-md-6">
 
+        <!-- Sends the login credentials to the Login Razor Page POST handler. -->
         <form method="post">
 
+            <!--
+                Displays model-level login errors, such as:
+                - invalid login attempt
+                - temporarily locked account
+
+                role="alert" helps assistive technologies announce
+                important authentication errors.
+            -->
             <div asp-validation-summary="ModelOnly"
-                 class="text-danger">
+                 class="text-danger"
+                 role="alert"
+                 aria-live="polite">
             </div>
+
+
+            <!-- =====================================
+                 Email
+                 ===================================== -->
 
             <div class="form-floating mb-3">
 
+                <!--
+                    autocomplete="username" allows password managers and
+                    browsers to recognise the account identifier.
+
+                    aria-required informs assistive technologies that
+                    the field must be completed.
+                -->
                 <input asp-for="Input.Email"
                        class="form-control"
                        autocomplete="username"
+                       aria-required="true"
                        placeholder="name@example.com" />
 
+                <!-- asp-for connects the label to the generated input ID. -->
                 <label asp-for="Input.Email">
                     Email
                 </label>
 
+                <!-- Displays validation errors for the email field. -->
                 <span asp-validation-for="Input.Email"
                       class="text-danger">
                 </span>
 
             </div>
 
+
+            <!-- =====================================
+                 Password
+                 ===================================== -->
+
             <div class="form-floating mb-3">
 
+                <!--
+                    autocomplete="current-password" identifies this
+                    as the user's existing password for password managers.
+                -->
                 <input asp-for="Input.Password"
                        class="form-control"
                        autocomplete="current-password"
+                       aria-required="true"
                        placeholder="Password" />
 
                 <label asp-for="Input.Password">
                     Password
                 </label>
 
+                <!-- Displays validation errors for the password field. -->
                 <span asp-validation-for="Input.Password"
                       class="text-danger">
                 </span>
 
             </div>
 
-            <div class="checkbox mb-3">
 
+            <!-- =====================================
+                 Remember me
+                 ===================================== -->
+
+            <div class="form-check mb-3">
+
+                <!-- Checkbox used to request a persistent login session. -->
+                <input class="form-check-input"
+                       asp-for="Input.RememberMe" />
+
+                <!-- Label is automatically connected to the checkbox. -->
                 <label asp-for="Input.RememberMe"
-                       class="form-label">
-
-                    <input class="form-check-input"
-                           asp-for="Input.RememberMe" />
+                       class="form-check-label">
 
                     @Html.DisplayNameFor(
                         model => model.Input.RememberMe
@@ -66,6 +113,11 @@
 
             </div>
 
+
+            <!-- =====================================
+                 Login action
+                 ===================================== -->
+
             <button type="submit"
                     class="w-100 btn btn-lg btn-primary">
 
@@ -73,6 +125,8 @@
 
             </button>
 
+
+            <!-- Link for users who do not yet have an account. -->
             <div class="mt-3">
 
                 <a asp-page="./Register"
@@ -87,8 +141,13 @@
         </form>
 
     </div>
+
 </div>
 
+
 @section Scripts {
+
+    <!-- Enables ASP.NET Core client-side validation. -->
     <partial name="_ValidationScriptsPartial" />
+
 }

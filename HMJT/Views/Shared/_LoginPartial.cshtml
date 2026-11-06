@@ -4,17 +4,43 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-<ul class="navbar-nav">
+
+<!--
+    Authentication navigation.
+
+    The visible options depend on whether the current user
+    is authenticated.
+-->
+<ul class="navbar-nav"
+    aria-label="Account navigation">
 
     @if (SignInManager.IsSignedIn(User))
     {
+        <!-- =====================================
+             Signed-in user
+             ===================================== -->
+
+        <!-- Displays the currently authenticated account. -->
         <li class="nav-item">
-            <span class="nav-link">
+
+            <span class="nav-link"
+                  aria-label="Signed in as @User.Identity?.Name">
+
                 @User.Identity?.Name
+
             </span>
+
         </li>
 
+
+        <!-- Logout action. -->
         <li class="nav-item">
+
+            <!--
+                Logout is sent as a POST request rather than a normal link.
+                This avoids using a GET request for an action that changes
+                authentication state.
+            -->
             <form asp-area="Identity"
                   asp-page="/Account/Logout"
                   asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
@@ -22,28 +48,46 @@
 
                 <button type="submit"
                         class="nav-link btn btn-link border-0">
+
                     Logout
+
                 </button>
 
             </form>
+
         </li>
     }
     else
     {
+        <!-- =====================================
+             Anonymous user
+             ===================================== -->
+
+        <!-- Opens account registration. -->
         <li class="nav-item">
+
             <a class="nav-link"
                asp-area="Identity"
                asp-page="/Account/Register">
+
                 Register
+
             </a>
+
         </li>
 
+
+        <!-- Opens the login page. -->
         <li class="nav-item">
+
             <a class="nav-link"
                asp-area="Identity"
                asp-page="/Account/Login">
+
                 Login
+
             </a>
+
         </li>
     }
 

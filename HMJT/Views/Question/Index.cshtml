@@ -1,162 +1,430 @@
 @model HMJT.ViewModels.QuestionIndexViewModel
 
 @{
-    // Sets the title for the page.
+    // Sets the browser/page title.
     ViewData["Title"] = "Questions";
 }
 
-<!-- Welcome heading and introduction. -->
+<!-- =====================================
+     Page heading and introduction
+     ===================================== -->
+
 <div class="mb-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-        <h2 class="mb-0">Explore Questions</h2>
-        <span class="badge bg-primary">Explore</span>
+
+    <div class="d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-2
+                mb-3">
+
+        <!-- Main heading for the page. -->
+        <h1 class="mb-0">
+            Explore Questions
+        </h1>
+
+        <!-- Decorative page badge.
+             The h1 already identifies the page. -->
+        <span class="badge bg-primary"
+              aria-hidden="true">
+            Explore
+        </span>
+
     </div>
 
-    <div class="welcome-banner p-4 p-md-5 mb-4 rounded-3 text-white">
-        <h2>Welcome, Curious Mind! 🧠</h2>
-       <p class="mb-3">
-        Explore the questions in your custom games,
-        discover different topics, and challenge your knowledge.
+
+    <!-- Welcome information. -->
+    <section class="welcome-banner
+                    p-4
+                    p-md-5
+                    mb-4
+                    rounded-3
+                    text-white"
+             aria-labelledby="questions-welcome-heading">
+
+        <h2 id="questions-welcome-heading">
+            Welcome, Curious Mind!
+
+            <!-- Decorative emoji. -->
+            <span aria-hidden="true">🧠</span>
+        </h2>
+
+        <p class="mb-3">
+            Explore the questions in your custom games,
+            discover different topics, and challenge your knowledge.
+        </p>
+
+        <p class="mb-0">
+            Search through questions from the games you have created
+            and find exactly what you are looking for using the
+            search and filtering options below.
+            Let the quiz adventure begin!
+        </p>
+
+    </section>
+
+</div>
+
+
+<!-- =====================================
+     Search and filtering
+     ===================================== -->
+
+<section aria-labelledby="question-search-heading">
+
+    <!--
+        role="search" identifies this form as the page's
+        main search area for assistive technologies.
+    -->
+    <form asp-controller="Question"
+          asp-action="Index"
+          method="get"
+          role="search"
+          class="question-search
+                 card
+                 border-0
+                 shadow-sm
+                 p-3
+                 p-md-4
+                 mb-4">
+
+        <div class="mb-3">
+
+            <!-- Section heading for the search controls. -->
+            <h2 id="question-search-heading"
+                class="h5 fw-bold mb-1">
+
+                <!-- Decorative search icon. -->
+                <i class="bi bi-search me-2"
+                   aria-hidden="true">
+                </i>
+
+                Find your next question
+
+            </h2>
+
+            <!--
+                The help text is connected to the search controls
+                using aria-describedby.
+            -->
+            <p id="question-search-help"
+               class="text-muted small mb-0">
+                Search by keyword or narrow down the results
+                using category, difficulty or game.
+            </p>
+
+        </div>
+
+
+        <div class="row g-3">
+
+
+            <!-- =====================================
+                 Keyword search
+                 ===================================== -->
+
+            <div class="col-12">
+
+                <label asp-for="SearchString"
+                       class="form-label fw-semibold">
+                    Search questions
+                </label>
+
+                <div class="input-group">
+
+                    <!-- Decorative icon because the input already has a label. -->
+                    <span class="input-group-text bg-body"
+                          aria-hidden="true">
+
+                        <i class="bi bi-search">
+                        </i>
+
+                    </span>
+
+                    <input asp-for="SearchString"
+                           class="form-control"
+                           placeholder="e.g. What is a closing tag?..."
+                           aria-describedby="question-search-help" />
+
+                </div>
+
+            </div>
+
+
+            <!-- =====================================
+                 Category filter
+                 ===================================== -->
+
+            <div class="col-md-6">
+
+                <label asp-for="Category"
+                       class="form-label">
+                    Category
+                </label>
+
+                <!-- Category options are supplied by the ViewModel. -->
+                <select asp-for="Category"
+                        asp-items="Model.Categories"
+                        class="form-select"
+                        aria-describedby="question-search-help">
+                </select>
+
+            </div>
+
+
+            <!-- =====================================
+                 Difficulty filter
+                 ===================================== -->
+
+            <div class="col-md-6">
+
+                <label asp-for="Difficulty"
+                       class="form-label">
+                    Difficulty
+                </label>
+
+                <!-- Difficulty options are supplied by the ViewModel. -->
+                <select asp-for="Difficulty"
+                        asp-items="Model.Difficulties"
+                        class="form-select"
+                        aria-describedby="question-search-help">
+                </select>
+
+            </div>
+
+
+            <!-- =====================================
+                 Game filter
+                 ===================================== -->
+
+            <div class="col-md-6">
+
+                <label asp-for="GameName"
+                       class="form-label">
+                    Game
+                </label>
+
+                <!-- Custom game names are supplied by the ViewModel. -->
+                <select asp-for="GameName"
+                        asp-items="Model.GameNames"
+                        class="form-select"
+                        aria-describedby="question-search-help">
+                </select>
+
+            </div>
+
+
+            <!-- =====================================
+                 Search actions
+                 ===================================== -->
+
+            <div class="col-12
+                        d-flex
+                        flex-wrap
+                        gap-2
+                        mt-4">
+
+                <!-- Applies the current search and filters. -->
+                <button type="submit"
+                        class="btn btn-primary px-4">
+
+                    <i class="bi bi-search me-1"
+                       aria-hidden="true">
+                    </i>
+
+                    Search questions
+
+                </button>
+
+
+                <!-- Reloads the page without search/filter parameters. -->
+                <a asp-controller="Question"
+                   asp-action="Index"
+                   class="btn btn-outline-secondary px-4">
+
+                    <i class="bi bi-arrow-counterclockwise me-1"
+                       aria-hidden="true">
+                    </i>
+
+                    Clear filters
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</section>
+
+
+<!-- =====================================
+     Search results
+     ===================================== -->
+
+<section aria-labelledby="question-results-heading">
+
+    <div class="d-flex
+                justify-content-between
+                align-items-center
+                mb-3">
+
+        <h2 id="question-results-heading"
+            class="h5 mb-0">
+            Questions
+        </h2>
+
+        <!--
+            Visible result count.
+            role="status" makes the number of results available
+            as status information for assistive technologies.
+        -->
+        <span class="badge bg-secondary"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true">
+
+            @Model.Questions.Count question(s)
+
+        </span>
+
+    </div>
+
+
+    <!--
+        A hidden summary provides a natural description of
+        the result set before the user enters the table.
+    -->
+    <p class="visually-hidden">
+        @Model.Questions.Count question results are currently displayed.
     </p>
 
-    <p class="mb-0">
-        Search through questions from the games you have created
-        and find exactly what you are looking for using the
-        search and filtering options below.
-        Let the quiz adventure begin!
-        </p>
-    </div>
-</div>
 
-<!-- Sends search and filter values to the Index GET action. -->
-<form asp-controller="Question"
-      asp-action="Index"
-      method="get"
-      class="question-search card border-0 shadow-sm p-3 p-md-4 mb-4">
+    <!-- =====================================
+         Questions table
+         ===================================== -->
 
-    <div class="mb-3">
-        <h5 class="fw-bold mb-1">
-            <i class="bi bi-search me-2"></i>Find your next question
-        </h5>
-        <p class="text-muted small mb-0">
-            Search by keyword or narrow down the results using the filters.
-        </p>
-    </div>
+    <!-- Makes the table horizontally scrollable on smaller screens. -->
+    <div class="table-responsive">
 
-    <div class="row g-3">
-        <!-- Keyword search connected to the ViewModel. -->
-        <div class="col-12">
-            <label asp-for="SearchString" class="form-label fw-semibold">
-                Search questions
-            </label>
+        <table class="table
+                      table-bordered
+                      table-striped
+                      table-hover
+                      align-middle">
 
-            <div class="input-group">
-                <span class="input-group-text bg-body">
-                    <i class="bi bi-search"></i>
-                </span>
+            <!-- Hidden caption gives screen-reader users
+                 additional context about the table contents. -->
+            <caption class="visually-hidden">
+                Search results showing questions from the current
+                user's custom games, including category,
+                difficulty, correct answer and game name
+            </caption>
 
-                <input asp-for="SearchString"
-                       class="form-control"
-                       placeholder="e.g. What is a closing tag?..." />
-            </div>
-        </div>
 
-        <!-- Category options come from the ViewModel. -->
-        <div class="col-md-6">
-            <label asp-for="Category" class="form-label">Category</label>
-            <select asp-for="Category"
-                    asp-items="Model.Categories"
-                    class="form-select">
-            </select>
-        </div>
+            <thead class="table-light">
 
-        <!-- Difficulty options come from the ViewModel. -->
-        <div class="col-md-6">
-            <label asp-for="Difficulty" class="form-label">Difficulty</label>
-            <select asp-for="Difficulty"
-                    asp-items="Model.Difficulties"
-                    class="form-select">
-            </select>
-        </div>
+                <tr>
+                    <!-- scope="col" associates each heading
+                         with the cells underneath it. -->
+                    <th scope="col">Question</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Difficulty</th>
+                    <th scope="col">Correct Answer</th>
+                    <th scope="col">Game Name</th>
+                </tr>
 
-        <!-- Game options come from the ViewModel. -->
-        <div class="col-md-6">
-            <label asp-for="GameName" class="form-label">Game</label>
-            <select asp-for="GameName"
-                    asp-items="Model.GameNames"
-                    class="form-select">
-            </select>
-        </div>
+            </thead>
 
-        <!-- Search and clear buttons. -->
-        <div class="col-12 d-flex flex-wrap gap-2 mt-4">
-            <button type="submit" class="btn btn-primary px-4">
-                <i class="bi bi-search me-1"></i>
-                Search questions
-            </button>
 
-            <a asp-controller="Question"
-               asp-action="Index"
-               class="btn btn-outline-secondary px-4">
-                <i class="bi bi-arrow-counterclockwise me-1"></i>
-                Clear filters
-            </a>
-        </div>
-    </div>
-</form>
+            <tbody>
 
-<!-- Displays the number of matching questions. -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0">Questions</h5>
-    <span class="badge bg-secondary">
-        @Model.Questions.Count question(s)
-    </span>
-</div>
-
-<!-- Displays questions supplied by the ViewModel. -->
-<div class="table-responsive">
-    <table class="table table-bordered table-striped table-hover align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>Question</th>
-                <th>Category</th>
-                <th>Difficulty</th>
-                <th>Correct Answer</th>
-                <th>Game Name</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @if (Model.Questions.Any())
-            {
-                @foreach (var question in Model.Questions)
+                @if (Model.Questions.Any())
                 {
+                    <!-- Display every question matching the current filters. -->
+                    @foreach (var question in Model.Questions)
+                    {
+                        <tr>
+
+                            <!--
+                                The question text acts as the row heading.
+
+                                This helps screen-reader users associate
+                                Category, Difficulty, Correct Answer and
+                                Game Name with the correct question.
+                            -->
+                            <th scope="row">
+                                @question.QuestionText
+                            </th>
+
+                            <td>
+                                @question.Category
+                            </td>
+
+                            <td>
+                                @question.Difficulty
+                            </td>
+
+                            <td>
+                                @question.CorrectAnswer
+                            </td>
+
+                            <td>
+                                @question.GameName
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <!-- =====================================
+                         Empty search result
+                         ===================================== -->
+
                     <tr>
-                        <td>@question.QuestionText</td>
-                        <td>@question.Category</td>
-                        <td>@question.Difficulty</td>
-                        <td>@question.CorrectAnswer</td>
-                        <td>@question.GameName</td>
+
+                        <td colspan="5"
+                            class="text-center py-4">
+
+                            <!-- Decorative search icon. -->
+                            <i class="bi
+                                      bi-search
+                                      fs-3
+                                      d-block
+                                      mb-2
+                                      text-muted"
+                               aria-hidden="true">
+                            </i>
+
+                            <strong>
+                                No questions found
+                            </strong>
+
+                            <p class="text-muted mb-2">
+                                Try another keyword or change your filters.
+                            </p>
+
+                            <!-- Removes all filters and displays the full list again. -->
+                            <a asp-controller="Question"
+                               asp-action="Index"
+                               class="btn btn-outline-primary btn-sm">
+
+                                Show all questions
+
+                            </a>
+
+                        </td>
+
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="5" class="text-center py-4">
-                        <i class="bi bi-search fs-3 d-block mb-2 text-muted"></i>
-                        <strong>No questions found</strong>
-                        <p class="text-muted mb-2">
-                            Try another keyword or change your filters.
-                        </p>
-                        <a asp-controller="Question"
-                           asp-action="Index"
-                           class="btn btn-outline-primary btn-sm">
-                            Show all questions
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>

@@ -1,52 +1,103 @@
 @model HMJT.ViewModels.QuestionViewModel
 
 @{
-    // Sets the title for the page.
+    // Sets the browser/page title.
     ViewData["Title"] = "Delete Question";
 }
 
-<h2>Delete Question</h2>
+<!-- Main page heading. -->
+<h1>Delete Question</h1>
 
-<h4>Are you sure you want to delete this question?</h4>
+<!-- Clear warning before the destructive action. -->
+<h2 class="h4">
+    Are you sure you want to delete this question?
+</h2>
 
 <hr />
 
-<!-- Displays the question information before deletion. -->
+<!-- =====================================
+     Question information
+     ===================================== -->
 
-<div class="form-group">
-    <label asp-for="QuestionText"></label>
-    <p class="form-control">@Model.QuestionText</p>
-</div>
+<!--
+    A description list is used because this information is read-only.
+    This is more semantically correct than displaying ordinary text
+    inside elements styled as form controls.
+-->
+<dl class="row">
 
-<div class="form-group">
-    <label asp-for="Category"></label>
-    <p class="form-control">@Model.Category</p>
-</div>
+    <!-- Question text. -->
+    <dt class="col-sm-3">
+        Question
+    </dt>
 
-<div class="form-group">
-    <label asp-for="Difficulty"></label>
-    <p class="form-control">@Model.Difficulty</p>
-</div>
+    <dd class="col-sm-9">
+        @Model.QuestionText
+    </dd>
 
-<div class="form-group">
-    <label asp-for="CorrectAnswer"></label>
-    <p class="form-control">@Model.CorrectAnswer</p>
-</div>
 
-<br />
+    <!-- Question category. -->
+    <dt class="col-sm-3">
+        Category
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Category
+    </dd>
+
+
+    <!-- Question difficulty. -->
+    <dt class="col-sm-3">
+        Difficulty
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Difficulty
+    </dd>
+
+
+    <!-- Correct answer option. -->
+    <dt class="col-sm-3">
+        Correct Answer
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.CorrectAnswer
+    </dd>
+
+</dl>
+
+
+<!-- =====================================
+     Delete confirmation
+     ===================================== -->
 
 <!-- Sends the QuestionId to the Delete POST action. -->
-<form asp-action="Delete" method="post">
+<form asp-action="Delete"
+      method="post">
+
+    <!-- Protects the POST request against cross-site request forgery. -->
+    @Html.AntiForgeryToken()
 
     <!-- Keeps the ID of the question being deleted. -->
-    <input type="hidden" asp-for="QuestionId" />
+    <input type="hidden"
+           asp-for="QuestionId" />
 
-    <!-- Retains the game context; the controller must verify ownership. -->
-    <input type="hidden" asp-for="GameId" />
+    <!-- Keeps the associated GameId.
+         Ownership must still be verified server-side. -->
+    <input type="hidden"
+           asp-for="GameId" />
 
-    <!-- Confirms deletion. -->
-    <button type="submit" class="btn btn-danger">Delete</button>
+    <!-- Confirms the destructive action. -->
+    <button type="submit"
+            class="btn btn-danger">
+        Delete
+    </button>
 
     <!-- Cancels deletion and returns to the question list. -->
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Cancel
+    </a>
+
 </form>

@@ -1,111 +1,288 @@
 @model HMJT.ViewModels.QuestionViewModel
 
 @{
-    // Sets the title for the page.
+    // Sets the browser/page title.
     ViewData["Title"] = "Edit Question";
 }
 
-<h2>Edit Question</h2>
+<!-- Main page heading. -->
+<h1>Edit Question</h1>
 
-<!-- Sends the edited ViewModel to the Edit POST action. -->
-<form asp-action="Edit" method="post">
+<!-- Explains the required-field marker. -->
+<p class="text-muted">
+    Fields marked with
+    <span class="text-danger" aria-hidden="true">*</span>
+    <span class="visually-hidden">an asterisk</span>
+    are required.
+</p>
+
+<!-- Sends the edited question to the Edit POST action. -->
+<form asp-action="Edit"
+      method="post">
+
+    <!-- Protects the POST request against cross-site request forgery. -->
+    @Html.AntiForgeryToken()
 
     <!-- Keeps the QuestionId when the form is submitted. -->
-    <input type="hidden" asp-for="QuestionId" />
+    <input type="hidden"
+           asp-for="QuestionId" />
 
-    <!-- Keeps the GameId; the controller should verify ownership server-side. -->
-    <input type="hidden" asp-for="GameId" />
+    <!-- Keeps the GameId.
+         The controller still verifies ownership server-side. -->
+    <input type="hidden"
+           asp-for="GameId" />
 
     <!-- Displays model-level validation errors. -->
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    <div class="form-group">
-        <label asp-for="QuestionText"></label>
-        <span class="text-danger">*</span>
-        <input asp-for="QuestionText" class="form-control" />
-        <span asp-validation-for="QuestionText" class="text-danger"></span>
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger"
+         role="alert"
+         aria-live="polite">
     </div>
 
+
+    <!-- =====================================
+         Question text
+         ===================================== -->
+
+    <div class="form-group">
+
+        <label asp-for="QuestionText"
+               class="form-label">
+        </label>
+
+        <span class="text-danger"
+              aria-hidden="true">*</span>
+        <span class="visually-hidden">required</span>
+
+        <input asp-for="QuestionText"
+               class="form-control"
+               aria-required="true" />
+
+        <span asp-validation-for="QuestionText"
+              class="text-danger">
+        </span>
+
+    </div>
+
+
+    <!-- =====================================
+         Category
+         ===================================== -->
+
     <div class="form-group mt-3">
-        <label asp-for="Category"></label>
-        <span class="text-danger">*</span>
+
+        <label asp-for="Category"
+               class="form-label">
+        </label>
+
+        <span class="text-danger"
+              aria-hidden="true">*</span>
+        <span class="visually-hidden">required</span>
 
         <select asp-for="Category"
                 asp-items="Model.Categories"
-                class="form-select">
-            <option value="">-- Select a category --</option>
+                class="form-select"
+                aria-required="true">
+
+            <option value="">
+                -- Select a category --
+            </option>
+
         </select>
 
-        <span asp-validation-for="Category" class="text-danger"></span>
+        <span asp-validation-for="Category"
+              class="text-danger">
+        </span>
+
     </div>
 
+
+    <!-- =====================================
+         Difficulty
+         ===================================== -->
+
     <div class="form-group mt-3">
-        <label asp-for="Difficulty"></label>
-        <span class="text-danger">*</span>
+
+        <label asp-for="Difficulty"
+               class="form-label">
+        </label>
+
+        <span class="text-danger"
+              aria-hidden="true">*</span>
+        <span class="visually-hidden">required</span>
 
         <select asp-for="Difficulty"
                 asp-items="Model.Difficulties"
-                class="form-select">
+                class="form-select"
+                aria-required="true">
         </select>
 
-        <span asp-validation-for="Difficulty" class="text-danger"></span>
+        <span asp-validation-for="Difficulty"
+              class="text-danger">
+        </span>
+
     </div>
 
-    <div class="form-group mt-3">
-        <label asp-for="AnswerA"></label>
-        <span class="text-danger">*</span>
-        <input asp-for="AnswerA" class="form-control" />
-        <span asp-validation-for="AnswerA" class="text-danger"></span>
-    </div>
 
-    <div class="form-group mt-3">
-        <label asp-for="AnswerB"></label>
-        <span class="text-danger">*</span>
-        <input asp-for="AnswerB" class="form-control" />
-        <span asp-validation-for="AnswerB" class="text-danger"></span>
-    </div>
+    <!-- =====================================
+         Answer options
+         ===================================== -->
 
-    <div class="form-group mt-3">
-        <label asp-for="AnswerC"></label>
-        <span class="text-danger">*</span>
-        <input asp-for="AnswerC" class="form-control" />
-        <span asp-validation-for="AnswerC" class="text-danger"></span>
-    </div>
+    <!-- The four answer fields belong together logically. -->
+    <fieldset class="mt-4">
 
-    <div class="form-group mt-3">
-        <label asp-for="AnswerD"></label>
-        <span class="text-danger">*</span>
-        <input asp-for="AnswerD" class="form-control" />
-        <span asp-validation-for="AnswerD" class="text-danger"></span>
-    </div>
+        <legend class="h5 mb-3">
+            Answer Options
+        </legend>
 
-    <!-- Creates a dropdown containing the available answer options. -->
-    <div class="form-group mt-3">
-        <label asp-for="CorrectAnswer"></label>
-        <span class="text-danger">*</span>
 
+        <!-- Answer A. -->
+        <div class="form-group">
+
+            <label asp-for="AnswerA"
+                   class="form-label">
+            </label>
+
+            <span class="text-danger"
+                  aria-hidden="true">*</span>
+            <span class="visually-hidden">required</span>
+
+            <input asp-for="AnswerA"
+                   class="form-control"
+                   aria-required="true" />
+
+            <span asp-validation-for="AnswerA"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- Answer B. -->
+        <div class="form-group mt-3">
+
+            <label asp-for="AnswerB"
+                   class="form-label">
+            </label>
+
+            <span class="text-danger"
+                  aria-hidden="true">*</span>
+            <span class="visually-hidden">required</span>
+
+            <input asp-for="AnswerB"
+                   class="form-control"
+                   aria-required="true" />
+
+            <span asp-validation-for="AnswerB"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- Answer C. -->
+        <div class="form-group mt-3">
+
+            <label asp-for="AnswerC"
+                   class="form-label">
+            </label>
+
+            <span class="text-danger"
+                  aria-hidden="true">*</span>
+            <span class="visually-hidden">required</span>
+
+            <input asp-for="AnswerC"
+                   class="form-control"
+                   aria-required="true" />
+
+            <span asp-validation-for="AnswerC"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- Answer D. -->
+        <div class="form-group mt-3">
+
+            <label asp-for="AnswerD"
+                   class="form-label">
+            </label>
+
+            <span class="text-danger"
+                  aria-hidden="true">*</span>
+            <span class="visually-hidden">required</span>
+
+            <input asp-for="AnswerD"
+                   class="form-control"
+                   aria-required="true" />
+
+            <span asp-validation-for="AnswerD"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+    </fieldset>
+
+
+    <!-- =====================================
+         Correct answer
+         ===================================== -->
+
+    <div class="form-group mt-4">
+
+        <label asp-for="CorrectAnswer"
+               class="form-label fw-semibold">
+            Correct Answer
+        </label>
+
+        <span class="text-danger"
+              aria-hidden="true">*</span>
+        <span class="visually-hidden">required</span>
+
+        <!-- Creates a dropdown containing the available AnswerOption values. -->
         <select asp-for="CorrectAnswer"
                 asp-items="Html.GetEnumSelectList<HMJT.Models.AnswerOption>()"
-                class="form-select">
+                class="form-select"
+                aria-required="true">
         </select>
 
-        <span asp-validation-for="CorrectAnswer" class="text-danger"></span>
+        <span asp-validation-for="CorrectAnswer"
+              class="text-danger">
+        </span>
+
     </div>
 
-    <br />
 
-    <!-- Saves the changes to the question. -->
-    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <!-- =====================================
+         Form actions
+         ===================================== -->
 
-    <!-- Returns to the question list without saving. -->
-    <a asp-controller="Game"
-   asp-action="Questions"
-   asp-route-id="@Model.GameId"
-   class="btn btn-secondary">
-    Back to Questions</a>
+    <div class="mt-4">
+
+        <!-- Saves the changes to the question. -->
+        <button type="submit"
+                class="btn btn-primary">
+            Save Changes
+        </button>
+
+        <!-- Returns to the questions belonging to this custom game. -->
+        <a asp-controller="Game"
+           asp-action="Questions"
+           asp-route-id="@Model.GameId"
+           class="btn btn-secondary">
+            Back to Questions
+        </a>
+
+    </div>
+
 </form>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
 
+@section Scripts {
+
+    <!-- Enables ASP.NET Core client-side validation. -->
+    <partial name="_ValidationScriptsPartial" />
+
+}

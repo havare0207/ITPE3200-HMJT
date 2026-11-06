@@ -1,30 +1,74 @@
 @model HMJT.ViewModels.GameViewModel
 
-<h2>Create New Game</h2>
+@{
+    // Sets the browser/page title.
+    ViewData["Title"] = "Create New Game";
+}
 
+<!-- Main page heading. -->
+<h1>Create New Game</h1>
+
+<!-- Explains the required-field marker for all users,
+     while the visually-hidden text helps screen-reader users. -->
+<p class="text-muted">
+    Fields marked with
+    <span class="text-danger" aria-hidden="true">*</span>
+    <span class="visually-hidden">an asterisk</span>
+    are required.
+</p>
+
+<!-- Sends the completed form to the Create POST action. -->
 <form asp-action="Create" method="post">
-    <!--  Include an anti-forgery token to protect the POST request. -->
+
+    <!-- Include an anti-forgery token to protect the POST request. -->
     @Html.AntiForgeryToken()
 
-    <!-- Display validation errors that are not tied to one field. -->
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    <div class="form-group">
-        <label asp-for="Name"></label>
-        <span class="text-danger">*</span>
-
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+    <!-- Display validation errors that are not tied to one specific field.
+         role="alert" and aria-live help screen readers announce new errors. -->
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger"
+         role="alert"
+         aria-live="polite">
     </div>
 
-    <button type="submit" class="btn btn-primary">Create</button>
+    <!-- Game name field. -->
+    <div class="form-group mb-3">
 
-    <a asp-action="Index" class="btn btn-secondary">
+        <!-- asp-for connects the label to the generated input ID. -->
+        <label asp-for="Name" class="form-label"></label>
+
+        <!-- The visible asterisk shows that the field is required.
+             It is hidden from screen readers because the hidden text below
+             already describes the requirement. -->
+        <span class="text-danger" aria-hidden="true">*</span>
+        <span class="visually-hidden">required</span>
+
+        <!-- Input for the custom game name. -->
+        <input asp-for="Name"
+               class="form-control"
+               aria-required="true" />
+
+        <!-- Displays validation errors for the Name field. -->
+        <span asp-validation-for="Name"
+              class="text-danger">
+        </span>
+    </div>
+
+    <!-- Creates the game. -->
+    <button type="submit"
+            class="btn btn-primary">
+        Create
+    </button>
+
+    <!-- Returns to My Games without creating a new game. -->
+    <a asp-action="Index"
+       class="btn btn-secondary">
         Back to Games
     </a>
+
 </form>
 
 @section Scripts {
-    <!--  Enable client-side validation -->
+    <!-- Enable ASP.NET Core client-side validation. -->
     <partial name="_ValidationScriptsPartial" />
 }

@@ -1,14 +1,19 @@
 @model HMJT.ViewModels.GameQuestionsViewModel
 
 @{
+    // Sets the browser/page title.
     ViewData["Title"] = "Game Questions";
 }
 
-<!-- Display the name of the game whose questions are being managed. -->
-<h2>@Model.GameName - Questions</h2>
+<!-- Main page heading showing which game's questions are being managed. -->
+<h1>@Model.GameName - Questions</h1>
 
+<!-- Main page actions. -->
 <div class="mb-3">
-    <!--  Send the game ID so the new question is associated with this game. -->
+
+    <!-- Opens the page for creating a new question.
+         The GameId is included so the new question is connected
+         to the correct custom game. -->
     <a asp-controller="Question"
        asp-action="Create"
        asp-route-gameId="@Model.GameId"
@@ -16,6 +21,7 @@
         Add Question
     </a>
 
+    <!-- Returns to the user's custom game list. -->
     <a asp-controller="Game"
        asp-action="Index"
        class="btn btn-secondary">
@@ -23,48 +29,98 @@
     </a>
 </div>
 
-<!--  Check whether the ViewModel contains any questions. -->
+<!-- Check whether the current game contains any questions. -->
 @if (Model.Questions.Any())
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Question</th>
-                <th>Category</th>
-                <th>Difficulty</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            <!--  Display each question belonging to this game. -->
-            @foreach (var question in Model.Questions)
-            {
-                <tr>
-                    <td>@question.QuestionText</td>
-                    <td>@question.Category</td>
-                    <td>@question.Difficulty</td>
-                    <td>
-                        <a asp-controller="Question"
-                           asp-action="Edit"
-                           asp-route-id="@question.QuestionId"
-                           class="btn btn-sm btn-secondary">
-                            Edit
-                        </a>
+    <!-- Makes the table horizontally scrollable on smaller screens. -->
+    <div class="table-responsive">
 
-                        <a asp-controller="Question"
-                           asp-action="Delete"
-                           asp-route-id="@question.QuestionId"
-                           class="btn btn-sm btn-danger">
-                            Delete
-                        </a>
-                    </td>
+        <table class="table">
+
+            <!-- The caption is visually hidden but gives screen-reader users
+                 extra context about what the table contains. -->
+            <caption class="visually-hidden">
+                Questions belonging to @Model.GameName
+            </caption>
+
+            <thead>
+                <tr>
+                    <!-- scope="col" helps screen readers associate
+                         table cells with the correct column heading. -->
+                    <th scope="col">Question</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Difficulty</th>
+                    <th scope="col">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+
+            <tbody>
+
+                <!-- Display every question belonging to this custom game. -->
+                @foreach (var question in Model.Questions)
+                {
+                    <tr>
+                        <td>@question.QuestionText</td>
+                        <td>@question.Category</td>
+                        <td>@question.Difficulty</td>
+
+                        <td>
+                            <!-- Keeps the action buttons grouped together
+                                 and gives them consistent spacing. -->
+                            <div class="d-flex flex-wrap gap-2">
+
+                                <!-- The aria-label includes the question text,
+                                     so screen-reader users know exactly
+                                     which question will be edited. -->
+                                <a asp-controller="Question"
+                                   asp-action="Edit"
+                                   asp-route-id="@question.QuestionId"
+                                   class="btn btn-sm btn-secondary"
+                                   aria-label="Edit question: @question.QuestionText">
+                                    Edit
+                                </a>
+
+                                <!-- The aria-label includes the question text,
+                                     so screen-reader users know exactly
+                                     which question will be deleted. -->
+                                <a asp-controller="Question"
+                                   asp-action="Delete"
+                                   asp-route-id="@question.QuestionId"
+                                   class="btn btn-sm btn-danger"
+                                   aria-label="Delete question: @question.QuestionText">
+                                    Delete
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+    </div>
 }
 else
 {
-    <!--  Show a helpful message when the game has no questions yet. -->
-    <p>This game does not have any questions yet.</p>
+    <!-- Helpful empty state shown when the game does not yet
+         contain any questions. -->
+    <div class="text-center py-4">
+
+        <strong>No questions yet</strong>
+
+        <p class="text-muted mb-3">
+            This game does not have any questions yet.
+        </p>
+
+        <!-- Gives the user a direct next action instead of
+             leaving them on an empty page. -->
+        <a asp-controller="Question"
+           asp-action="Create"
+           asp-route-gameId="@Model.GameId"
+           class="btn btn-outline-primary btn-sm">
+            Add your first question
+        </a>
+
+    </div>
 }

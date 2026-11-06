@@ -1,15 +1,37 @@
 ﻿@{
+    // Sets the browser/page title.
     ViewData["Title"] = "Privacy";
 }
 
-<div class="container py-4">
+<section class="container py-4"
+         aria-labelledby="privacy-heading">
 
-    <h1 class="mb-4">Privacy and Account Security</h1>
+    <!-- Main page heading. -->
+    <h1 id="privacy-heading"
+        class="mb-3">
+        Privacy and Account Security
+    </h1>
 
-    <div class="card shadow-sm mb-4">
+    <!-- Brief introduction to the information on this page. -->
+    <p class="text-muted mb-4">
+        This page explains how Code Pursuit handles account information,
+        passwords, login protection and access to custom games.
+    </p>
+
+
+    <!-- =====================================
+         Account information
+         ===================================== -->
+
+    <section class="card shadow-sm mb-4"
+             aria-labelledby="account-information-heading">
+
         <div class="card-body">
 
-            <h2 class="h4">Account information</h2>
+            <h2 id="account-information-heading"
+                class="h4">
+                Account information
+            </h2>
 
             <p>
                 Code Pursuit uses ASP.NET Core Identity to manage
@@ -22,13 +44,23 @@
             </p>
 
         </div>
-    </div>
+
+    </section>
 
 
-    <div class="card shadow-sm mb-4">
+    <!-- =====================================
+         Password security
+         ===================================== -->
+
+    <section class="card shadow-sm mb-4"
+             aria-labelledby="password-security-heading">
+
         <div class="card-body">
 
-            <h2 class="h4">Password security</h2>
+            <h2 id="password-security-heading"
+                class="h4">
+                Password security
+            </h2>
 
             <p>
                 Passwords are never stored as plain text in the database.
@@ -55,13 +87,23 @@
             </p>
 
         </div>
-    </div>
+
+    </section>
 
 
-    <div class="card shadow-sm mb-4">
+    <!-- =====================================
+         Login protection
+         ===================================== -->
+
+    <section class="card shadow-sm mb-4"
+             aria-labelledby="login-protection-heading">
+
         <div class="card-body">
 
-            <h2 class="h4">Login protection</h2>
+            <h2 id="login-protection-heading"
+                class="h4">
+                Login protection
+            </h2>
 
             <p>
                 Accounts are temporarily locked after several unsuccessful
@@ -75,13 +117,23 @@
             </p>
 
         </div>
-    </div>
+
+    </section>
 
 
-    <div class="card shadow-sm">
+    <!-- =====================================
+         Custom games
+         ===================================== -->
+
+    <section class="card shadow-sm"
+             aria-labelledby="custom-games-heading">
+
         <div class="card-body">
 
-            <h2 class="h4">Custom games</h2>
+            <h2 id="custom-games-heading"
+                class="h4">
+                Custom games
+            </h2>
 
             <p>
                 Saved custom games are associated with the account that
@@ -90,6 +142,7 @@
             </p>
 
         </div>
-    </div>
 
-</div>
+    </section>
+
+</section>

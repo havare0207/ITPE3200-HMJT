@@ -151,6 +151,24 @@
         Model.MissingWedges.Count == 0 &&
         currentPlayerState?.MustLeaveCenterBeforeFinalRetry != true &&
         !showWrongFinalAnswerPopup;
+
+    // Builds a text-only wedge summary for screen-reader announcements.
+    // This ensures that wedge progress is communicated through text
+    // rather than only through the colored wedge token.
+    string collectedWedgeSummary =
+        Model.Wedges.Count == 0
+            ? "No wedges collected."
+            : $"Collected wedges: {string.Join(", ", Model.Wedges)}.";
+
+    // Combines the normal gameplay message with the current wedge progress.
+    // JavaScript places this text into a live region after the page loads
+    // so screen-reader users are notified about game-state changes.
+    string gameplayScreenReaderAnnouncement =
+        !string.IsNullOrWhiteSpace(Model.Message) &&
+        Model.HasActiveGame
+            ? $"{Model.Message} {Model.PlayerName} has collected " +
+              $"{Model.Wedges.Count} of 6 wedges. {collectedWedgeSummary}"
+            : string.Empty;
 }
 
 <!-- Show the setup form if no game is currently active. -->
@@ -187,10 +205,14 @@
                       asp-action="StartGame"
                       method="post">
 
-                    <!-- Show validation or setup messages. -->
+                    <!-- Displays setup or validation feedback.
+                        role="alert" ensures important feedback is announced
+                        by assistive technologies when the page is displayed. -->
                     @if (!string.IsNullOrWhiteSpace(Model.Message))
                     {
-                        <div class="alert alert-warning">
+                        <div class="alert alert-warning"
+                            role="alert"
+                            aria-live="polite">
                             @Model.Message
                         </div>
                     }
@@ -200,91 +222,107 @@
                          Game mode
                          ===================================== -->
 
-                    <h2>1. Game mode</h2>
+                    <!--
+                        Standard Game and Custom Game are one logical
+                        radio-button group. A fieldset and legend make
+                        that relationship clear to screen-reader users.
+                    -->
+                    <fieldset class="mb-4">
 
-                    <div class="row g-3 mb-4">
+                        <legend class="h2">
+                            1. Game mode
+                        </legend>
 
-                        <!-- Standard game mode.
-                             This uses the normal Code Pursuit question set. -->
-                        <div class="col-md-6">
-                            <label class="card h-100 p-3">
+                        <div class="row g-3">
 
-                                <div class="form-check">
-                                    <input class="form-check-input"
-                                           type="radio"
-                                           name="gameMode"
-                                           id="standardGameMode"
-                                           value="@GameMode.Standard"
-                                           checked />
+                            <div class="col-md-6">
+                                <div class="card h-100 p-3">
 
-                                    <span class="form-check-label fw-bold">
-                                        Standard Game
-                                    </span>
-                                </div>
-
-                                <span class="text-muted mt-2">
-                                    Play using the standard Code Pursuit
-                                    question set.
-                                </span>
-
-                            </label>
-                        </div>
-
-
-                        <!-- Custom game mode.
-                             A user must be logged in and have at least
-                             one saved custom game before this can be selected. -->
-                        <div class="col-md-6">
-                            <label class="card h-100 p-3">
-
-                                <div class="form-check">
-
-                                    @if (User.Identity?.IsAuthenticated == true &&
-                                         Model.CustomGames.Any())
-                                    {
+                                    <div class="form-check">
                                         <input class="form-check-input"
                                                type="radio"
                                                name="gameMode"
-                                               id="customGameMode"
-                                               value="@GameMode.Custom" />
+                                               id="standardGameMode"
+                                               value="@GameMode.Standard"
+                                               aria-describedby="standardGameDescription"
+                                               checked />
+
+                                        <label class="form-check-label fw-bold"
+                                               for="standardGameMode">
+                                            Standard Game
+                                        </label>
+                                    </div>
+
+                                    <p id="standardGameDescription"
+                                       class="text-muted mt-2 mb-0">
+                                        Play using the standard Code Pursuit
+                                        question set.
+                                    </p>
+
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-6">
+                                <div class="card h-100 p-3">
+
+                                    <div class="form-check">
+
+                                        @if (User.Identity?.IsAuthenticated == true &&
+                                             Model.CustomGames.Any())
+                                        {
+                                            <input class="form-check-input"
+                                                   type="radio"
+                                                   name="gameMode"
+                                                   id="customGameMode"
+                                                   value="@GameMode.Custom"
+                                                   aria-describedby="customGameModeDescription" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-check-input"
+                                                   type="radio"
+                                                   name="gameMode"
+                                                   id="customGameMode"
+                                                   aria-describedby="customGameModeDescription"
+                                                   disabled />
+                                        }
+
+                                        <label class="form-check-label fw-bold"
+                                               for="customGameMode">
+                                            Custom Game
+                                        </label>
+
+                                    </div>
+
+                                    @if (User.Identity?.IsAuthenticated != true)
+                                    {
+                                        <p id="customGameModeDescription"
+                                           class="text-muted mt-2 mb-0">
+                                            Login or register to use custom games.
+                                        </p>
+                                    }
+                                    else if (!Model.CustomGames.Any())
+                                    {
+                                        <p id="customGameModeDescription"
+                                           class="text-muted mt-2 mb-0">
+                                            Create a custom game under My Games first.
+                                        </p>
                                     }
                                     else
                                     {
-                                        <input class="form-check-input"
-                                               type="radio"
-                                               id="customGameMode"
-                                               disabled />
+                                        <p id="customGameModeDescription"
+                                           class="text-muted mt-2 mb-0">
+                                            Play using one of your saved custom games.
+                                        </p>
                                     }
 
-                                    <span class="form-check-label fw-bold">
-                                        Custom Game
-                                    </span>
-
                                 </div>
+                            </div>
 
-                                @if (User.Identity?.IsAuthenticated != true)
-                                {
-                                    <span class="text-muted mt-2">
-                                        Login or register to use custom games.
-                                    </span>
-                                }
-                                else if (!Model.CustomGames.Any())
-                                {
-                                    <span class="text-muted mt-2">
-                                        Create a custom game under My Games first.
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted mt-2">
-                                        Play using one of your saved custom games.
-                                    </span>
-                                }
-
-                            </label>
                         </div>
 
-                    </div>
+                    </fieldset>
 
 
                     <!-- =====================================
@@ -298,16 +336,28 @@
                              is selected above. -->
                         <div id="customGameSelection"
                              class="mb-4"
+                             role="region"
+                             aria-labelledby="customGameSelectionHeading"
+                             aria-hidden="true"
                              style="display: none;">
 
+                            <h2 id="customGameSelectionHeading"
+                                class="h5">
+                                Choose your custom game
+                            </h2>
+
+                            <!-- The label is explicitly connected to the custom-game dropdown. -->
                             <label for="customGameId"
-                                   class="form-label fw-bold">
-                                Choose Custom Game
+                                class="form-label fw-bold">
+                                Custom game
                             </label>
 
+                            <!-- aria-describedby connects the explanatory help text
+                                below to the dropdown for screen-reader users. -->
                             <select id="customGameId"
                                     name="customGameId"
-                                    class="form-select">
+                                    class="form-select"
+                                    aria-describedby="customGameHelp">
 
                                 <option value="">
                                     Select a custom game...
@@ -322,7 +372,8 @@
 
                             </select>
 
-                            <div class="form-text">
+                            <div id="customGameHelp"
+                                class="form-text">
                                 Only custom games belonging to your
                                 logged-in account are shown here.
                             </div>
@@ -427,79 +478,107 @@
                          Difficulty
                          ===================================== -->
 
-                    <h2 class="setup-difficulty-heading">
-                        3. Question difficulty
-                    </h2>
+                    <!--
+                        Difficulty choices form one radio-button group.
+                        The fieldset/legend structure lets screen readers
+                        announce the group and allows normal arrow-key
+                        navigation between Easy, Medium and Hard.
+                    -->
+                    <fieldset class="mt-4">
 
-                    <div class="difficulty-card-grid">
+                        <legend class="h2 setup-difficulty-heading">
+                            3. Question difficulty
+                        </legend>
 
-                        <!-- Easy -->
-                        <label class="difficulty-card difficulty-easy">
+                        <div class="difficulty-card-grid">
 
-                            <input type="radio"
-                                   name="difficulty"
-                                   value="@Difficulty.Easy"
-                                   checked />
+                            <label class="difficulty-card difficulty-easy"
+                                   for="difficultyEasy">
 
-                            <span class="difficulty-radio"></span>
+                                <input type="radio"
+                                       id="difficultyEasy"
+                                       name="difficulty"
+                                       value="@Difficulty.Easy"
+                                       aria-describedby="difficultyEasyDescription"
+                                       checked />
 
-                            <span class="difficulty-icon">
-                                &lt;/&gt;
-                            </span>
+                                <span class="difficulty-radio"
+                                      aria-hidden="true">
+                                </span>
 
-                            <strong>Easy</strong>
+                                <span class="difficulty-icon"
+                                      aria-hidden="true">
+                                    &lt;/&gt;
+                                </span>
 
-                            <span class="difficulty-description">
-                                Core concepts and straightforward questions.
-                            </span>
+                                <strong>Easy</strong>
 
-                        </label>
+                                <span id="difficultyEasyDescription"
+                                      class="difficulty-description">
+                                    Core concepts and straightforward questions.
+                                </span>
 
-
-                        <!-- Medium -->
-                        <label class="difficulty-card difficulty-medium">
-
-                            <input type="radio"
-                                   name="difficulty"
-                                   value="@Difficulty.Medium" />
-
-                            <span class="difficulty-radio"></span>
-
-                            <span class="difficulty-icon">
-                                💡
-                            </span>
-
-                            <strong>Medium</strong>
-
-                            <span class="difficulty-description">
-                                More reasoning and short code examples.
-                            </span>
-
-                        </label>
+                            </label>
 
 
-                        <!-- Hard -->
-                        <label class="difficulty-card difficulty-hard">
+                            <label class="difficulty-card difficulty-medium"
+                                   for="difficultyMedium">
 
-                            <input type="radio"
-                                   name="difficulty"
-                                   value="@Difficulty.Hard" />
+                                <input type="radio"
+                                       id="difficultyMedium"
+                                       name="difficulty"
+                                       value="@Difficulty.Medium"
+                                       aria-describedby="difficultyMediumDescription" />
 
-                            <span class="difficulty-radio"></span>
+                                <span class="difficulty-radio"
+                                      aria-hidden="true">
+                                </span>
 
-                            <span class="difficulty-icon">
-                                ★
-                            </span>
+                                <span class="difficulty-icon"
+                                      aria-hidden="true">
+                                    💡
+                                </span>
 
-                            <strong>Hard</strong>
+                                <strong>Medium</strong>
 
-                            <span class="difficulty-description">
-                                Trickier language details and deeper concepts.
-                            </span>
+                                <span id="difficultyMediumDescription"
+                                      class="difficulty-description">
+                                    More reasoning and short code examples.
+                                </span>
 
-                        </label>
+                            </label>
 
-                    </div>
+
+                            <label class="difficulty-card difficulty-hard"
+                                   for="difficultyHard">
+
+                                <input type="radio"
+                                       id="difficultyHard"
+                                       name="difficulty"
+                                       value="@Difficulty.Hard"
+                                       aria-describedby="difficultyHardDescription" />
+
+                                <span class="difficulty-radio"
+                                      aria-hidden="true">
+                                </span>
+
+                                <span class="difficulty-icon"
+                                      aria-hidden="true">
+                                    ★
+                                </span>
+
+                                <strong>Hard</strong>
+
+                                <span id="difficultyHardDescription"
+                                      class="difficulty-description">
+                                    Trickier language details and deeper concepts.
+                                </span>
+
+                            </label>
+
+                        </div>
+
+                    </fieldset>
 
 
                     <!-- The existing StartGame action is still used.
@@ -605,14 +684,24 @@ else if (Model.IsAwaitingStartConfirmation)
                  The randomly selected starter is highlighted. -->
             <div class="starter-player-list">
 
+                <!-- Lists all players.
+                    The starting player is identified both visually
+                    and with hidden text for screen-reader users. -->
                 @foreach (PlayerGameState player in Model.Players)
                 {
                     <span class="starter-player-chip
-                                 @(player.PlayerNumber == Model.PlayerNumber
-                                     ? "starter-player-chip-selected"
-                                     : "")">
+                                @(player.PlayerNumber == Model.PlayerNumber
+                                    ? "starter-player-chip-selected"
+                                    : "")">
 
                         @player.PlayerName
+
+                        @if (player.PlayerNumber == Model.PlayerNumber)
+                        {
+                            <span class="visually-hidden">
+                                - starting player
+                            </span>
+                        }
 
                     </span>
                 }
@@ -674,13 +763,25 @@ else
 
     </div>
 
-    <!-- Show feedback from the latest game action. -->
+    <!-- Displays gameplay feedback visually. -->
     @if (!string.IsNullOrWhiteSpace(Model.Message))
     {
         <div class="gameplay-status">
             @Model.Message
         </div>
     }
+
+    <!--
+        Empty live region used only by assistive technologies.
+        JavaScript fills this region after the page has loaded.
+    -->
+    <div id="gameplayScreenReaderStatus"
+         class="visually-hidden"
+         role="status"
+         aria-live="polite"
+         aria-atomic="true"
+         data-announcement="@gameplayScreenReaderAnnouncement">
+    </div>
 
     <!-- Main gameplay area.
          The interactive board is shown on the left
@@ -708,47 +809,56 @@ else
                 </p>
             }
 
-            <!-- Shows which color belongs to each question category. -->
-            <div class="board-key">
+            <!-- Board legend.
+                Category names are provided as text so information
+                is not communicated through color alone. -->
+            <div class="board-key"
+                aria-label="Board category legend">
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                          style="background: #3182e8;">
+                        style="background: #3182e8;"
+                        aria-hidden="true">
                     </span>
                     Java
                 </span>
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                          style="background: #f6ca46;">
+                        style="background: #f6ca46;"
+                        aria-hidden="true">
                     </span>
                     Python
                 </span>
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                          style="background: #9748dc;">
+                        style="background: #9748dc;"
+                        aria-hidden="true">
                     </span>
                     C#
                 </span>
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                          style="background: #f59a45;">
+                        style="background: #f59a45;"
+                        aria-hidden="true">
                     </span>
                     HTML/CSS
                 </span>
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                          style="background: #25ad63;">
+                        style="background: #25ad63;"
+                        aria-hidden="true">
                     </span>
                     JavaScript
                 </span>
 
                 <span class="board-key-item">
                     <span class="board-key-color"
-                          style="background: #ec407a;">
+                        style="background: #ec407a;"
+                        aria-hidden="true">
                     </span>
                     Game History
                 </span>
@@ -776,7 +886,13 @@ else
                       method="post"
                       class="board-move-form">
 
-                    <div class="interactive-board">
+                    <!-- Interactive game board.
+                        The individual legal destinations already have descriptive
+                        aria-label attributes, while this label gives the entire
+                        board a meaningful name for assistive technologies. -->
+                    <div class="interactive-board"
+                        role="group"
+                        aria-label="Code Pursuit interactive game board">
 
                         <!-- =====================================
                              Category labels
@@ -1422,13 +1538,18 @@ else
                                     p => p.PlayerNumber == player.PlayerNumber
                                 );
 
+                            <!-- Visual player piece.
+                                role="img" makes the descriptive aria-label available
+                                to assistive technologies. The same information is also
+                                available as text in the player list beside the board. -->
                             <div class="board-player-piece
                                         board-player-offset-@playerOffsetIndex
                                         @(player.PlayerNumber == Model.PlayerNumber
                                             ? "current-board-player"
                                             : "")"
                                 style="@GetBoardSpacePosition(player.BoardSpaceId)"
-                                aria-label="@player.PlayerName, player @player.PlayerNumber">
+                                role="img"
+                                aria-label="@player.PlayerName, player @player.PlayerNumber, board space @player.BoardSpaceId">
 
                                 <!-- Uses the same wedge system as
                                     the sidebar player token. -->
@@ -1472,11 +1593,11 @@ else
                 }
                 else
                 {
-                    <h3>Current Player</h3>
+                    <h2>Current Player</h2>
 
-                    <h2>
+                    <h3>
                         @Model.PlayerName
-                    </h2>
+                    </h3>
 
                     <p>
                         Player @Model.PlayerNumber
@@ -1730,8 +1851,12 @@ else
                     as the player collects wedges. -->
                 <div class="wedge-progress-visual">
 
+                    <!-- Visual representation of collected wedges.
+                        The adjacent text list contains the same information,
+                        so users do not have to understand the colors alone. -->
                     <div class="@GetWedgeTokenClass(Model.Wedges)"
-                        aria-label="Visual wedge progress for current player">
+                        role="img"
+                        aria-label="@Model.PlayerName has collected @Model.Wedges.Count of 6 category wedges">
                     </div>
 
                     <div>
@@ -1778,10 +1903,17 @@ else
 
                     @foreach (PlayerGameState player in Model.Players)
                     {
-                        <div class="player-token-item @(player.PlayerNumber == Model.PlayerNumber ? "current-player-token" : "")">
+                        <!-- Player summary.
+                            The current player is identified programmatically
+                            in addition to the existing visual highlight. -->
+                        <div class="player-token-item @(player.PlayerNumber == Model.PlayerNumber ? "current-player-token" : "")"
+                            aria-current="@(player.PlayerNumber == Model.PlayerNumber ? "true" : null)">
 
+                            <!-- Visual wedge token. Text beside the token gives
+                                the same progress information without relying on color. -->
                             <div class="@GetWedgeTokenClass(player.Wedges, true)"
-                                aria-label="Collected wedges for @player.PlayerName">
+                                role="img"
+                                aria-label="@player.PlayerName has collected @player.Wedges.Count of 6 wedges">
                             </div>
 
                             <div class="player-token-text">
@@ -1827,10 +1959,10 @@ else
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title"
+                    <h2 class="modal-title h5"
                         id="winnerModalLabel">
                         Winner!
-                    </h5>
+                    </h2>
                 </div>
 
                 <div class="modal-body">
@@ -1870,10 +2002,10 @@ else
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title"
+                    <h2 class="modal-title h5"
                         id="finalRuleModalLabel">
                         Final Question Unlocked
-                    </h5>
+                    </h2>
 
                     <button type="button"
                             class="btn-close"
@@ -1919,10 +2051,10 @@ else
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title"
+                    <h2 class="modal-title h5"
                         id="wrongFinalAnswerModalLabel">
                         Wrong Final Answer
-                    </h5>
+                    </h2>
 
                     <button type="button"
                             class="btn-close"
@@ -1990,10 +2122,20 @@ else
                 return;
             }
 
+            const customSelected =
+                customGameMode.checked;
+
             customGameSelection.style.display =
-                customGameMode.checked
+                customSelected
                     ? "block"
                     : "none";
+
+            // Keep the accessibility tree synchronized
+            // with the visual visibility of the controls.
+            customGameSelection.setAttribute(
+                "aria-hidden",
+                customSelected ? "false" : "true"
+            );
         }
 
 
@@ -2023,6 +2165,35 @@ else
         // Set the correct initial visibility
         // when the page first loads.
         updateGameModeDisplay();
+    });
+</script>
+
+<!-- =====================================
+     Screen-reader gameplay announcement
+     ===================================== -->
+
+<script>
+    window.addEventListener("load", function () {
+
+        const screenReaderStatus =
+            document.getElementById("gameplayScreenReaderStatus");
+
+        if (!screenReaderStatus) {
+            return;
+        }
+
+        const announcement =
+            screenReaderStatus.dataset.announcement;
+
+        if (!announcement) {
+            return;
+        }
+
+        // The live region starts empty and is populated after load,
+        // which makes gameplay updates more reliably announced.
+        window.setTimeout(function () {
+            screenReaderStatus.textContent = announcement;
+        }, 150);
     });
 </script>
 

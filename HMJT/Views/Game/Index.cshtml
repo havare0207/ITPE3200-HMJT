@@ -1,52 +1,223 @@
 @model HMJT.ViewModels.GameIndexViewModel
 
 @{
+    // Sets the browser/page title.
     ViewData["Title"] = "Games";
 }
 
-<h2>My Games</h2>
+<!-- Main page heading. -->
+<h1>My Games</h1>
 
-<a asp-action="Create" class="btn btn-primary mb-3">
+<p class="text-muted">
+    Create and manage your custom Code Pursuit games.
+</p>
+
+<!-- Opens the page for creating a new custom game. -->
+<a asp-action="Create"
+   class="btn btn-primary mb-4">
     Create New Game
 </a>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Times Played</th>
-            <th>Created At</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!--  Display each game supplied by the index ViewModel. -->
-        @foreach (var game in Model.Games)
-        {
-            <tr>
-                <td>@game.Name</td>
-                <td>@game.TimesPlayed</td>
-                <td>@game.CreatedAt</td>
-                <td>
-                    <a asp-action="Questions"
-                       asp-route-id="@game.GameId"
-                       class="btn btn-info">
-                        Manage Questions
-                    </a>
 
-                    <a asp-action="Update"
-                       asp-route-id="@game.GameId"
-                       class="btn btn-sm btn-warning">
-                        Edit
-                    </a>
+<!-- =====================================
+     Saved custom games
+     ===================================== -->
 
-                    <a asp-action="Delete"
-                       asp-route-id="@game.GameId"
-                       class="btn btn-sm btn-danger">
-                        Delete
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<section aria-labelledby="my-games-heading">
+
+    <div class="d-flex
+                justify-content-between
+                align-items-center
+                mb-3">
+
+        <!-- Gives screen-reader users a clear section heading
+             before entering the game table. -->
+        <h2 id="my-games-heading"
+            class="h4 mb-0">
+            Saved Games
+        </h2>
+
+        <!-- Announces how many games are currently available. -->
+        <span class="badge bg-secondary"
+              aria-label="@Model.Games.Count() custom games">
+
+            @Model.Games.Count() game(s)
+
+        </span>
+
+    </div>
+
+
+    <!--
+        The responsive wrapper allows horizontal scrolling on
+        narrow screens without changing the table structure.
+    -->
+    <div class="table-responsive">
+
+        <table class="table table-striped align-middle">
+
+            <!--
+                Hidden caption explains the purpose of the table
+                when a screen-reader user enters it.
+            -->
+            <caption class="visually-hidden">
+                Custom games belonging to your account,
+                including play count, creation date and available actions
+            </caption>
+
+
+            <thead>
+
+                <tr>
+                    <!-- scope="col" associates each header
+                         with the cells underneath it. -->
+                    <th scope="col">
+                        Name
+                    </th>
+
+                    <th scope="col">
+                        Times Played
+                    </th>
+
+                    <th scope="col">
+                        Created At
+                    </th>
+
+                    <th scope="col">
+                        Actions
+                    </th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                @if (Model.Games.Any())
+                {
+                    @foreach (var game in Model.Games)
+                    {
+                        <tr>
+
+                            <!--
+                                The game name acts as the row heading.
+
+                                This makes it easier for screen readers to identify
+                                which game the other values and actions belong to.
+                            -->
+                            <th scope="row">
+                                @game.Name
+                            </th>
+
+
+                            <!-- Number of times this game has been played. -->
+                            <td>
+                                @game.TimesPlayed
+                            </td>
+
+
+                            <!--
+                                <time> gives the date additional semantic meaning
+                                while preserving the visible date/time format.
+                            -->
+                            <td>
+                                <time datetime="@game.CreatedAt.ToString("O")">
+                                    @game.CreatedAt
+                                        .ToLocalTime()
+                                        .ToString("dd.MM.yyyy HH:mm:ss")
+                                </time>
+                            </td>
+
+
+                            <!-- =====================================
+                                 Game actions
+                                 ===================================== -->
+
+                            <td>
+
+                                <!--
+                                    The group label gives the action buttons
+                                    additional context for screen-reader users.
+                                -->
+                                <div class="d-flex flex-wrap gap-2"
+                                     role="group"
+                                     aria-label="Actions for @game.Name">
+
+                                    <!-- Opens question management for this game. -->
+                                    <a asp-action="Questions"
+                                       asp-route-id="@game.GameId"
+                                       class="btn btn-info"
+                                       aria-label="Manage questions for @game.Name">
+
+                                        Manage Questions
+
+                                    </a>
+
+
+                                    <!-- Opens the game editing page. -->
+                                    <a asp-action="Update"
+                                       asp-route-id="@game.GameId"
+                                       class="btn btn-sm btn-warning"
+                                       aria-label="Edit game @game.Name">
+
+                                        Edit
+
+                                    </a>
+
+
+                                    <!-- Opens the delete confirmation page. -->
+                                    <a asp-action="Delete"
+                                       asp-route-id="@game.GameId"
+                                       class="btn btn-sm btn-danger"
+                                       aria-label="Delete game @game.Name">
+
+                                        Delete
+
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <!-- =====================================
+                         Empty state
+                         ===================================== -->
+
+                    <tr>
+
+                        <td colspan="4"
+                            class="text-center py-4">
+
+                            <strong>
+                                No custom games yet
+                            </strong>
+
+                            <p class="text-muted mb-2">
+                                Create your first custom game to add
+                                your own questions.
+                            </p>
+
+                            <a asp-action="Create"
+                               class="btn btn-outline-primary btn-sm">
+
+                                Create your first game
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
